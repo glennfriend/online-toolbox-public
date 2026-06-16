@@ -1,7 +1,14 @@
 // 功能 1:數字計算。
 //
 // 安全求值:不使用 eval()。自寫遞迴下降(recursive descent)解析器,
-// 只支援數字、+ - * /、括號與運算優先序,不執行任何使用者輸入的程式碼。
+// 只支援數字、+ - * / **(平方/次方)、括號與運算優先序,不執行任何使用者輸入的程式碼。
+//
+// 文法(優先序由低到高):
+//   expr   := term (('+' | '-') term)*
+//   term   := unary (('*' | '/') unary)*
+//   unary  := ('+' | '-') unary | power      // 一元正負,比 ** 鬆 → -3 ** 2 = -(3²)
+//   power  := primary ('**' unary)?          // 次方,右結合;右運算元可帶正負(2 ** -1)
+//   primary:= '(' expr ')' | number
 
 import { registerEvaluator } from '../registry.js';
 
@@ -35,23 +42,39 @@ function evalExpr(input) {
     return value;
   }
 
-  // term := factor (('*' | '/') factor)*
+  // term := unary (('*' | '/') unary)*
   function parseTerm() {
-    let value = parseFactor();
+    let value = parseUnary();
     while (peek() === '*' || peek() === '/') {
       const op = eat();
-      const rhs = parseFactor();
+      const rhs = parseUnary();
       if (op === '/' && rhs === 0) throw new Error('除以零');
       value = op === '*' ? value * rhs : value / rhs;
     }
     return value;
   }
 
-  // factor := ('+' | '-') factor | '(' expr ')' | number
-  function parseFactor() {
+  // unary := ('+' | '-') unary | power
+  function parseUnary() {
     const t = peek();
-    if (t === '+') { eat(); return parseFactor(); }
-    if (t === '-') { eat(); return -parseFactor(); }
+    if (t === '+') { eat(); return parseUnary(); }
+    if (t === '-') { eat(); return -parseUnary(); }
+    return parsePower();
+  }
+
+  // power := primary ('**' unary)?  右結合;右運算元用 unary,故 2 ** -1 可行
+  function parsePower() {
+    const base = parsePrimary();
+    if (peek() === '**') {
+      eat();
+      return base ** parseUnary();
+    }
+    return base;
+  }
+
+  // primary := '(' expr ')' | number
+  function parsePrimary() {
+    const t = peek();
     if (t === '(') {
       eat();
       const value = parseExpr();
@@ -70,10 +93,11 @@ function evalExpr(input) {
   return result;
 }
 
-// 切詞:數字(含小數)或單一運算子 / 括號;忽略空白。
+// 切詞:數字(含小數)、** 次方,或單一運算子 / 括號;忽略空白。
+// ** 要排在 [*] 前面,否則會被切成兩個 *。
 function tokenize(input) {
   const tokens = [];
-  const re = /\d*\.?\d+|[+\-*/()]/g;
+  const re = /\d*\.?\d+|\*\*|[+\-*/()]/g;
   let m;
   let consumed = 0;
   while ((m = re.exec(input)) !== null) {

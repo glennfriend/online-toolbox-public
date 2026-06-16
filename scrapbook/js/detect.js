@@ -6,6 +6,7 @@
 export const TYPES = {
   json: 'JSON / 物件',
   html: 'HTML',
+  diff: 'Diff',
   markdown: 'Markdown',
   csv: 'CSV',
   code: '程式碼',
@@ -17,10 +18,18 @@ export function detectType(raw) {
   if (!text) return 'text';
   if (looksStructured(text)) return 'json';
   if (looksHtml(text)) return 'html';
+  if (looksDiff(text)) return 'diff';
   if (looksMarkdown(text)) return 'markdown';
   if (looksCode(text)) return 'code';
   if (looksCsv(text)) return 'csv';
   return 'text';
+}
+
+// Diff / patch:git diff 標頭、hunk 標記(@@ -.. +.. @@),或同時有 --- 與 +++ 檔頭。
+function looksDiff(text) {
+  return /^diff --git /m.test(text)
+    || /^@@ -\d+(,\d+)? \+\d+(,\d+)? @@/m.test(text)
+    || (/^--- /m.test(text) && /^\+\+\+ /m.test(text));
 }
 
 // CSV:至少兩行、每行用逗號切出的欄數一致且 ≥2 欄。

@@ -1,6 +1,6 @@
 // CSV → HTML 表格。第一行當表頭。支援用雙引號包住、內含逗號的欄位。
 
-import { escapeHtml } from '../util.js';
+import { escapeHtml } from '../lib/dom.js';
 
 export function renderCsv(text) {
   const rows = text.trim().split(/\r?\n/).map(splitCsvLine);

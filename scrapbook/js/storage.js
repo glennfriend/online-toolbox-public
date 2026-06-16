@@ -5,7 +5,7 @@
 //   type='image' → payload 是 Blob(IndexedDB 原生存,不轉 base64)
 // 因 IndexedDB 為非同步,以下函式皆回傳 Promise。
 
-import { openStore } from './idb.js';
+import { openStore } from './lib/idb.js';
 
 const store = openStore({ dbName: 'scrapbook', storeName: 'items' });
 const LEGACY_KEY = 'scrapbook:items'; // 舊版 localStorage 用的 key

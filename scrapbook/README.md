@@ -9,8 +9,9 @@
 ## 功能
 
 - **即時 render**:在輸入框貼上內容,顯示版立即轉換。
-- **自動偵測類型**:JSON / 物件、HTML、Markdown、CSV、程式碼、純文字,徽章顯示偵測結果。
+- **自動偵測類型**:JSON / 物件、HTML、Diff、Markdown、CSV、程式碼、純文字,徽章顯示偵測結果。
   - 無法轉換的物件字面值(如 `{a:"123"}`)也會排版上色,不執行任何程式碼。
+  - 貼上 git diff 會像 git 一樣上色(+綠 / -紅 / hunk)。
 - **儲存庫**(IndexedDB):
   - 文字與圖片都能存,重開頁面仍在。
   - chip 依分類上色:圖片=淡黃、純文字=淡灰、特殊格式(JSON/Markdown/CSV…)=淡紅。
@@ -25,48 +26,59 @@
 
 ## 架構
 
-純前端 ES modules,核心與「內容類型功能」分離,功能可插拔。
+純前端 ES modules,**完全自包含**(獨立工具,不與其他工具共用程式碼)。
+核心(殼層)與「內容類型 handler」分離,handler 可插拔。
 
 ```
 scrapbook/
 ├── index.html              版面 + 載入 js/main.js
-├── styles.css              版面、配色、chip 分類色
+├── styles.css
 └── js/
-    ├── main.js             控制器:即時 render、儲存庫、複製、type handler 派發
-    ├── detect.js           內容類型偵測(啟發式)
-    ├── storage.js          持久層:item CRUD + 用量估計(用 idb.js)
-    ├── idb.js              通用 IndexedDB 封裝(與本專案無關,可重用)
-    ├── clipboard.js        富文字複製(text/html + text/plain)
-    ├── util.js             共用:escapeHtml
-    ├── features/
-    │   └── image.js        圖片功能(可插拔):貼上、大小檢查、存檔、複製成 PNG
-    └── renderers/
+    ├── main.js             殼層:DOM、handler 登記表、共用 ctx、儲存庫清單
+    ├── detect.js           內容子格式偵測(json/html/diff/markdown/csv/code/純文字)
+    ├── storage.js          持久層:item CRUD + 用量估計
+    ├── lib/                本工具的通用模組(與內容無關的基礎設施)
+    │   ├── idb.js          IndexedDB 封裝
+    │   ├── clipboard.js    富文字複製(text/html + text/plain)
+    │   └── dom.js          escapeHtml + el()
+    ├── handlers/           每種「儲存型別」一個 handler(自帶完整行為)
+    │   ├── text.js         文字:即時 render、儲存、開啟、富文字複製、chip 分類
+    │   └── image.js        圖片:貼上、大小檢查、存檔、開啟、複製成 PNG
+    └── renderers/          文字子格式的純函式渲染器(text handler 內部用)
         ├── index.js        render 派發
         ├── structured.js   JSON / 物件 排版上色(不執行程式碼)
         ├── markdown.js     精簡 Markdown → HTML
         ├── html.js         白名單 sanitizer(移除 script / 事件 / 危險協定)
         ├── code.js         通用語法上色
-        └── csv.js          CSV → 表格
+        ├── csv.js          CSV → 表格
+        └── diff.js         git diff 上色(+綠 / -紅)
 ```
 
-### type handler 登記表(可插拔的關鍵)
+### handler 登記表(可插拔的關鍵)
 
-`main.js` 不寫死任何類型,改用登記表派發每種 item 的行為:
+`main.js` 不認識任何具體型別,只提供殼層 + `ctx`(共用服務)。每種儲存型別由一個 handler
+模組透過 `ctx.registerHandler(...)` 註冊,**自帶完整行為**:
 
 ```js
 registerHandler({
   type: 'image',
   label: (item) => `${item.title} (${formatMB(item.size)})`, // chip 標籤(可選)
-  open: (item) => { /* 點 chip 時:把輸入+顯示切到這筆 */ },
+  category: (item) => 'cat-image',                            // chip 顏色分類(可選)
+  open: (item) => { /* 點 chip:把輸入 + 顯示切到這筆 */ },
 });
 ```
 
-**新增一種內容功能** = 寫一個 `features/xxx.js`,在裡面 `registerHandler(...)`,並在 `main.js` 加一行 `initXxxFeature(...)`。
-**移除一種功能** = 刪掉該模組 + 拿掉那一行。核心不受影響。
+`ctx` 提供:`registerHandler / setDisplay / setBadge / setCopyHandler / addItem /
+refreshSaved / showToast / notifyDisplayChanged / onDisplayChanged` 及 DOM 參照。
+
+**新增一種儲存型別** = 寫一個 `handlers/xxx.js`(在裡面 `registerHandler`),並在 `main.js` 加一行 `initXxxHandler(ctx)`。
+**新增一種文字子格式**(如 diff)= 在 `detect.js` 加偵測 + `renderers/` 加一個渲染器 + dispatch 一行(不需新 handler)。
+**移除** = 反向操作,核心一行都不用動。
 
 ### 解耦事件
 
-`main.js` 顯示文字時會在 `display` 上發出 `scrapbook:text-shown` 事件。功能模組(如圖片)監聽它來收掉自己的控制項、還原複製行為。核心永遠發送,沒人監聽也無妨 → 移除功能不影響核心。
+顯示版內容變更時,核心透過 `ctx.notifyDisplayChanged(type)` 通知;handler 用 `ctx.onDisplayChanged(cb)`
+訂閱(例如圖片 handler 在切回文字時收掉自己的控制項)。核心永遠發送,沒人訂閱也無妨 → 移除功能不影響核心。
 
 ---
 
@@ -82,7 +94,7 @@ registerHandler({
 - 綁**單一瀏覽器 + 單一裝置**,不跨裝置、不自動備份。
 - 使用者清「Cookie 和網站資料」、無痕關閉、Safari ITP(7 天未造訪)、磁碟不足回收 → 都可能清掉。
 - 磁碟上**未加密**:不要存密碼 / token / 機密。
-- 圖片有 5MB 上限(`features/image.js` 的 `MAX_BYTES`,改一行可調)。
+- 圖片有 5MB 上限(`handlers/image.js` 的 `MAX_BYTES`,改一行可調)。
 
 ---
 
@@ -103,7 +115,7 @@ registerHandler({
 
 ## 本機開發
 
-需用本機 HTTP server(ES modules 不能用 `file://` 開):
+需用本機 HTTP server(ES modules 不能用 `file://` 開)。本工具自包含,從 scrapbook 內啟動即可:
 
 ```bash
 cd scrapbook

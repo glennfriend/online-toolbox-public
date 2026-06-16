@@ -3,7 +3,7 @@
 // 重點:不執行任何程式碼。純粹做字元層級的 tokenize → 重新縮排 → 包上色 span,
 // 所以連 {a:"123"} 這種非嚴格 JSON(無引號 key、單引號)也能排得漂亮。
 
-import { escapeHtml } from '../util.js';
+import { escapeHtml } from '../lib/dom.js';
 
 export function renderStructured(text) {
   const tokens = tokenize(text.trim());

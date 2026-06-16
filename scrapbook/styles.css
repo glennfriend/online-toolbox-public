@@ -127,6 +127,15 @@ body {
   border-radius: 6px;
 }
 
+/* 顯示版裡的 diff(像 git diff:+綠 -紅) */
+.diff-view { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .88rem; line-height: 1.5; background: var(--bg-code); border-radius: 8px; padding: .6rem 0; overflow: auto; }
+.diff-line { display: block; padding: 0 1rem; white-space: pre-wrap; word-break: break-word; }
+.diff-add  { background: #e6ffec; color: #1a7f37; }
+.diff-del  { background: #ffebe9; color: #cf222e; }
+.diff-hunk { color: #8250df; background: #f6f0ff; }
+.diff-meta, .diff-file { color: #57606a; font-weight: 600; }
+
 /* 顯示版裡的 CSV 表格 */
 .csv-view { border-collapse: collapse; font-size: .88rem; }
 .csv-view th, .csv-view td { border: 1px solid var(--border-soft); padding: .3em .6em; text-align: left; }

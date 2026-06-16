@@ -1,7 +1,7 @@
 // 通用程式碼語法上色(啟發式,偏 JS / 類 C 語法)。
 // 逐段比對:註解 → 字串 → 數字 → 識別字 / 關鍵字 → 其他單一字元。不執行程式碼。
 
-import { escapeHtml } from '../util.js';
+import { escapeHtml } from '../lib/dom.js';
 
 const KEYWORDS = new Set((
   'function return const let var if else for while do switch case break continue '

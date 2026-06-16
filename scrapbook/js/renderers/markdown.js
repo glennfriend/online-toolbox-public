@@ -4,7 +4,7 @@
 // 安全性:所有使用者文字都先經過 escapeHtml 才插入,markdown 模式不會夾帶原始 HTML
 //(原始 HTML 由 html 模式負責),連結也只允許安全協定。
 
-import { escapeHtml } from '../util.js';
+import { escapeHtml } from '../lib/dom.js';
 
 export function renderMarkdown(src) {
   const lines = src.replace(/\r\n?/g, '\n').split('\n');

@@ -2,7 +2,7 @@
 
 貼上即時 render 的剪貼簿小工具:貼上任何內容會即時轉成好讀的樣子,可儲存在瀏覽器本機、隨時回填與複製(保留格式)。純前端、零第三方相依、單頁應用。
 
-線上版:<https://glennfriend.github.io/doc-report-public/scrapbook/>
+線上版:<https://glennfriend.github.io/online-toolbox-public/scrapbook/>
 
 ---
 
@@ -111,6 +111,7 @@ python3 -m http.server 8008
 # 開 http://127.0.0.1:8008/
 ```
 
-> ⚠️ **部署注意**:本目錄的 `index.html` 是手寫的 app,**不要**在本資料夾放 `*.md` / `*.html` / `*.pdf` 兄弟檔——
-> `public-deploy.sh` 的 render 會把含這些副檔名的子目錄自動產生 index.html,覆蓋掉這個 app。
-> (本 README 因此需在 deploy 設定中將 `scrapbook/` 排除於 render 之外。)
+## 部署
+
+本 repo 用 GitHub Pages 發佈(Settings → Pages → 由 `main` 分支的根目錄部署)。
+app 全用相對路徑,放在任何子路徑(如 `/scrapbook/`)都能運作,不需建置步驟。

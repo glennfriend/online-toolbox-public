@@ -143,8 +143,8 @@ body {
 
 /* 顯示版裡的圖片 */
 .image-view { margin: 0; }
-.image-view img { max-width: 100%; height: auto; border-radius: 6px; }
-.image-view figcaption { margin-top: .3em; font-size: .85rem; color: var(--muted); }
+.image-view img { max-width: 100%; height: auto; border-radius: 6px; cursor: zoom-in; }
+.image-view figcaption { margin-bottom: .4em; font-size: .85rem; color: var(--muted); }
 .saved { display: flex; flex-wrap: wrap; gap: .5rem; }
 .saved .hint { color: var(--muted); }
 

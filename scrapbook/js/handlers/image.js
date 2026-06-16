@@ -93,15 +93,19 @@ export function initImageHandler(ctx) {
     objectUrl = URL.createObjectURL(blob);
     setBadge('圖片');
     const figure = el('figure', 'image-view');
-    const img = document.createElement('img');
-    img.src = objectUrl;
-    img.alt = caption;
-    figure.append(img);
     if (caption) {
       const cap = document.createElement('figcaption');
       cap.textContent = caption;
-      figure.append(cap);
+      figure.append(cap); // 檔名在圖片上方
     }
+    const img = document.createElement('img');
+    img.src = objectUrl;
+    img.alt = caption;
+    img.title = '點擊開新分頁看大圖';
+    // 另開新分頁看原圖(用瀏覽器原生檢視器縮放/平移)。
+    // 用 blob 另產生一個專用網址,避免被 showImage 的回收機制清掉。
+    img.addEventListener('click', () => window.open(URL.createObjectURL(blob), '_blank', 'noopener'));
+    figure.append(img);
     setDisplay(figure);
     // 圖片的「複製」改成複製影像本身(寫入剪貼簿的 image/png)
     setCopyHandler(() => copyImage(blob));

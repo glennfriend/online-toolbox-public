@@ -1,0 +1,122 @@
+/* Calcpad — 版面與配色。延續站上風格(system-ui、藍色重點、GitHub 風灰階)。 */
+
+:root {
+  --fg: #24292f;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --border-soft: #d8dee4;
+  --accent: #2563eb;
+  --warn: #8250df;
+  --error: #cf222e;
+  --bg-code: #f6f8fa;
+  --bg-page: #dde2e9;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.6;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem;
+  color: var(--fg);
+  background: var(--bg-page);
+}
+
+/* ── 頂列:標題 + 複製網址 ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: 1rem;
+}
+.topbar h1 { font-size: 1.4rem; margin: 0; margin-right: auto; }
+
+.btn {
+  font: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--fg);
+  padding: .3em .9em;
+}
+.btn:hover { background: var(--bg-code); }
+
+/* ── 編輯器:左輸入 / 右答案,共用等寬字體與行高以求逐行對齊 ── */
+/* 左欄(輸入)固定寬,右欄(答案)吃掉剩下的所有寬度;
+   視窗很窄時左欄改用第二種較小的固定寬,右欄仍自動撐滿。 */
+.editor {
+  display: grid;
+  grid-template-columns: 32rem 1fr;
+  height: 68vh;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .95rem;
+  line-height: 1.7;
+}
+@media (max-width: 720px) {
+  .editor { grid-template-columns: 18rem 1fr; }
+}
+
+/* 輸入框與答案欄的 padding-top / line-height 必須一致,第一行才會對齊。
+   wrap=off:每個邏輯行就是一個視覺行,讓右側答案能精準對齊每一行。 */
+.input,
+.results {
+  height: 100%;
+  padding: 1rem;
+  font: inherit;
+  line-height: inherit;
+}
+
+.input {
+  border: 0;
+  resize: none;
+  outline: none;
+  color: var(--fg);
+  white-space: pre;
+  overflow: auto;
+}
+.input:focus { box-shadow: inset 2px 0 0 var(--accent); }
+
+.results {
+  border-left: 1px solid var(--border-soft);
+  background: var(--bg-code);
+  overflow: hidden; /* 由 JS 跟著輸入框捲動,維持對齊 */
+  text-align: left;
+}
+
+/* 每行答案恰好一行高;過長省略,避免換行破壞對齊 */
+.result-line {
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-ok { color: var(--accent); font-weight: 600; }
+.result-error { color: var(--error); }
+.result-conflict { color: var(--warn); }
+
+/* ── 編輯器下方動作列 ── */
+.actions { margin-top: 1rem; }
+
+/* ── 提示 toast ── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%) translateY(1rem);
+  background: #24292f;
+  color: #fff;
+  padding: .5em 1.1em;
+  border-radius: 8px;
+  font-size: .9rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

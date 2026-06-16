@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="numbr 風格的逐行筆記型計算機,內容即時編進網址。">
+  <title>Calcpad</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Calcpad</h1>
+    <button id="copy-link" class="btn" type="button">🔗 複製網址</button>
+  </header>
+
+  <main class="editor">
+    <textarea id="input" class="input" wrap="off" spellcheck="false"
+      placeholder="逐行輸入,右側即時顯示答案。"></textarea>
+    <div id="results" class="results" aria-live="polite"></div>
+  </main>
+
+  <p class="actions">
+    <button id="ex-math" class="btn" type="button">＝ 算式範例</button>
+    <button id="ex-datetime" class="btn" type="button">🕐 日期範例</button>
+  </p>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

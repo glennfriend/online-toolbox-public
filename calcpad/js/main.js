@@ -14,6 +14,7 @@ const input = document.querySelector('#input');
 const results = document.querySelector('#results');
 const copyLinkBtn = document.querySelector('#copy-link');
 const exMathBtn = document.querySelector('#ex-math');
+const exThousandsBtn = document.querySelector('#ex-thousands');
 const exDatetimeBtn = document.querySelector('#ex-datetime');
 const toast = document.querySelector('#toast');
 
@@ -25,6 +26,7 @@ const EXAMPLE_MATH = [
   '(3 + 5) ** 2',
   '(3 ** 2) + (2 * 3 * 5 ) + (5 ** 2)',
 ].join('\n');
+const EXAMPLE_THOUSANDS = '1,000 + 2,000,000';
 const EXAMPLE_DATETIME = [
   '2001-01-01T09:00:00+08:00 + 2h + 30m',
   '2001-01-01T09:00:00+08:00 to UTC',
@@ -117,6 +119,7 @@ function appendExample(text) {
   input.selectionStart = input.selectionEnd = input.value.length;
 }
 exMathBtn.addEventListener('click', () => appendExample(EXAMPLE_MATH));
+exThousandsBtn.addEventListener('click', () => appendExample(EXAMPLE_THOUSANDS));
 exDatetimeBtn.addEventListener('click', () => appendExample(EXAMPLE_DATETIME));
 
 copyLinkBtn.addEventListener('click', async () => {

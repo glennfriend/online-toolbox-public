@@ -12,9 +12,11 @@
 
 import { registerEvaluator } from '../registry.js';
 
-// 只認領「整行都是算術」的內容:僅含數字、運算子、括號、小數點、空白,且至少有一個數字。
-// 含字母 / 冒號(如日期、時區)的行不會命中,自然與 datetime 區隔。
-const MATH_LINE = /^[\d\s+\-*/().]+$/;
+// 只認領「整行都是算術」的內容:僅含數字、運算子、括號、小數點、千分位逗號、空白,
+// 且至少有一個數字。含字母 / 冒號(如日期、時區)的行不會命中,自然與 datetime 區隔。
+// 註:這裡只放寬「字元集」;逗號分組是否合法由下面 number token 的文法把關 ——
+//     分組不對的逗號會落在 token 之外,被 tokenize 當成非法符號丟錯(而非默默吃掉)。
+const MATH_LINE = /^[\d\s+\-*/().,]+$/;
 
 registerEvaluator({
   name: 'math',
@@ -93,17 +95,27 @@ function evalExpr(input) {
   return result;
 }
 
-// 切詞:數字(含小數)、** 次方,或單一運算子 / 括號;忽略空白。
+// 切詞:數字(含小數 / 千分位逗號)、** 次方,或單一運算子 / 括號;忽略空白。
 // ** 要排在 [*] 前面,否則會被切成兩個 *。
+//
+// 數字文法(只接受「合法分組」的逗號):
+//   \d{1,3}(,\d{3})+(\.\d+)?   帶千分位:首組 1~3 位,之後每組剛好 3 位(如 1,212 / 12,344,444)
+//   \d+(\.\d+)?                無逗號的一般整數 / 小數(如 12 / 12.5)
+//   \.\d+                      開頭省略整數的小數(如 .5)
+// 分組不對的逗號(如 12,12)匹配不到完整 number,逗號會落在 token 之外 →
+// 下面的縫隙檢查丟「看不懂的符號」,自然「算不出來」,而非默默把它吃掉。
+const NUMBER = String.raw`\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?|\.\d+`;
+
 function tokenize(input) {
   const tokens = [];
-  const re = /\d*\.?\d+|\*\*|[+\-*/()]/g;
+  const re = new RegExp(String.raw`${NUMBER}|\*\*|[+\-*/()]`, 'g');
   let m;
   let consumed = 0;
   while ((m = re.exec(input)) !== null) {
-    // 確認跳過的只有空白,否則代表有非法字元(理論上 match 已擋掉,雙重保險)。
+    // 確認跳過的只有空白,否則代表有非法字元(含分組錯的逗號)。
     if (input.slice(consumed, m.index).trim() !== '') throw new Error('看不懂的符號');
-    tokens.push(m[0]);
+    // 數字 token 去掉千分位逗號,後續 Number() 才認得;運算子無逗號,replace 無副作用。
+    tokens.push(m[0].replace(/,/g, ''));
     consumed = re.lastIndex;
   }
   if (input.slice(consumed).trim() !== '') throw new Error('看不懂的符號');

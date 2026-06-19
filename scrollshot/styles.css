@@ -62,9 +62,14 @@ body {
 .options label { display: inline-flex; align-items: center; gap: .4rem; }
 .options select { font: inherit; padding: .2em .4em; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
 
-/* 狀態 */
-.status { margin-top: 1rem; min-height: 1.4em; font-size: .9rem; color: var(--muted); }
-.status.err { color: var(--danger); }
+/* 流程步驟訊息 */
+.steps { margin: 1rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; }
+.step { padding: .12em 0; color: var(--muted); }                 /* 尚未完成:灰、標記 -- */
+.step .mark { display: inline-block; width: 1.6em; color: var(--muted); }
+.step.done { color: var(--fg); }                                 /* 完成:深色、標記 → */
+.step.done .mark { color: var(--accent); }
+.step.err { color: var(--danger); cursor: help; }                /* 失敗:紅、❌、滑鼠移上看原因 */
+.step.err .why { color: var(--muted); font-size: .82em; }
 
 /* 動作鈕 */
 .actions { display: flex; gap: .5rem; margin-top: .4rem; flex-wrap: wrap; }

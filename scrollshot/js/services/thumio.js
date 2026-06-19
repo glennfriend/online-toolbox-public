@@ -9,6 +9,7 @@ export function thumio() {
   return {
     id: 'thumio',
     name: 'thum.io(僅顯示為主)',
+    shortName: 'thum.io',
 
     async capture(url, opts) {
       const endpoint = 'https://image.thum.io/get/'

@@ -8,6 +8,7 @@ export function microlink() {
   return {
     id: 'microlink',
     name: 'Microlink(可下載 / 複製)',
+    shortName: 'Microlink',
 
     async capture(url, opts) {
       const api = 'https://api.microlink.io/?url=' + encodeURIComponent(url)

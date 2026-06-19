@@ -70,6 +70,12 @@ body {
 .step.done .mark { color: var(--accent); }
 .step.err { color: var(--danger); cursor: help; }                /* 失敗:紅、❌、滑鼠移上看原因 */
 .step.err .why { color: var(--muted); font-size: .82em; }
+/* 失效切換時,各服務的嘗試(縮排在步驟下) */
+.attempt { padding: .1em 0 .1em 2em; color: var(--muted); }
+.attempt .mark { display: inline-block; width: 1.4em; }
+.attempt.ok { color: var(--fg); }
+.attempt.ok .mark { color: var(--accent); }
+.attempt.fail { color: var(--danger); cursor: help; }
 
 /* 動作鈕 */
 .actions { display: flex; gap: .5rem; margin-top: .4rem; flex-wrap: wrap; }

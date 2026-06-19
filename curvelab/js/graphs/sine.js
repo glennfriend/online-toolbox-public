@@ -17,6 +17,7 @@ registerGraph({
       fx: function(t){ return t; },                  // 波:x = t
       fy: function(t){ return Math.sin(t); },        //      y = sin t
       tMin: 0, tMax: 2*Math.PI, frames: 240,
+      tLabel: 'x',                                   // 這張圖的參數就是橫軸的 x
       fmt: function(t){ return t.toFixed(2); },
       decorate: function(p){
         p.el('circle', { cx:p.sx(cx0), cy:p.sy(0), r:Math.abs(p.sx(cx0+1)-p.sx(cx0)), fill:'none', stroke:THEME.line, 'stroke-width':1.5 });
@@ -32,12 +33,12 @@ registerGraph({
           conn.setAttribute('x2', p.sx(t));  conn.setAttribute('y2', p.sy(hy));
         };
       },
-      onDraw: function(t, X, Y){ out.innerHTML = '轉角 t = ' + t.toFixed(2) + '　｜　<span class="y">高度 sin(t) = ' + Y.toFixed(2) + '</span>'; }
+      onDraw: function(t, X, Y){ out.innerHTML = '<span class="x">x = ' + t.toFixed(2) + '</span>　→　<span class="y">y = sin(x) = ' + Y.toFixed(2) + '</span>'; }
     });
 
     var note = UI.note(
       '把一個點繞<span class="x">單位圓</span>轉,它的<span class="y">高度</span>就是 sin。' +
-      '轉角 t 一邊增加,高度一邊上上下下,把每個時刻的高度往右排開,畫出來就是正弦波。' +
+      '當 <span class="x">x</span>(也就是繞圓轉的角度)一邊增加,高度一邊上上下下,把每個 x 的高度往右排開,畫出來就是正弦波。' +
       '這就是「旋轉 → 波」:三角函數和圓其實是同一件事。按播放看它生成。'
     );
 

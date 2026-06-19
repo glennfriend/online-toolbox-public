@@ -51,6 +51,7 @@ var UI = {
 
     var t = tMin, playing = false, raf = null, alive = true;
     var slider, playBtn;
+    var tLabel = opts.tLabel || 't';   // 參數顯示名稱(預設 t;若參數其實就是 x,可傳 'x')
 
     function draw(){
       trail.setAttribute('d', plot.paramPath(fx, fy, tMin, t, step));
@@ -81,7 +82,7 @@ var UI = {
     slider = UI.sliderRow('t', { min:tMin, max:tMax, step:step, value:t }, function(v){
       playing=false; playBtn.textContent='▶ 播放'; t=v; draw();
     });
-    var lab = document.createElement('label'); lab.textContent='t'; lab.style.fontFamily='var(--mono)';
+    var lab = document.createElement('label'); lab.textContent=tLabel; lab.style.fontFamily='var(--mono)';
     row.append(playBtn, lab, slider.row.children[1], slider.out);
     controls.appendChild(row);
 

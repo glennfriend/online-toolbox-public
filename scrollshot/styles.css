@@ -1,0 +1,92 @@
+/* Scrollshot — 版面與配色(延續站上風格:system-ui、藍色主色)。 */
+
+:root {
+  --fg: #24292f;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --border-soft: #d8dee4;
+  --accent: #2563eb;
+  --bg-code: #f6f8fa;
+  --bg-page: #dde2e9;
+  --danger: #cf222e;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.7;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem;
+  color: var(--fg);
+  background: var(--bg-page);
+}
+
+.head h1 { margin: 0; font-size: 1.5rem; }
+.head p { margin: .3rem 0 1.2rem; color: var(--muted); font-size: .95rem; }
+.head strong { color: var(--fg); }
+
+/* 輸入列 */
+.bar { display: flex; gap: .6rem; }
+.url {
+  flex: 1; min-width: 0;
+  font: inherit;
+  padding: .6em .8em;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--fg);
+}
+.url:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.btn {
+  font: inherit; font-size: .9rem; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: #fff; color: var(--fg);
+  padding: .5em 1em; white-space: nowrap; text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.btn:hover { background: var(--bg-code); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:disabled { background: var(--accent); }
+
+/* 選項列 */
+.options {
+  display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: center;
+  margin-top: .8rem; font-size: .9rem; color: var(--muted);
+}
+.options label { display: inline-flex; align-items: center; gap: .4rem; }
+.options select { font: inherit; padding: .2em .4em; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+
+/* 狀態 */
+.status { margin-top: 1rem; min-height: 1.4em; font-size: .9rem; color: var(--muted); }
+.status.err { color: var(--danger); }
+
+/* 動作鈕 */
+.actions { display: flex; gap: .5rem; margin-top: .4rem; flex-wrap: wrap; }
+
+/* 結果圖 */
+.result { margin-top: 1rem; }
+.shot {
+  max-width: 100%; height: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: zoom-in;
+  box-shadow: 0 1px 4px rgba(20, 30, 50, .08);
+}
+
+/* 提示 toast */
+.toast {
+  position: fixed; left: 50%; bottom: 2rem;
+  transform: translateX(-50%) translateY(1rem);
+  background: #24292f; color: #fff;
+  padding: .5em 1.1em; border-radius: 8px; font-size: .9rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

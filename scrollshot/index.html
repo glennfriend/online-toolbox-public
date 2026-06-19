@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="輸入網址,產生整頁(含卷動)截圖,可下載 / 複製。">
+  <title>Scrollshot</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="head">
+    <h1>Scrollshot</h1>
+    <p>輸入網址,產生<strong>整頁(含卷動)</strong>截圖,可下載 / 複製。截圖由第三方服務產生。</p>
+  </header>
+
+  <form id="form" class="bar">
+    <input id="url" class="url" type="text" inputmode="url" autocomplete="off"
+      placeholder="https://example.com">
+    <button id="go" class="btn btn-primary" type="submit">截圖</button>
+  </form>
+
+  <div class="options">
+    <label><input type="checkbox" id="fullpage" checked> 整頁(含卷動)</label>
+    <label class="svc">服務 <select id="service"></select></label>
+  </div>
+
+  <div id="status" class="status" aria-live="polite"></div>
+
+  <div id="actions" class="actions" hidden>
+    <button id="download" class="btn" type="button">⬇ 下載</button>
+    <button id="copy" class="btn" type="button">📋 複製</button>
+    <a id="openorig" class="btn" target="_blank" rel="noopener">↗ 原圖</a>
+  </div>
+
+  <div id="result" class="result"></div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

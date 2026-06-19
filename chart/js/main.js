@@ -16,6 +16,21 @@ const input = qs('#input');
 const saveBtn = qs('#save');
 const savedList = qs('#saved');
 const exampleSel = qs('#example');
+const sizeBar = qs('#sizes');
+
+// 輸出尺寸預設(資料驅動,要增減就改這個陣列)。w/h 省略 = 自適應(跟著容器寬、固定高)。
+const SIZES = [
+  { id: 'auto', label: '自適應' },
+  { id: '1280x720', w: 1280, h: 720, label: '1280×720 (16:9)' },
+  { id: '1920x1080', w: 1920, h: 1080, label: '1920×1080 (16:9)' },
+  { id: '1024x768', w: 1024, h: 768, label: '1024×768 (4:3)' },
+  { id: '1200x630', w: 1200, h: 630, label: '1200×630 (社群)' },
+  { id: '1080x1080', w: 1080, h: 1080, label: '1080×1080 (方形)' },
+  { id: '1080x1350', w: 1080, h: 1350, label: '1080×1350 (直式)' },
+  { id: '800x600', w: 800, h: 600, label: '800×600' },
+  { id: '600x400', w: 600, h: 400, label: '600×400' },
+];
+let currentSize = null; // null = 自適應;否則 { w, h }(供匯出用精確尺寸)
 const formatBar = qs('#formats');
 const chartBar = qs('#charttypes');
 const config = qs('#config');
@@ -62,6 +77,8 @@ async function init() {
   try { echartsLib = await loadECharts(); }
   catch { setStatus('繪圖元件載入失敗(CDN 與本地皆無法載入)'); return; }
   chart = echartsLib.init(chartBox, null, { renderer: 'canvas' });
+  buildSizeButtons();
+  applySize(SIZES[0]);    // 預設自適應
 
   input.value = SAMPLE;   // 預設帶一份範例,一開啟就看得到圖
   parseAndRender();
@@ -176,6 +193,22 @@ function buildChartButtons() {
   setActive(chartBar, chartId);
 }
 
+function buildSizeButtons() {
+  SIZES.forEach((s) => {
+    const b = mkButton(s.label, () => applySize(s));
+    b.dataset.id = s.id;
+    sizeBar.appendChild(b);
+  });
+}
+
+// 套用輸出尺寸:改容器大小 → chart.resize() 即時重排(不重載);記住尺寸供匯出用。
+function applySize(size) {
+  if (size.w) { chartBox.style.width = size.w + 'px'; chartBox.style.height = size.h + 'px'; currentSize = { w: size.w, h: size.h }; }
+  else { chartBox.style.width = '100%'; chartBox.style.height = '460px'; currentSize = null; }
+  setActive(sizeBar, size.id);
+  if (chart) chart.resize();
+}
+
 function highlightFormat(usedFmt) { setActive(formatBar, format === 'auto' ? 'auto' : usedFmt); }
 
 function setActive(bar, id) {
@@ -227,7 +260,8 @@ function loadIntoInput(text) {
 // ── 匯出 ──
 function downloadPng() {
   if (!chart) return;
-  const url = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
+  // 選了精確尺寸 → pixelRatio 1,讓 PNG 剛好是該尺寸;自適應 → pixelRatio 2 較清晰
+  const url = chart.getDataURL({ type: 'png', pixelRatio: currentSize ? 1 : 2, backgroundColor: '#fff' });
   triggerDownload(url, filename('png'));
   showToast('已下載 PNG');
 }

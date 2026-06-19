@@ -44,11 +44,18 @@
 
   <div id="status" class="status" aria-live="polite"></div>
 
-  <div id="chart" class="chart-box"></div>
+  <div class="row">
+    <span class="row-label">尺寸</span>
+    <div id="sizes" class="chip-row"></div>
+  </div>
+
+  <div class="chart-scroll">
+    <div id="chart" class="chart-box"></div>
+  </div>
 
   <div id="actions" class="actions" hidden>
-    <button id="download-png" class="btn" type="button">⬇ 下載 PNG</button>
-    <button id="download-svg" class="btn" type="button">⬇ 下載 SVG</button>
+    <button id="download-png" class="btn" type="button">PNG Download</button>
+    <button id="download-svg" class="btn" type="button">SVG Download</button>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

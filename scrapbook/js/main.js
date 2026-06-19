@@ -177,7 +177,9 @@ async function restoreDraft() {
 // 把一段文字載入輸入框,並讓 text handler 重新 render 顯示版(用 input 事件,維持解耦)。
 function loadTextIntoInput(text) {
   input.value = text;
-  currentBaseline = text;                  // 視為已載入,沒未存變動
+  // 從暫存區還原回來的是「未儲存」內容 → 標記為 dirty(baseline=null),
+  // 這樣再切去開別筆時會再次自動暫存,不會把它弄丟。
+  currentBaseline = null;
   input.dispatchEvent(new Event('input'));
 }
 

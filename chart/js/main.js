@@ -8,9 +8,14 @@ import { parse } from './parse/index.js';
 import { FORMAT_LABELS, detectFormat } from './detect.js';
 import { numericColumns, firstStringColumn } from './table.js';
 import { CHARTS, getChart } from './charts/index.js';
+import { loadItems, addItem, removeItem } from './storage.js';
+import { EXAMPLES } from './examples.js';
 
 const qs = (s) => document.querySelector(s);
 const input = qs('#input');
+const saveBtn = qs('#save');
+const savedList = qs('#saved');
+const exampleSel = qs('#example');
 const formatBar = qs('#formats');
 const chartBar = qs('#charttypes');
 const config = qs('#config');
@@ -43,6 +48,15 @@ async function init() {
   let timer;
   input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(parseAndRender, 200); });
   window.addEventListener('resize', () => chart && chart.resize());
+
+  // 儲存庫 + 範例
+  saveBtn.addEventListener('click', saveCurrent);
+  exampleSel.addEventListener('change', () => {
+    const ex = EXAMPLES[exampleSel.value];
+    if (ex != null) loadIntoInput(ex);
+    exampleSel.value = ''; // 選完歸位,方便再次選
+  });
+  refreshSaved();
 
   setStatus('載入繪圖元件中…');
   try { echartsLib = await loadECharts(); }
@@ -171,6 +185,43 @@ function setActive(bar, id) {
 function mkButton(text, onClick) {
   const b = document.createElement('button'); b.type = 'button'; b.className = 'chip-btn'; b.textContent = text;
   b.addEventListener('click', onClick); return b;
+}
+
+// ── 儲存庫(存目前輸入 / 回填 / 刪除)+ 載入 ──
+async function saveCurrent() {
+  const text = input.value;
+  if (!text.trim()) { showToast('沒有內容可儲存'); return; }
+  try { await addItem(text); await refreshSaved(); showToast('已存進儲存庫'); }
+  catch { showToast('儲存失敗,可能空間已滿'); }
+}
+
+async function refreshSaved() {
+  const items = await loadItems();
+  savedList.innerHTML = '';
+  items.forEach((item) => savedList.appendChild(buildChip(item)));
+}
+
+function buildChip(item) {
+  const chip = document.createElement('div'); chip.className = 'saved-chip';
+  const label = document.createElement('button');
+  label.type = 'button'; label.className = 'saved-label'; label.textContent = item.title;
+  label.title = '點擊載入這筆資料';
+  label.addEventListener('click', () => loadIntoInput(item.payload));
+  const del = document.createElement('button');
+  del.type = 'button'; del.className = 'saved-del'; del.textContent = '✕'; del.title = '刪除';
+  del.addEventListener('click', async () => {
+    if (!confirm(`確定刪除「${item.title}」嗎?`)) return;
+    await removeItem(item.id); await refreshSaved();
+  });
+  chip.append(label, del);
+  return chip;
+}
+
+// 載入一段文字到輸入區(範例 / 儲存庫共用):格式回到自動偵測,再觸發解析重繪。
+function loadIntoInput(text) {
+  format = 'auto'; setActive(formatBar, 'auto');
+  input.value = text;
+  input.dispatchEvent(new Event('input'));
 }
 
 // ── 匯出 ──

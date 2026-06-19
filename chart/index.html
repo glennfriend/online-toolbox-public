@@ -11,7 +11,17 @@
 <body>
   <header class="head">
     <h1>Chart</h1>
-    <p>貼上資料 → 選欄位與圖種 → 產生<strong>清楚的靜態統計圖</strong>(數值直接標在圖上,不用互動)。可匯出 PNG / SVG。</p>
+    <div class="toolbar">
+      <button id="save" class="btn" type="button">💾 儲存</button>
+      <div id="saved" class="saved"></div>
+      <select id="example" class="example" aria-label="載入範例">
+        <option value="">範例…</option>
+        <option value="json">JSON</option>
+        <option value="csv">CSV</option>
+        <option value="tsv">TSV(Excel/Sheet)</option>
+        <option value="markdown">Markdown 表格</option>
+      </select>
+    </div>
   </header>
 
   <section class="pane">

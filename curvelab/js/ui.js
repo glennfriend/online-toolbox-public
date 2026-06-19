@@ -44,10 +44,11 @@ var UI = {
       plot.el('path', { d:plot.paramPath(fx, fy, tMin, tMax, step), fill:'none',
                         stroke:THEME.line, 'stroke-width':2, 'stroke-dasharray':'2 4' });
 
+    var color = opts.color || THEME.accent;   // 主曲線/點的顏色(預設綠)
     var update = (typeof opts.decorate === 'function') ? opts.decorate(plot) : null;
-    var trail = plot.el('path', { fill:'none', stroke:THEME.accent, 'stroke-width':3,
+    var trail = plot.el('path', { fill:'none', stroke:color, 'stroke-width':3,
                                   'stroke-linejoin':'round', 'stroke-linecap':'round' });
-    var pt = plot.el('circle', { r:6, fill:THEME.accent });
+    var pt = plot.el('circle', { r:6, fill:color });
 
     var t = tMin, playing = false, raf = null, alive = true;
     var slider, playBtn;

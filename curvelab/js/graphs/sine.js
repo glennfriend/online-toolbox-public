@@ -1,9 +1,9 @@
 "use strict";
-/* 正弦曲線  y = sin(x)  —— 從單位圓「旋轉 → 波」生成 */
+/* 正弦・餘弦  y = sin(x) / cos(x)  —— 單位圓上同一個轉動點的兩個投影 */
 registerGraph({
   id: 'sine',
-  name: '正弦曲線',
-  eq: 'y=sin(x)',
+  name: '正弦・餘弦',
+  eq: 'sin / cos',
   group: '函數 · 線',
   create: function(root){
     // 寬而扁,且兩軸等比例(圓才會圓):x 範圍 10.2、y 範圍 3.6 → 高 ≈ 寬 × 3.6/10.2
@@ -14,41 +14,56 @@ registerGraph({
     var out = UI.readout();
 
     var tracer = UI.tracer(plot, {
-      fx: function(t){ return t; },                  // 波:x = t
-      fy: function(t){ return Math.sin(t); },        //      y = sin t
+      fx: function(t){ return t; },                  // 主曲線:sin 波 (x, sin x)
+      fy: function(t){ return Math.sin(t); },
       tMin: 0, tMax: 2*Math.PI, frames: 240,
-      tLabel: 'x',                                   // 這張圖的參數就是橫軸的 x
-      fmt: function(t){ return t.toFixed(2); },
+      tLabel: 'x',
+      color: THEME.y,                                // sin 用橘色(對應它的股)
       decorate: function(p){
-        p.el('circle', { cx:p.sx(cx0), cy:p.sy(0), r:Math.abs(p.sx(cx0+1)-p.sx(cx0)), fill:'none', stroke:THEME.line, 'stroke-width':1.5 });
-        var radius = p.el('line', { stroke:THEME.x, 'stroke-width':1.5 });
-        var conn   = p.el('line', { stroke:THEME.y, 'stroke-width':1.5, 'stroke-dasharray':'4 3' });
-        var dot    = p.el('circle', { r:4, fill:THEME.x });
+        var rpx = Math.abs(p.sx(cx0+1) - p.sx(cx0));            // 單位半徑的像素長
+        p.el('circle', { cx:p.sx(cx0), cy:p.sy(0), r:rpx, fill:'none', stroke:THEME.line, 'stroke-width':1.5 });
+        // cos 的底圖(淡)與軌跡(藍)
+        p.el('path', { d:p.paramPath(function(t){ return t; }, function(t){ return Math.cos(t); }, 0, 2*Math.PI, 0.01),
+                       fill:'none', stroke:THEME.line, 'stroke-width':2, 'stroke-dasharray':'2 4' });
+        var cosTrail = p.el('path', { fill:'none', stroke:THEME.x, 'stroke-width':3, 'stroke-linejoin':'round', 'stroke-linecap':'round' });
+        var cosPt    = p.el('circle', { r:5, fill:THEME.x });
+        // 圓上的直角三角形:水平股 = cos(藍)、垂直股 = sin(橘)、斜邊 = 半徑(1)
+        var radius = p.el('line', { stroke:THEME.muted, 'stroke-width':1.5 });
+        var legH   = p.el('line', { stroke:THEME.x, 'stroke-width':3 });            // cos:水平
+        var legV   = p.el('line', { stroke:THEME.y, 'stroke-width':3 });            // sin:垂直
+        var Pc     = p.el('circle', { r:4.5, fill:THEME.accent });
+        var conn   = p.el('line', { stroke:THEME.y, 'stroke-width':1.5, 'stroke-dasharray':'4 3' });  // 把 sin 高度連到 sin 波
         return function(t){
-          var hx = cx0 + Math.cos(t), hy = Math.sin(t);
-          radius.setAttribute('x1', p.sx(cx0)); radius.setAttribute('y1', p.sy(0));
-          radius.setAttribute('x2', p.sx(hx));  radius.setAttribute('y2', p.sy(hy));
-          dot.setAttribute('cx', p.sx(hx)); dot.setAttribute('cy', p.sy(hy));
-          conn.setAttribute('x1', p.sx(hx)); conn.setAttribute('y1', p.sy(hy));
-          conn.setAttribute('x2', p.sx(t));  conn.setAttribute('y2', p.sy(hy));
+          var c = Math.cos(t), s = Math.sin(t);
+          var fx = cx0 + c;                              // P 的 x(腳點)
+          radius.setAttribute('x1', p.sx(cx0)); radius.setAttribute('y1', p.sy(0)); radius.setAttribute('x2', p.sx(fx)); radius.setAttribute('y2', p.sy(s));
+          legH.setAttribute('x1', p.sx(cx0)); legH.setAttribute('y1', p.sy(0)); legH.setAttribute('x2', p.sx(fx)); legH.setAttribute('y2', p.sy(0));
+          legV.setAttribute('x1', p.sx(fx));  legV.setAttribute('y1', p.sy(0)); legV.setAttribute('x2', p.sx(fx)); legV.setAttribute('y2', p.sy(s));
+          Pc.setAttribute('cx', p.sx(fx)); Pc.setAttribute('cy', p.sy(s));
+          conn.setAttribute('x1', p.sx(fx)); conn.setAttribute('y1', p.sy(s)); conn.setAttribute('x2', p.sx(t)); conn.setAttribute('y2', p.sy(s));
+          cosTrail.setAttribute('d', p.paramPath(function(u){ return u; }, function(u){ return Math.cos(u); }, 0, t, 0.01));
+          cosPt.setAttribute('cx', p.sx(t)); cosPt.setAttribute('cy', p.sy(c));
         };
       },
-      onDraw: function(t, X, Y){
-        // 用顯示的 x 算 y;sin 的值是無理數,顯示為四捨五入的近似值,故用 ≈
-        var xr = Num.round(t, 2), yr = Math.sin(xr);
-        out.innerHTML = '<span class="x">x = ' + Num.show(xr,2) + '</span>　→　<span class="y">y = sin(x) ≈ ' + Num.show(yr,2) + '</span>';
+      onDraw: function(t){
+        // 用顯示的 x 算 sin、cos;兩者通常是無理數,顯示為四捨五入的近似值,故用 ≈
+        var xr = Num.round(t, 2);
+        out.innerHTML = '<span class="x">x = ' + Num.show(xr,2) + '</span>　｜　' +
+          '<span class="y">sin(x) ≈ ' + Num.show(Math.sin(xr),2) + '</span>　｜　' +
+          '<span style="color:var(--x);font-weight:600">cos(x) ≈ ' + Num.show(Math.cos(xr),2) + '</span>';
       }
     });
 
     var note = UI.note(
-      '把一個點繞<span class="x">單位圓</span>轉,它的<span class="y">高度</span>就是 sin。' +
-      '當 <span class="x">x</span>(也就是繞圓轉的角度)一邊增加,高度一邊上上下下,把每個 x 的高度往右排開,畫出來就是正弦波。' +
-      '這就是「旋轉 → 波」:三角函數和圓其實是同一件事。按播放看它生成。' +
-      '<br><span style="color:var(--muted);font-size:13px">註:sin 的值通常是無理數,畫面顯示為四捨五入後的近似值(≈)。</span>'
+      '單位圓上一個轉動點,有兩個影子:<span class="y">高度(上下)= sin</span>、<span class="x">左右位置 = cos</span>。' +
+      '它們正是這個點在直角三角形裡的兩股,斜邊是半徑 = 1,所以永遠 <span class="k">sin²+cos² = 1</span>。' +
+      '右邊兩條波就是 sin(橘)和 cos(藍):形狀一樣,<span class="x">cos 只是領先 sin 90°</span> 的同一種波。' +
+      '<br><span style="color:var(--muted);font-size:13px">註:sin、cos 的值通常是無理數,畫面顯示為四捨五入後的近似值(≈)。</span>'
     );
 
     var panel = document.createElement('div'); panel.className='panel';
-    panel.append(UI.eq('y = sin(x)'), out, UI.plotWrap(plot.svg, false), tracer.controls, note);
+    panel.append(UI.eq('y = <span style="color:var(--y)">sin(x)</span>　/　<span style="color:var(--x)">cos(x)</span>'),
+                 out, UI.plotWrap(plot.svg, false), tracer.controls, note);
     root.appendChild(panel);
 
     return { destroy: tracer.destroy };

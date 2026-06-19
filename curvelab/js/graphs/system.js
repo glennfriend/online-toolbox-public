@@ -15,23 +15,51 @@ registerGraph({
     var dot = plot.el('circle', { r:6.5, fill:THEME.accent });
     var out = UI.readout();
 
+    // 代入消去法的逐步推導(用目前的數字實際代入,看「公式」怎麼算出那個交點)
+    var steps = document.createElement('div');
+    steps.className = 'note';
+    steps.style.fontFamily = 'var(--mono)';
+    steps.style.fontSize = '13.5px';
+    steps.style.lineHeight = '1.9';
+
+    function n(v){ return Num.show(v, 2); }
+    function signed(v){ return (v < 0 ? '− ' + n(-v) : '+ ' + n(v)); }
+    function paren(v){ return (v < 0 ? '(' + n(v) + ')' : n(v)); }   // 負數加括號,避免「− -1」雙重符號
+
     function draw(){
       L1.setAttribute('d', plot.funcPath(function(x){ return m1*x + b1; }, -6, 6, 0.2));
       L2.setAttribute('d', plot.funcPath(function(x){ return m2*x + b2; }, -6, 6, 0.2));
+
+      var head = '<b>代入消去法</b>(看公式怎麼算出交點):<br>' +
+        '① 兩式都 = y,讓它們相等:<br>' +
+        '　 ' + n(m1) + 'x ' + signed(b1) + ' = ' + n(m2) + 'x ' + signed(b2) + '<br>' +
+        '② x 移一邊、數字移另一邊:<br>' +
+        '　 (' + n(m1) + ' − ' + paren(m2) + ')x = ' + n(b2) + ' − ' + paren(b1) + '　→　' + n(m1 - m2) + 'x = ' + n(b2 - b1) + '<br>';
+
       if (m1 === m2){
         dot.setAttribute('opacity', 0);
         out.innerHTML = (b1 === b2)
           ? '<span class="err">兩條線重合 → 無限多組解</span>'
           : '<span class="err">兩條線平行,永遠不相交 → 無解</span>';
-      } else {
-        var x = (b2 - b1) / (m1 - m2), y = m1*x + b1;
-        dot.setAttribute('opacity', 1);
-        dot.setAttribute('cx', plot.sx(x)); dot.setAttribute('cy', plot.sy(y));
-        // 用顯示的交點 x 算 y(可驗算);x 是否被四捨五入決定用 = 還是 ≈
-        var xr = Num.round(x, 2), yr = m1*xr + b1;
-        var eq = Num.sameAt(x, xr, 9) ? '=' : '≈';
-        out.innerHTML = '交點(就是解):(x, y) ' + eq + ' (' + Num.show(xr,2) + ', ' + Num.show(yr,2) + ')';
+        steps.innerHTML = head +
+          '③ 但 ' + n(m1) + ' − ' + n(m2) + ' = 0,<span class="err">不能除以 0</span> → ' +
+          (b1 === b2 ? '兩式其實一樣 → 無限多組解' : '無解(兩線平行)') + '。';
+        return;
       }
+
+      var x = (b2 - b1) / (m1 - m2), y = m1*x + b1;
+      dot.setAttribute('opacity', 1);
+      dot.setAttribute('cx', plot.sx(x)); dot.setAttribute('cy', plot.sy(y));
+      // 用顯示的交點 x 算 y(可驗算);x 是否被四捨五入決定用 = 還是 ≈
+      var xr = Num.round(x, 2), yr = m1*xr + b1;
+      var eq = Num.sameAt(x, xr, 9) ? '=' : '≈';
+      out.innerHTML = '交點(就是解):(x, y) ' + eq + ' (' + n(xr) + ', ' + n(yr) + ')';
+
+      steps.innerHTML = head +
+        '③ 兩邊除以 ' + n(m1 - m2) + ':<br>' +
+        '　 x = ' + n(b2 - b1) + ' / ' + n(m1 - m2) + ' ' + eq + ' <b>' + n(xr) + '</b><br>' +
+        '④ 代回求 y:y = ' + n(m1) + '·(' + n(xr) + ') ' + signed(b1) + ' ' + eq + ' <b>' + n(yr) + '</b><br>' +
+        '→ <span class="k">(' + n(xr) + ', ' + n(yr) + ')</span> 就是上圖兩線的交點 ✓';
     }
 
     var controls = UI.controls();
@@ -49,7 +77,7 @@ registerGraph({
     );
 
     var panel = document.createElement('div'); panel.className='panel';
-    panel.append(UI.eq('<span style="color:var(--x)">y=m₁x+b₁</span>　<span style="color:var(--y)">y=m₂x+b₂</span>'), out, UI.plotWrap(plot.svg, false), controls, note);
+    panel.append(UI.eq('<span style="color:var(--x)">y=m₁x+b₁</span>　<span style="color:var(--y)">y=m₂x+b₂</span>'), out, UI.plotWrap(plot.svg, false), controls, steps, note);
     root.appendChild(panel);
 
     s1.out.textContent = m1; s2.out.textContent = b1; s3.out.textContent = m2; s4.out.textContent = b2; draw();

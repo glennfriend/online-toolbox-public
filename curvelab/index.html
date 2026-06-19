@@ -126,33 +126,31 @@
   <nav class="tabs" id="tabs" aria-label="選擇公式"></nav>
 </div>
 
-<!-- 共用 library(載入順序要在各圖之前)。
-     ?v=N 是版本號:改了任何 JS 結構就把它 +1,可避免瀏覽器用到舊的快取檔。 -->
-<script src="js/theme.js?v=3"></script>
-<script src="js/plot.js?v=3"></script>
-<script src="js/ui.js?v=3"></script>
-<script src="js/expr.js?v=3"></script>
-<script src="js/registry.js?v=3"></script>
-
-<!-- 各圖模組:每個一個獨立檔案;此處的排列順序 = 右側按鈕的順序。
-     新增一個圖 = 在 js/graphs/ 加一個檔案,再在這裡多加一行 <script>;核心完全不用動。 -->
-<script src="js/graphs/line.js?v=3"></script>
-<script src="js/graphs/quadratic.js?v=3"></script>
-<script src="js/graphs/parabola.js?v=3"></script>
-<script src="js/graphs/inverse.js?v=3"></script>
-<script src="js/graphs/abs.js?v=3"></script>
-<script src="js/graphs/circle.js?v=3"></script>
-<script src="js/graphs/ellipse.js?v=3"></script>
-<script src="js/graphs/system.js?v=3"></script>
-<script src="js/graphs/roots.js?v=3"></script>
-<script src="js/graphs/pythagoras.js?v=3"></script>
-<script src="js/graphs/sine.js?v=3"></script>
-<script src="js/graphs/catenary.js?v=3"></script>
-<script src="js/graphs/cycloid.js?v=3"></script>
-<script src="js/graphs/spiral.js?v=3"></script>
-<script src="js/graphs/cardioid.js?v=3"></script>
-<script src="js/graphs/astroid.js?v=3"></script>
-<script src="js/graphs/lemniscate.js?v=3"></script>
-<script src="js/graphs/lissajous.js?v=3"></script>
+<!-- 載入器:用 Date.now() 當版本號,讓瀏覽器每次都抓最新檔,不必再手動改版本號。
+     (代價:每次載入重抓這些小檔,對這種小工具可忽略;離線 file:// 會忽略查詢字串,不影響。)
+     新增一個圖 = 在 js/graphs/ 加一個檔案,再把檔名加進下面 files 陣列(順序 = 右側按鈕順序)。 -->
+<script>
+(function(){
+  var v = Date.now();
+  var files = [
+    // 共用 library(要在各圖之前)
+    'js/theme.js', 'js/plot.js', 'js/ui.js', 'js/expr.js', 'js/registry.js',
+    // 各圖模組
+    'js/graphs/line.js', 'js/graphs/quadratic.js', 'js/graphs/parabola.js', 'js/graphs/inverse.js', 'js/graphs/abs.js',
+    'js/graphs/circle.js', 'js/graphs/ellipse.js', 'js/graphs/system.js', 'js/graphs/roots.js', 'js/graphs/pythagoras.js',
+    'js/graphs/sine.js', 'js/graphs/catenary.js', 'js/graphs/cycloid.js', 'js/graphs/spiral.js', 'js/graphs/cardioid.js',
+    'js/graphs/astroid.js', 'js/graphs/lemniscate.js', 'js/graphs/lissajous.js'
+  ];
+  var last;
+  files.forEach(function(src){
+    var s = document.createElement('script');
+    s.src = src + '?v=' + v;
+    s.async = false;                 // 動態插入的 script:設 async=false 保留執行順序
+    document.head.appendChild(s);
+    last = s;
+  });
+  last.onload = function(){ if (window.App && App.init) App.init(); };  // 全部載入後才掛載 App
+})();
+</script>
 </body>
 </html>

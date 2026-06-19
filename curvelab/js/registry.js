@@ -53,5 +53,5 @@ var App = (function(){
 
   return { init: init };
 })();
-
-document.addEventListener('DOMContentLoaded', App.init);
+// App.init() 由 index.html 的載入器在所有 JS 載入完成後呼叫(不再用 DOMContentLoaded,
+// 因為動態載入的 script 可能比 DOMContentLoaded 還晚執行)。

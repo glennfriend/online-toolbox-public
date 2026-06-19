@@ -25,7 +25,13 @@ registerGraph({
       pt.setAttribute('cx', px); pt.setAttribute('cy', py);
       projX.setAttribute('x1',px); projX.setAttribute('y1',plot.sy(0)); projX.setAttribute('x2',px); projX.setAttribute('y2',py);
       projY.setAttribute('x1',px); projY.setAttribute('y1',py);        projY.setAttribute('x2',plot.sx(0)); projY.setAttribute('y2',py);
-      out.innerHTML = '(x, y) = (' + x.toFixed(1) + ', ' + y.toFixed(1) + ')　｜　x² + y² = ' + (x*x+y*y).toFixed(1) + ' = r²';
+      // 用「顯示出來的那組座標」去算總和,畫面才內部一致、可驗算;
+      // 因座標四捨五入,總和會非常接近(但不必剛好等於)r²,故用 ≈。
+      var xs = +x.toFixed(2), ys = +y.toFixed(2);
+      var sum = xs*xs + ys*ys;
+      var eq = (sum.toFixed(2) === (r*r).toFixed(2)) ? '=' : '≈';
+      out.innerHTML = '(x, y) = (' + xs.toFixed(2) + ', ' + ys.toFixed(2) + ')　｜　x² + y² = ' +
+                      sum.toFixed(2) + ' ' + eq + ' r² = ' + (r*r);
     }
 
     var wrap = UI.plotWrap(plot.svg, true);

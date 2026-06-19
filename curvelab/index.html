@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>互動公式圖形庫</title>
+<title>Curvelab</title>
 <style>
   :root{
     --bg:#F2F4F7; --surface:#FFFFFF; --ink:#1B2433; --muted:#5C6675;
@@ -37,8 +37,9 @@
   .app__head h1{ font-size:18px; font-weight:600; margin:0; letter-spacing:.01em; }
   .app__head p{ font-size:13px; color:var(--muted); margin:4px 0 0; }
 
+  .body{ display:flex; gap:16px; align-items:flex-start; }
   .stage{
-    flex:1; padding:8px 0 24px;
+    flex:1; min-width:0; padding:8px 0 24px;
   }
   .panel{
     background:var(--surface); border:1px solid var(--line);
@@ -89,11 +90,11 @@
   .err{ color:var(--danger); }
 
   .tabs{
-    position:sticky; bottom:0; display:flex; gap:8px; flex-wrap:wrap;
-    padding:12px 0 18px; background:linear-gradient(to top,var(--bg) 70%,transparent);
+    flex:0 0 150px; position:sticky; top:16px;
+    display:flex; flex-direction:column; gap:8px; padding:8px 0;
   }
   .tab{
-    flex:1 1 auto; min-width:96px; text-align:center;
+    width:100%; text-align:center;
     padding:10px 12px; border:1px solid var(--line-strong); border-radius:10px;
     background:var(--surface); color:var(--ink); cursor:pointer;
     font-family:var(--sans); font-size:14px; line-height:1.3;
@@ -102,16 +103,24 @@
   .tab:hover{ border-color:var(--accent); }
   .tab.active{ border:2px solid var(--accent); background:var(--accent-soft); }
   .tab.active small{ color:var(--accent); }
+
+  /* 窄螢幕:右側欄收不下時,改回水平排在圖形下方(不黏底、不擋內容) */
+  @media (max-width:640px){
+    .body{ flex-direction:column; }
+    .tabs{ flex:none; position:static; flex-direction:row; flex-wrap:wrap; padding:0 0 18px; }
+    .tab{ flex:1 1 auto; min-width:96px; }
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="app__head">
-    <h1>互動公式圖形庫</h1>
-    <p>選下面的公式,拉動參數,看圖形怎麼變。</p>
+    <h1>Curvelab</h1>
   </header>
-  <main class="stage" id="stage"></main>
-  <nav class="tabs" id="tabs" aria-label="選擇公式"></nav>
+  <div class="body">
+    <main class="stage" id="stage"></main>
+    <nav class="tabs" id="tabs" aria-label="選擇公式"></nav>
+  </div>
 </div>
 
 <script>

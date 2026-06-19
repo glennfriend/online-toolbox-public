@@ -37,6 +37,7 @@ const config = qs('#config');
 const preview = qs('#preview');
 const mapBox = qs('#mapping');
 const chartBox = qs('#chart');
+const frame = qs('#chart-frame');
 const actions = qs('#actions');
 const statusEl = qs('#status');
 const toast = qs('#toast');
@@ -62,7 +63,7 @@ async function init() {
 
   let timer;
   input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(parseAndRender, 200); });
-  window.addEventListener('resize', () => chart && chart.resize());
+  window.addEventListener('resize', () => { if (!chart) return; if (currentSize) fitScale(); else chart.resize(); });
 
   // 儲存庫 + 範例
   saveBtn.addEventListener('click', saveCurrent);
@@ -201,12 +202,33 @@ function buildSizeButtons() {
   });
 }
 
-// 套用輸出尺寸:改容器大小 → chart.resize() 即時重排(不重載);記住尺寸供匯出用。
+// 套用輸出尺寸:以「真實尺寸」繪製(匯出就是這個尺寸),再縮放到塞滿外框寬度
+// → 不管選多大,畫面都看得到整張、不用左右拉;匯出仍是選的精確尺寸。
 function applySize(size) {
-  if (size.w) { chartBox.style.width = size.w + 'px'; chartBox.style.height = size.h + 'px'; currentSize = { w: size.w, h: size.h }; }
-  else { chartBox.style.width = '100%'; chartBox.style.height = '460px'; currentSize = null; }
   setActive(sizeBar, size.id);
-  if (chart) chart.resize();
+  if (size.w) {
+    currentSize = { w: size.w, h: size.h };
+    chartBox.style.width = size.w + 'px';
+    chartBox.style.height = size.h + 'px';
+    if (chart) chart.resize();
+    fitScale();
+  } else {
+    currentSize = null;
+    chartBox.style.transform = 'none';
+    chartBox.style.width = '100%';
+    chartBox.style.height = '460px';
+    frame.style.height = '';
+    if (chart) chart.resize();
+  }
+}
+
+// 把真實尺寸的圖等比縮小到塞滿外框寬度;外框高度設成縮放後的高度(避免留白或重疊)。
+function fitScale() {
+  if (!currentSize) return;
+  const scale = Math.min(1, frame.clientWidth / currentSize.w);
+  chartBox.style.transformOrigin = 'top left';
+  chartBox.style.transform = `scale(${scale})`;
+  frame.style.height = (currentSize.h * scale) + 'px';
 }
 
 function highlightFormat(usedFmt) { setActive(formatBar, format === 'auto' ? 'auto' : usedFmt); }

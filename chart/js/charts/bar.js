@@ -10,7 +10,7 @@ export const bar = {
     const { categories, series } = aggregateByCategory(table, m.xIdx, m.yIdxs, m.agg);
     const opt = baseOption();
     opt.xAxis = { type: 'category', data: categories, axisLabel: categoryAxisLabel(categories.length) };
-    opt.yAxis = { type: 'value' };
+    opt.yAxis = { type: 'value', min: 0 };   // 長條一定從 0 起,長度比例才不會誤導
     opt.series = series.map((s) => ({ name: s.name, type: 'bar', data: s.data, label: valueLabel('top') }));
     return opt;
   },
@@ -22,7 +22,7 @@ export const barHorizontal = {
   build(table, m) {
     const { categories, series } = aggregateByCategory(table, m.xIdx, m.yIdxs, m.agg);
     const opt = baseOption();
-    opt.xAxis = { type: 'value' };
+    opt.xAxis = { type: 'value', min: 0 };   // 橫條的數值軸也從 0 起
     opt.yAxis = { type: 'category', data: categories };
     opt.series = series.map((s) => ({ name: s.name, type: 'bar', data: s.data, label: valueLabel('right') }));
     return opt;

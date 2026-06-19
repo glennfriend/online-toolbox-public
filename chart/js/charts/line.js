@@ -7,7 +7,8 @@ function buildLine(table, m, area) {
   const { categories, series } = aggregateByCategory(table, m.xIdx, m.yIdxs, m.agg);
   const opt = baseOption();
   opt.xAxis = { type: 'category', data: categories, boundaryGap: false, axisLabel: categoryAxisLabel(categories.length) };
-  opt.yAxis = { type: 'value' };
+  // 區域圖填到底,從 0 起才不誤導;折線看趨勢,維持自動縮放
+  opt.yAxis = { type: 'value', ...(area ? { min: 0 } : {}) };
   opt.series = series.map((s) => ({
     name: s.name,
     type: 'line',

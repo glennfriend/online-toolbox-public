@@ -20,12 +20,11 @@ const sizeBar = qs('#sizes');
 
 // 輸出尺寸預設(資料驅動,要增減就改這個陣列)。w/h 省略 = 自適應(跟著容器寬、固定高)。
 const SIZES = [
-  { id: 'auto', label: '自適應' },
+  { id: '600x400', w: 600, h: 400, label: '600×400' },
   { id: '1280x720', w: 1280, h: 720, label: '1280×720 (16:9)' },
   { id: '1200x630', w: 1200, h: 630, label: '1200×630 (社群)' },
-  { id: '600x400', w: 600, h: 400, label: '600×400' },
 ];
-let currentSize = null; // null = 自適應;否則 { w, h }(供匯出用精確尺寸)
+let currentSize = null; // 目前輸出尺寸 { w, h }(供匯出用精確尺寸)
 const formatBar = qs('#formats');
 const chartBar = qs('#charttypes');
 const config = qs('#config');
@@ -46,8 +45,6 @@ let lastOption = null;   // 最近一次的 option(供匯出 SVG 重繪)
 let colSig = '';         // 欄位簽章:變了才重設欄位對應、重建控制項
 const map = { xIdx: 0, yIdxs: [], agg: 'sum' }; // 欄位對應
 
-const SAMPLE = '水果,一月,二月\n蘋果,30,45\n香蕉,20,25\n橘子,15,30\n葡萄,28,18';
-
 init();
 
 async function init() {
@@ -58,7 +55,7 @@ async function init() {
 
   let timer;
   input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(parseAndRender, 200); });
-  window.addEventListener('resize', () => { if (!chart) return; if (currentSize) fitScale(); else chart.resize(); });
+  window.addEventListener('resize', () => { if (chart && currentSize) fitScale(); });
 
   // 儲存庫 + 範例
   saveBtn.addEventListener('click', saveCurrent);
@@ -76,7 +73,7 @@ async function init() {
   buildSizeButtons();
   applySize(SIZES[0]);    // 預設自適應
 
-  input.value = SAMPLE;   // 預設帶一份範例,一開啟就看得到圖
+  input.value = EXAMPLES.json;   // 預設帶一份範例(台灣六都),一開啟就看得到圖
   parseAndRender();
 }
 
@@ -201,20 +198,11 @@ function buildSizeButtons() {
 // → 不管選多大,畫面都看得到整張、不用左右拉;匯出仍是選的精確尺寸。
 function applySize(size) {
   setActive(sizeBar, size.id);
-  if (size.w) {
-    currentSize = { w: size.w, h: size.h };
-    chartBox.style.width = size.w + 'px';
-    chartBox.style.height = size.h + 'px';
-    if (chart) chart.resize();
-    fitScale();
-  } else {
-    currentSize = null;
-    chartBox.style.transform = 'none';
-    chartBox.style.width = '100%';
-    chartBox.style.height = '460px';
-    frame.style.height = '';
-    if (chart) chart.resize();
-  }
+  currentSize = { w: size.w, h: size.h };
+  chartBox.style.width = size.w + 'px';
+  chartBox.style.height = size.h + 'px';
+  if (chart) chart.resize();   // 以真實尺寸繪製(匯出就是這個尺寸)
+  fitScale();                  // 再縮放到塞滿外框寬度
 }
 
 // 把真實尺寸的圖等比縮小到塞滿外框寬度;外框高度設成縮放後的高度(避免留白或重疊)。

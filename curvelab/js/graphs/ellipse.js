@@ -4,6 +4,7 @@ registerGraph({
   id: 'ellipse',
   name: '橢圓',
   eq: 'x²/a²+y²/b²=1',
+  group: '形狀 · 生成',
   create: function(root){
     var plot = createPlot({ xMin:-7, xMax:7, yMin:-7, yMax:7 });  // 範圍方形 → 不變形
     plot.grid(); plot.axes();

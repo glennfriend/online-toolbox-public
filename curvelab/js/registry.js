@@ -17,20 +17,37 @@ var App = (function(){
     var g = null;
     for (var i=0;i<GRAPHS.length;i++) if (GRAPHS[i].id===id) g = GRAPHS[i];
     current = g.create(stage) || {};
-    var kids = tabs.children;
-    for (var k=0;k<kids.length;k++) kids[k].classList.toggle('active', kids[k].dataset.id === id);
+    var allTabs = tabs.querySelectorAll('.tab');
+    for (var k=0;k<allTabs.length;k++) allTabs[k].classList.toggle('active', allTabs[k].dataset.id === id);
+  }
+
+  function makeTab(g){
+    var b = document.createElement('button');
+    b.className = 'tab'; b.dataset.id = g.id;
+    b.innerHTML = g.name + '<small>' + (g.eq || '') + '</small>';
+    b.addEventListener('click', function(){ select(g.id); });
+    return b;
   }
 
   function init(){
     stage = document.getElementById('stage');
     tabs  = document.getElementById('tabs');
+
+    // 依 group 分欄(欄的順序 = 各 group 第一次出現的順序);沒寫 group 的歸到「其他」
+    var order = [], byGroup = {};
     GRAPHS.forEach(function(g){
-      var b = document.createElement('button');
-      b.className = 'tab'; b.dataset.id = g.id;
-      b.innerHTML = g.name + '<small>' + (g.eq || '') + '</small>';
-      b.addEventListener('click', function(){ select(g.id); });
-      tabs.appendChild(b);
+      var key = g.group || '其他';
+      if (!byGroup[key]){ byGroup[key] = []; order.push(key); }
+      byGroup[key].push(g);
     });
+    order.forEach(function(key){
+      var col = document.createElement('div'); col.className = 'tab-col';
+      var h = document.createElement('div'); h.className = 'tab-col-h'; h.textContent = key;
+      col.appendChild(h);
+      byGroup[key].forEach(function(g){ col.appendChild(makeTab(g)); });
+      tabs.appendChild(col);
+    });
+
     if (GRAPHS.length) select(GRAPHS[0].id);
   }
 

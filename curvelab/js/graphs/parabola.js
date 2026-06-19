@@ -4,6 +4,7 @@ registerGraph({
   id: 'parabola',
   name: '拋物線',
   eq: 'y=x²',
+  group: '函數 · 線',
   create: function(root){
     var plot = createPlot({ xMin:-4, xMax:4, yMin:-2, yMax:16 });
     plot.grid(); plot.axes();

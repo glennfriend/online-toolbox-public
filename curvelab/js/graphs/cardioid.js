@@ -4,6 +4,7 @@ registerGraph({
   id: 'cardioid',
   name: '心臟線',
   eq: 'r=a(1−cosθ)',
+  group: '形狀 · 生成',
   create: function(root){
     var a = 2;
     // 心臟線往左延伸,取範圍 x:[-5,1.5]、y:[-3.25,3.25],兩邊都 6.5 → 不變形

@@ -4,6 +4,7 @@ registerGraph({
   id: 'astroid',
   name: '星形線',
   eq: 'x=a cos³t',
+  group: '形狀 · 生成',
   create: function(root){
     var a = 3;
     var plot = createPlot({ xMin:-3.6, xMax:3.6, yMin:-3.6, yMax:3.6 });  // 方形 → 不變形

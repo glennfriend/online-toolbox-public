@@ -4,6 +4,7 @@ registerGraph({
   id: 'spiral',
   name: '螺線',
   eq: 'r=bθ',
+  group: '形狀 · 生成',
   create: function(root){
     var plot = createPlot({ xMin:-6, xMax:6, yMin:-6, yMax:6 });   // 方形 → 不變形
     plot.grid(); plot.axes();

@@ -4,6 +4,7 @@ registerGraph({
   id: 'quadratic',
   name: '二次函數',
   eq: 'y=ax²+bx+c',
+  group: '函數 · 線',
   create: function(root){
     var plot = createPlot({ xMin:-6, xMax:6, yMin:-4, yMax:12 });
     plot.grid(); plot.axes();

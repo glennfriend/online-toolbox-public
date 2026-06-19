@@ -4,6 +4,7 @@ registerGraph({
   id: 'abs',
   name: '絕對值',
   eq: 'y=a|x−h|+k',
+  group: '函數 · 線',
   create: function(root){
     var plot = createPlot({ xMin:-6, xMax:6, yMin:-6, yMax:6 });
     plot.grid(); plot.axes();

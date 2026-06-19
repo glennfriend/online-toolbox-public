@@ -4,6 +4,7 @@ registerGraph({
   id: 'lissajous',
   name: '利薩茹',
   eq: '頻率比 p:q',
+  group: '形狀 · 生成',
   create: function(root){
     var plot = createPlot({ xMin:-3.6, xMax:3.6, yMin:-3.6, yMax:3.6 });  // 方形 → 不變形
     plot.grid(); plot.axes();

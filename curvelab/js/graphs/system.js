@@ -4,6 +4,7 @@ registerGraph({
   id: 'system',
   name: '聯立方程式',
   eq: '兩線交點',
+  group: '函數 · 線',
   create: function(root){
     var plot = createPlot({ xMin:-6, xMax:6, yMin:-6, yMax:6 });
     plot.grid(); plot.axes();

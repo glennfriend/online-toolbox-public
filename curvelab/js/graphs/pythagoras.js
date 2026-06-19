@@ -4,6 +4,7 @@ registerGraph({
   id: 'pythagoras',
   name: '畢氏定理',
   eq: 'a²+b²=c²',
+  group: '形狀 · 生成',
   create: function(root){
     // x、y 範圍都是 18,搭配方形 SVG → 兩軸等比例,直角看起來才是真的直角
     var plot = createPlot({ xMin:-6, xMax:12, yMin:-6, yMax:12 });

@@ -4,6 +4,7 @@ registerGraph({
   id: 'cycloid',
   name: '擺線',
   eq: '滾動的輪',
+  group: '形狀 · 生成',
   create: function(root){
     // 兩軸等比例:x 範圍 7.5、y 範圍 3.0 → 高 = 寬 × 3/7.5
     var plot = createPlot({ xMin:-0.6, xMax:6.9, yMin:-0.4, yMax:2.6, width:380, height:152 });

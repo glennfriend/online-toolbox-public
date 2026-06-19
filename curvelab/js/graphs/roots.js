@@ -6,6 +6,7 @@ registerGraph({
   id: 'roots',
   name: '方程式的解',
   eq: 'f(x)=0',
+  group: '函數 · 線',
   create: function(root){
     var X0=-6, X1=6, Y0=-6, Y1=10;
 

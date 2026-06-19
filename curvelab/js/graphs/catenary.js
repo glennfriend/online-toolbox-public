@@ -4,6 +4,7 @@ registerGraph({
   id: 'catenary',
   name: '懸鏈線',
   eq: 'y=a cosh(x/a)',
+  group: '函數 · 線',
   create: function(root){
     var plot = createPlot({ xMin:-6, xMax:6, yMin:-1, yMax:8 });
     plot.grid(); plot.axes();

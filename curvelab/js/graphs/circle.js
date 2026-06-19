@@ -4,6 +4,7 @@ registerGraph({
   id: 'circle',
   name: '圓',
   eq: 'x²+y²=r²',
+  group: '形狀 · 生成',
   create: function(root){
     var plot = createPlot({ xMin:-9, xMax:9, yMin:-9, yMax:9 });
     plot.grid(); plot.axes();

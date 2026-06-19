@@ -4,6 +4,7 @@ registerGraph({
   id: 'sine',
   name: '正弦曲線',
   eq: 'y=sin(x)',
+  group: '函數 · 線',
   create: function(root){
     // 寬而扁,且兩軸等比例(圓才會圓):x 範圍 10.2、y 範圍 3.6 → 高 ≈ 寬 × 3.6/10.2
     var plot = createPlot({ xMin:-3.2, xMax:7, yMin:-1.8, yMax:1.8, width:380, height:134 });

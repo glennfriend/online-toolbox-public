@@ -31,7 +31,7 @@
   }
   .app{
     display:flex; flex-direction:column; min-height:100vh;
-    max-width:760px; margin:0 auto; padding:0 16px;
+    max-width:900px; margin:0 auto; padding:0 16px;
   }
   .app__head{ padding:20px 4px 8px; }
   .app__head h1{ font-size:18px; font-weight:600; margin:0; letter-spacing:.01em; }
@@ -54,11 +54,11 @@
     font-family:var(--mono); font-size:14px; text-align:center;
     color:var(--muted); min-height:20px; margin-bottom:12px;
   }
-  .plot-wrap{ max-width:380px; margin:0 auto; }
+  .plot-wrap{ max-width:440px; margin:0 auto; }
   .plot-wrap svg{ display:block; width:100%; height:auto; }
   .plot-wrap.grab svg{ cursor:grab; touch-action:none; }
 
-  .controls{ max-width:440px; margin:18px auto 0; display:flex; flex-direction:column; gap:12px; }
+  .controls{ max-width:460px; margin:18px auto 0; display:flex; flex-direction:column; gap:12px; }
   .ctl-row{ display:flex; align-items:center; gap:12px; }
   .ctl-row label{ font-family:var(--mono); font-size:14px; color:var(--muted); }
   .ctl-row .val{ min-width:42px; text-align:right; font-size:14px; font-weight:600; }
@@ -87,11 +87,13 @@
   .note .x{ color:var(--x); font-weight:600; }
   .note .y{ color:var(--y); font-weight:600; }
   .note .k{ font-family:var(--mono); color:var(--accent); font-weight:600; }
+  .note .accent{ color:var(--accent); font-weight:600; }
   .err{ color:var(--danger); }
 
   .tabs{
-    flex:0 0 150px; position:sticky; top:16px;
-    display:flex; flex-direction:column; gap:8px; padding:8px 0;
+    flex:0 0 158px; position:sticky; top:16px;
+    max-height:calc(100vh - 32px); overflow-y:auto;
+    display:flex; flex-direction:column; gap:8px; padding:8px 2px;
   }
   .tab{
     width:100%; text-align:center;
@@ -107,7 +109,8 @@
   /* 窄螢幕:右側欄收不下時,改回水平排在圖形下方(不黏底、不擋內容) */
   @media (max-width:640px){
     .body{ flex-direction:column; }
-    .tabs{ flex:none; position:static; flex-direction:row; flex-wrap:wrap; padding:0 0 18px; }
+    .tabs{ flex:none; position:static; max-height:none; overflow:visible;
+           flex-direction:row; flex-wrap:wrap; padding:0 0 18px; }
     .tab{ flex:1 1 auto; min-width:96px; }
   }
 </style>
@@ -123,470 +126,32 @@
   </div>
 </div>
 
-<script>
-"use strict";
+<!-- 共用 library(載入順序要在各圖之前) -->
+<script src="js/theme.js"></script>
+<script src="js/plot.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/expr.js"></script>
+<script src="js/registry.js"></script>
 
-/* =========================================================================
- * 1) 主題色：從 CSS 變數讀出目前(淺/深色)實際色碼,給 SVG 用
- * ====================================================================== */
-function cssVar(name){
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-const THEME = {
-  ink:    cssVar('--ink'),
-  muted:  cssVar('--muted'),
-  line:   cssVar('--line'),
-  accent: cssVar('--accent'),
-  x:      cssVar('--x'),
-  y:      cssVar('--y'),
-};
-
-/* =========================================================================
- * 2) createPlot()：共用繪圖工具。每個圖都用它建立座標系與基本元件。
- *    傳入可視範圍,回傳一組方法(座標換算、加元件、畫格線/軸、函數路徑…)。
- * ====================================================================== */
-const SVGNS = 'http://www.w3.org/2000/svg';
-
-function createPlot(opts){
-  const W = opts.width  || 360;
-  const H = opts.height || 360;
-  const { xMin, xMax, yMin, yMax } = opts;
-
-  const svg = document.createElementNS(SVGNS, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('width', '100%');
-  svg.setAttribute('role', 'img');
-
-  const sx = x => (x - xMin) / (xMax - xMin) * W;            // 數學 x → 像素
-  const sy = y => H - (y - yMin) / (yMax - yMin) * H;        // 數學 y → 像素
-
-  function el(tag, attrs){
-    const e = document.createElementNS(SVGNS, tag);
-    for (const k in attrs) e.setAttribute(k, attrs[k]);
-    svg.appendChild(e);
-    return e;
-  }
-  function clear(){ while (svg.firstChild) svg.removeChild(svg.firstChild); }
-
-  function grid(){
-    for (let x = Math.ceil(xMin); x <= xMax; x++)
-      el('line', { x1:sx(x), y1:0, x2:sx(x), y2:H, stroke:THEME.line, 'stroke-width':1 });
-    for (let y = Math.ceil(yMin); y <= yMax; y++)
-      el('line', { x1:0, y1:sy(y), x2:W, y2:sy(y), stroke:THEME.line, 'stroke-width':1 });
-  }
-  function axes(){
-    el('line', { x1:0, y1:sy(0), x2:W, y2:sy(0), stroke:THEME.muted, 'stroke-width':1.5 });
-    el('line', { x1:sx(0), y1:0, x2:sx(0), y2:H, stroke:THEME.muted, 'stroke-width':1.5 });
-  }
-  // 把函數 f 取樣成 SVG path 的 d 字串；超出範圍處斷開(抬筆)避免亂線
-  function funcPath(f, x0, x1, step){
-    step = step || (xMax - xMin) / 360;
-    let d = '', pen = false;
-    for (let x = x0; x <= x1 + 1e-9; x += step){
-      let y; try { y = f(x); } catch(_) { y = NaN; }
-      if (!isFinite(y) || y > yMax + (yMax-yMin) || y < yMin - (yMax-yMin)) { pen = false; continue; }
-      d += (pen ? 'L' : 'M') + sx(x).toFixed(1) + ' ' + sy(y).toFixed(1) + ' ';
-      pen = true;
-    }
-    return d;
-  }
-  // 滑鼠/觸控座標 → 數學座標(供拖曳使用)
-  function clientToMath(evt){
-    const r = svg.getBoundingClientRect();
-    const px = (evt.clientX - r.left) / r.width  * W;
-    const py = (evt.clientY - r.top ) / r.height * H;
-    return { x: xMin + px / W * (xMax - xMin), y: yMax - py / H * (yMax - yMin) };
-  }
-
-  return { svg, W, H, xMin, xMax, yMin, yMax, sx, sy, el, clear, grid, axes, funcPath, clientToMath };
-}
-
-/* =========================================================================
- * 3) UI 小工具：減少各模組重複的版面程式碼
- * ====================================================================== */
-const UI = {
-  eq(html){ const d = document.createElement('div'); d.className='eq'; d.innerHTML=html; return d; },
-  readout(){ const d = document.createElement('div'); d.className='readout'; return d; },
-  note(html){ const d = document.createElement('div'); d.className='note'; d.innerHTML=html; return d; },
-  plotWrap(svg, grabbable){
-    const d = document.createElement('div');
-    d.className = 'plot-wrap' + (grabbable ? ' grab' : '');
-    d.appendChild(svg); return d;
-  },
-  controls(){ const d = document.createElement('div'); d.className='controls'; return d; },
-  sliderRow(label, cfg, onInput){
-    const row = document.createElement('div'); row.className='ctl-row';
-    const lab = document.createElement('label'); lab.textContent = label;
-    const inp = document.createElement('input'); inp.type='range';
-    inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=cfg.value;
-    const out = document.createElement('span'); out.className='val';
-    row.append(lab, inp, out);
-    inp.addEventListener('input', () => onInput(parseFloat(inp.value), out, inp));
-    return { row, input:inp, out };
-  },
-  button(label, onClick){
-    const b = document.createElement('button'); b.className='btn'; b.textContent=label;
-    b.addEventListener('click', onClick); return b;
-  },
-};
-
-/* =========================================================================
- * 4) 圖形模組註冊表。要新增一個圖,就 registerGraph({...}) 一個物件即可。
- *    模組介面：{ id, name, eq(可選按鈕副標), create(root) -> {destroy?} }
- * ====================================================================== */
-const GRAPHS = [];
-function registerGraph(g){ GRAPHS.push(g); }
-
-/* -------------------------------------------------------------------------
- * 模組 A：圓  x² + y² = r²
- * ---------------------------------------------------------------------- */
-registerGraph({
-  id: 'circle',
-  name: '圓',
-  eq: 'x²+y²=r²',
-  create(root){
-    const plot = createPlot({ xMin:-9, xMax:9, yMin:-9, yMax:9 });
-    plot.grid(); plot.axes();
-
-    const circle = plot.el('circle', { cx:plot.sx(0), cy:plot.sy(0), fill:'none', stroke:THEME.accent, 'stroke-width':2.5 });
-    const projX  = plot.el('line', { stroke:THEME.x, 'stroke-width':1.5, 'stroke-dasharray':'4 3' });
-    const projY  = plot.el('line', { stroke:THEME.y, 'stroke-width':1.5, 'stroke-dasharray':'4 3' });
-    plot.el('circle', { cx:plot.sx(0), cy:plot.sy(0), r:3, fill:THEME.muted });
-    const pt = plot.el('circle', { r:6.5, fill:THEME.accent });
-
-    let r = 4, theta = Math.PI/4;
-    const eqEl = UI.eq('x² + y² = <span class="p">r</span>²');
-    const out  = UI.readout();
-    function draw(){
-      const U = plot.W / 18;                          // 每單位像素
-      circle.setAttribute('r', r * U);
-      const x = r*Math.cos(theta), y = r*Math.sin(theta);
-      const px = plot.sx(x), py = plot.sy(y);
-      pt.setAttribute('cx', px); pt.setAttribute('cy', py);
-      projX.setAttribute('x1',px); projX.setAttribute('y1',plot.sy(0)); projX.setAttribute('x2',px); projX.setAttribute('y2',py);
-      projY.setAttribute('x1',px); projY.setAttribute('y1',py);        projY.setAttribute('x2',plot.sx(0)); projY.setAttribute('y2',py);
-      out.innerHTML = `(x, y) = (${x.toFixed(1)}, ${y.toFixed(1)})　｜　x² + y² = ${(x*x+y*y).toFixed(1)} = r²`;
-    }
-
-    const wrap = UI.plotWrap(plot.svg, true);
-    let dragging = false;
-    function onMove(e){ const m = plot.clientToMath(e); theta = Math.atan2(m.y, m.x); draw(); }
-    plot.svg.addEventListener('pointerdown', e => { dragging=true; onMove(e); try{ plot.svg.setPointerCapture(e.pointerId);}catch(_){} });
-    plot.svg.addEventListener('pointermove', e => { if(dragging) onMove(e); });
-    plot.svg.addEventListener('pointerup',   () => dragging=false);
-
-    const controls = UI.controls();
-    const rSlider = UI.sliderRow('r (半徑)', { min:1, max:8, step:1, value:r }, (v, o) => { r=v; o.textContent=v; draw(); });
-    controls.appendChild(rSlider.row);
-
-    const note = UI.note(
-      '<span class="x">x</span>、<span class="y">y</span> 是圓上某個點的座標,拖動橘點繞圓走就會改變它們。' +
-      '<span class="k">r</span> 是半徑,用滑桿調,決定整個圓的大小。不管點拖到哪,x²+y² 永遠等於 r²。'
-    );
-
-    const panel = document.createElement('div'); panel.className='panel';
-    panel.append(eqEl, out, wrap, controls, note);
-    root.appendChild(panel);
-
-    rSlider.out.textContent = r;
-    draw();
-    return {};
-  }
-});
-
-/* -------------------------------------------------------------------------
- * 模組 B：拋物線(曲線生成)  y = x²
- * ---------------------------------------------------------------------- */
-registerGraph({
-  id: 'parabola',
-  name: '拋物線',
-  eq: 'y=x²',
-  create(root){
-    const plot = createPlot({ xMin:-4, xMax:4, yMin:-2, yMax:16 });
-    plot.grid(); plot.axes();
-    const f = x => x*x;
-
-    plot.el('path', { d:plot.funcPath(f,-4,4,0.04), fill:'none', stroke:THEME.line, 'stroke-width':2, 'stroke-dasharray':'2 4' });
-    const trail = plot.el('path', { fill:'none', stroke:THEME.accent, 'stroke-width':3, 'stroke-linejoin':'round', 'stroke-linecap':'round' });
-    const projX = plot.el('line', { stroke:THEME.x, 'stroke-width':1.5, 'stroke-dasharray':'4 3' });
-    const projY = plot.el('line', { stroke:THEME.y, 'stroke-width':1.5, 'stroke-dasharray':'4 3' });
-    const pt    = plot.el('circle', { r:6.5, fill:THEME.accent });
-
-    let cx = -4, playing = false, raf = null, alive = true;
-    const out = UI.readout();
-    let slider;
-    function draw(){
-      const y=f(cx), px=plot.sx(cx), py=plot.sy(y);
-      trail.setAttribute('d', plot.funcPath(f, -4, cx, 0.04));
-      projX.setAttribute('x1',px); projX.setAttribute('y1',plot.sy(0)); projX.setAttribute('x2',px); projX.setAttribute('y2',py);
-      projY.setAttribute('x1',px); projY.setAttribute('y1',py);        projY.setAttribute('x2',plot.sx(0)); projY.setAttribute('y2',py);
-      pt.setAttribute('cx',px); pt.setAttribute('cy',py);
-      out.innerHTML = `<span style="color:${THEME.x}">x = ${cx.toFixed(1)}</span> → <span style="color:${THEME.y}">y = ${y.toFixed(1)}</span>`;
-      if (slider){ slider.input.value = cx; slider.out.textContent = cx.toFixed(1); }
-    }
-    const playBtn = UI.button('▶ 播放', () => {
-      if (playing){ playing=false; playBtn.textContent='▶ 播放'; return; }
-      if (cx >= 4) cx = -4;
-      playing = true; playBtn.textContent='⏸ 暫停';
-      (function tick(){ if(!playing||!alive) return; cx += 0.035; if(cx>=4){cx=4; playing=false; playBtn.textContent='▶ 播放';} draw(); if(playing) raf=requestAnimationFrame(tick); })();
-    });
-
-    const controls = UI.controls();
-    const row = document.createElement('div'); row.className='ctl-row';
-    slider = UI.sliderRow('x', { min:-4, max:4, step:0.1, value:cx }, (v) => { playing=false; playBtn.textContent='▶ 播放'; cx=v; draw(); });
-    row.appendChild(playBtn); row.appendChild(slider.row.children[1]); row.appendChild(slider.out);
-    // 把 slider 的 label 換成緊湊版
-    const lab = document.createElement('label'); lab.textContent='x'; lab.style.fontFamily='var(--mono)';
-    row.insertBefore(lab, row.children[1]);
-    controls.appendChild(row);
-
-    const note = UI.note(
-      '一條曲線是「點的集合」。你<span class="x">選一個 x</span>(直虛線),公式幫你<span class="y">算出 y</span>(橫虛線),' +
-      '就得到曲線上的一個點。點從左掃到右,沿路留下的軌跡就是整條曲線。每個 x 只會對到一個 y,這就是「函數」。'
-    );
-
-    const panel = document.createElement('div'); panel.className='panel';
-    panel.append(UI.eq('y = x²'), out, UI.plotWrap(plot.svg, false), controls, note);
-    root.appendChild(panel);
-
-    draw();
-    return { destroy(){ alive=false; playing=false; if(raf) cancelAnimationFrame(raf); } };
-  }
-});
-
-/* -------------------------------------------------------------------------
- * 模組 C：方程式的解  f(x) = 0  →  數線上的點
- *   使用者可自由輸入只含 x 的式子；用數值法找根,標在 x 軸(數線)上。
- *   可切換「顯示曲線 / 只看數線」,呈現「平面曲線 → 數線上的點」的關係。
- * ---------------------------------------------------------------------- */
-
-/* --- 小型運算式解析器(無外部相依,避免 eval)：tokenize → RPN → eval --- */
-const Expr = (function(){
-  const FUNCS = ['sin','cos','tan','sqrt','abs','exp','ln','log'];
-  const FN = { sin:Math.sin, cos:Math.cos, tan:Math.tan, sqrt:Math.sqrt, abs:Math.abs,
-               exp:Math.exp, ln:Math.log, log:(Math.log10||(v=>Math.log(v)/Math.LN10)) };
-  const PREC = { '+':2,'-':2,'*':3,'/':3,'~':4,'^':5 };
-  const RIGHT = { '^':true, '~':true };
-
-  function tokenize(s){
-    s = s.replace(/\s+/g,''); const out=[]; let i=0;
-    while (i < s.length){
-      const c = s[i];
-      if (/[0-9.]/.test(c)){ let j=i+1; while(j<s.length && /[0-9.]/.test(s[j])) j++; out.push({t:'num',v:parseFloat(s.slice(i,j))}); i=j; continue; }
-      if (/[a-zA-Z]/.test(c)){
-        let j=i+1; while(j<s.length && /[a-zA-Z]/.test(s[j])) j++;
-        const name = s.slice(i,j).toLowerCase(); i=j;
-        if (FUNCS.includes(name)) out.push({t:'func',v:name});
-        else if (name==='x')  out.push({t:'var'});
-        else if (name==='pi') out.push({t:'num',v:Math.PI});
-        else if (name==='e')  out.push({t:'num',v:Math.E});
-        else throw new Error('不認識的符號：'+name);
-        continue;
-      }
-      if ('+-*/^'.includes(c)){ out.push({t:'op',v:c}); i++; continue; }
-      if (c==='('){ out.push({t:'lp'}); i++; continue; }
-      if (c===')'){ out.push({t:'rp'}); i++; continue; }
-      throw new Error('看不懂的字元：'+c);
-    }
-    // 隱含乘法：2x → 2*x、2sin(x) → 2*sin(x)、x(x+1) → x*(x+1)
-    const res=[];
-    for (let k=0;k<out.length;k++){
-      res.push(out[k]); const a=out[k], b=out[k+1]; if(!b) continue;
-      const aEnd = (a.t==='num'||a.t==='var'||a.t==='rp');
-      const bStart = (b.t==='num'||b.t==='var'||b.t==='func'||b.t==='lp');
-      if (aEnd && bStart) res.push({t:'op',v:'*'});
-    }
-    return res;
-  }
-
-  function toRPN(tokens){
-    const out=[], ops=[]; let prev=null;
-    for (const tk of tokens){
-      if (tk.t==='num' || tk.t==='var'){ out.push(tk); }
-      else if (tk.t==='func'){ ops.push(tk); }
-      else if (tk.t==='op'){
-        let v = tk.v;
-        const unary = (v==='-'||v==='+') && (prev===null||prev==='op'||prev==='lp');
-        if (unary){ if(v==='+'){ prev='op'; continue; } v='~'; }
-        while (ops.length){
-          const top = ops[ops.length-1];
-          if (top.t==='func'){ out.push(ops.pop()); continue; }
-          if (top.t==='op'){ const tp=PREC[top.v], cp=PREC[v]; if (tp>cp || (tp===cp && !RIGHT[v])){ out.push(ops.pop()); continue; } }
-          break;
-        }
-        ops.push({t:'op',v});
-      }
-      else if (tk.t==='lp'){ ops.push(tk); }
-      else if (tk.t==='rp'){
-        while (ops.length && ops[ops.length-1].t!=='lp') out.push(ops.pop());
-        if (!ops.length) throw new Error('括號不對稱');
-        ops.pop();
-        if (ops.length && ops[ops.length-1].t==='func') out.push(ops.pop());
-      }
-      prev = tk.t==='op' ? 'op' : (tk.t==='lp'?'lp':(tk.t==='rp'?'rp':'val'));
-    }
-    while (ops.length){ const o=ops.pop(); if(o.t==='lp') throw new Error('括號不對稱'); out.push(o); }
-    return out;
-  }
-
-  function evalRPN(rpn, x){
-    const st=[];
-    for (const tk of rpn){
-      if (tk.t==='num') st.push(tk.v);
-      else if (tk.t==='var') st.push(x);
-      else if (tk.t==='op'){
-        if (tk.v==='~') st.push(-st.pop());
-        else { const b=st.pop(), a=st.pop();
-          st.push(tk.v==='+'?a+b: tk.v==='-'?a-b: tk.v==='*'?a*b: tk.v==='/'?a/b: Math.pow(a,b)); }
-      }
-      else if (tk.t==='func') st.push(FN[tk.v](st.pop()));
-    }
-    if (st.length!==1) throw new Error('式子不完整');
-    return st[0];
-  }
-
-  return { compile(expr){ const rpn = toRPN(tokenize(expr)); return x => evalRPN(rpn, x); } };
-})();
-
-function findRoots(f, a, b, step){
-  a = a==null?-30:a; b = b==null?30:b; step = step||0.02;
-  const safe = x => { let y; try{ y=f(x); }catch(_){ y=NaN; } return isFinite(y)?y:NaN; };
-  const bisect = (lo, hi) => { let flo=safe(lo); for(let k=0;k<50;k++){ const mid=(lo+hi)/2, fm=safe(mid); if(fm===0) return mid; if(flo*fm<0){ hi=mid; } else { lo=mid; flo=fm; } } return (lo+hi)/2; };
-  const roots=[]; let px=a, py=safe(a);
-  for (let x=a+step; x<=b; x+=step){
-    const cy=safe(x);
-    if (isFinite(py) && isFinite(cy)){
-      if (py===0) roots.push(px);
-      else if (py*cy<0) roots.push(bisect(px,x));
-    }
-    px=x; py=cy;
-  }
-  // 去重(相近的根合併)、四捨五入到漂亮數字
-  const uniq=[];
-  for (const r of roots){ if(!uniq.some(u=>Math.abs(u-r)<0.05)) uniq.push(r); }
-  return uniq.map(r => { const ri=Math.round(r); return Math.abs(r-ri)<0.015 ? ri : Math.round(r*100)/100; });
-}
-
-registerGraph({
-  id: 'roots',
-  name: '方程式的解',
-  eq: 'f(x)=0',
-  create(root){
-    const X0=-6, X1=6, Y0=-6, Y1=10;
-
-    const eqEl = UI.eq('f(x) = 0　<span style="font-size:14px;color:var(--muted)">的解在哪裡?</span>');
-    const out  = UI.readout();
-    const wrap = document.createElement('div'); wrap.className='plot-wrap';
-
-    let showCurve = true, expr = 'x^2 - 5x + 6';
-
-    function render(){
-      const plot = createPlot({ xMin:X0, xMax:X1, yMin:Y0, yMax:Y1 });
-      plot.grid();
-      // y 軸(只在顯示曲線時畫)
-      if (showCurve) plot.el('line', { x1:plot.sx(0), y1:0, x2:plot.sx(0), y2:plot.H, stroke:THEME.muted, 'stroke-width':1.5 });
-      // x 軸 = 數線,加粗強調
-      plot.el('line', { x1:0, y1:plot.sy(0), x2:plot.W, y2:plot.sy(0), stroke:THEME.ink, 'stroke-width':2.5 });
-
-      let f=null, err=null;
-      try { f = Expr.compile(expr); f(0); } catch(e){ err = e.message; }
-
-      if (f && showCurve){
-        plot.el('path', { d:plot.funcPath(f, X0, X1, 0.03), fill:'none', stroke:THEME.accent, 'stroke-width':2.5, 'stroke-linejoin':'round' });
-      }
-
-      let roots = [];
-      if (f && !err){
-        roots = findRoots(f).filter(r => r>=X0-0.001 && r<=X1+0.001);
-        for (const r of roots){
-          plot.el('circle', { cx:plot.sx(r), cy:plot.sy(0), r:6, fill:THEME.y });
-          plot.el('text', { x:plot.sx(r), y:plot.sy(0)+20, 'text-anchor':'middle',
-                            fill:THEME.y, style:'font-size:12px;font-family:var(--mono)' }).textContent = r;
-        }
-      }
-
-      wrap.innerHTML=''; wrap.appendChild(plot.svg);
-
-      if (err){ out.innerHTML = `<span class="err">看不懂這個式子(${err})</span>`; }
-      else {
-        const all = findRoots(f);
-        if (!all.length) out.textContent = '在 −30 ～ 30 之間找不到實數解';
-        else if (all.length > 8) out.innerHTML = `f(x) = 0 的解：x = ${all.slice(0,8).join(', ')} …(共 ${all.length} 個)`;
-        else out.innerHTML = `f(x) = 0 的解：x = ${all.join(', ')}`;
-      }
-    }
-
-    // 輸入區
-    const controls = UI.controls();
-    const inputRow = document.createElement('div'); inputRow.className='ctl-row';
-    const lab = document.createElement('label'); lab.textContent='f(x)';
-    const input = document.createElement('input'); input.type='text'; input.value=expr;
-    inputRow.append(lab, input);
-    input.addEventListener('input', () => { expr = input.value; render(); });
-
-    const presetWrap = document.createElement('div'); presetWrap.className='presets';
-    ['x^2 - 5x + 6', 'x^2 - 2', 'x^3 - x', 'sin(x)'].forEach(p => {
-      presetWrap.appendChild(UI.button(p, () => { expr=p; input.value=p; render(); }));
-    });
-
-    const toggleRow = document.createElement('div'); toggleRow.className='ctl-row';
-    const toggle = UI.button('只看數線', () => {
-      showCurve = !showCurve;
-      toggle.textContent = showCurve ? '只看數線' : '顯示曲線';
-      render();
-    });
-    toggleRow.appendChild(toggle);
-
-    controls.append(inputRow, presetWrap, toggleRow);
-
-    const note = UI.note(
-      '把 y 想成「f(x) 算出來的值」。曲線<span class="y">碰到 x 軸(y=0)的地方</span>,就是方程式 f(x)=0 的解。' +
-      '按「只看數線」會把曲線藏起來,只留下 x 軸——這時你看到的就是「<span class="k">1 個未知數的解 = 數線上的幾個點</span>」。' +
-      '可輸入任何只含 x 的式子,例如 <span class="k">x^2-5x+6</span>、<span class="k">x^3-x</span>、<span class="k">sin(x)</span>。'
-    );
-
-    const panel = document.createElement('div'); panel.className='panel';
-    panel.append(eqEl, out, wrap, controls, note);
-    root.appendChild(panel);
-
-    render();
-    return {};
-  }
-});
-
-/* =========================================================================
- * 5) App 外殼：建立下方切換按鈕、掛載目前的圖、處理切換
- * ====================================================================== */
-const App = (function(){
-  const stage = document.getElementById('stage');
-  const tabs  = document.getElementById('tabs');
-  let current = null;       // 目前模組的控制器(可能有 destroy)
-  let activeId = null;
-
-  function select(id){
-    if (current && current.destroy) current.destroy();   // 收掉上一個圖(停動畫等)
-    stage.innerHTML = '';
-    const g = GRAPHS.find(x => x.id === id);
-    current = g.create(stage) || {};
-    activeId = id;
-    [...tabs.children].forEach(b => b.classList.toggle('active', b.dataset.id === id));
-  }
-
-  function init(){
-    GRAPHS.forEach(g => {
-      const b = document.createElement('button');
-      b.className = 'tab'; b.dataset.id = g.id;
-      b.innerHTML = `${g.name}<small>${g.eq || ''}</small>`;
-      b.addEventListener('click', () => select(g.id));
-      tabs.appendChild(b);
-    });
-    if (GRAPHS.length) select(GRAPHS[0].id);
-  }
-
-  return { init };
-})();
-
-document.addEventListener('DOMContentLoaded', App.init);
-</script>
+<!-- 各圖模組:每個一個獨立檔案;此處的排列順序 = 右側按鈕的順序。
+     新增一個圖 = 在 js/graphs/ 加一個檔案,再在這裡多加一行 <script>;核心完全不用動。 -->
+<script src="js/graphs/line.js"></script>
+<script src="js/graphs/quadratic.js"></script>
+<script src="js/graphs/parabola.js"></script>
+<script src="js/graphs/inverse.js"></script>
+<script src="js/graphs/abs.js"></script>
+<script src="js/graphs/circle.js"></script>
+<script src="js/graphs/ellipse.js"></script>
+<script src="js/graphs/system.js"></script>
+<script src="js/graphs/roots.js"></script>
+<script src="js/graphs/pythagoras.js"></script>
+<script src="js/graphs/sine.js"></script>
+<script src="js/graphs/catenary.js"></script>
+<script src="js/graphs/cycloid.js"></script>
+<script src="js/graphs/spiral.js"></script>
+<script src="js/graphs/cardioid.js"></script>
+<script src="js/graphs/astroid.js"></script>
+<script src="js/graphs/lemniscate.js"></script>
+<script src="js/graphs/lissajous.js"></script>
 </body>
 </html>

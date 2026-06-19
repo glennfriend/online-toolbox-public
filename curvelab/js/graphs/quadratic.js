@@ -20,7 +20,12 @@ registerGraph({
       var vx = a!==0 ? -b/(2*a) : 0, vy = f(vx);
       vtx.setAttribute('cx', plot.sx(vx)); vtx.setAttribute('cy', plot.sy(vy));
       vtx.setAttribute('opacity', a!==0 ? 1 : 0);
-      out.innerHTML = 'y = ' + a + 'x² + ' + b + 'x + ' + c + (a!==0 ? '　｜　頂點 ≈ (' + vx.toFixed(1) + ', ' + vy.toFixed(1) + ')' : '　｜　a=0 時退化成直線');
+      var head = 'y = ' + a + 'x² + ' + b + 'x + ' + c;
+      if (a === 0){ out.innerHTML = head + '　｜　a=0 時退化成直線'; return; }
+      // 用顯示的頂點 x 算頂點 y(可驗算);頂點 x 是否被四捨五入決定用 = 還是 ≈
+      var vxr = Num.round(vx, 2), vyr = a*vxr*vxr + b*vxr + c;
+      var eq = Num.sameAt(vx, vxr, 9) ? '=' : '≈';
+      out.innerHTML = head + '　｜　頂點 ' + eq + ' (' + Num.show(vxr,2) + ', ' + Num.show(vyr,2) + ')';
     }
 
     var controls = UI.controls();

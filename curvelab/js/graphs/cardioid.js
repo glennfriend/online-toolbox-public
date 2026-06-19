@@ -24,7 +24,7 @@ registerGraph({
           spoke.setAttribute('x2', p.sx(r*Math.cos(t))); spoke.setAttribute('y2', p.sy(r*Math.sin(t)));
         };
       },
-      onDraw: function(t){ out.innerHTML = '角度 θ = ' + (t*180/Math.PI).toFixed(0) + '°　｜　半徑 r = ' + (a*(1-Math.cos(t))).toFixed(2); }
+      onDraw: function(t){ out.innerHTML = '角度 θ ≈ ' + (t*180/Math.PI).toFixed(0) + '°　｜　半徑 r ≈ ' + Num.show(a*(1-Math.cos(t)),2) + '(目前位置)'; }
     });
 
     var note = UI.note(

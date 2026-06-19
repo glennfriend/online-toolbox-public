@@ -33,8 +33,11 @@ registerGraph({
       lB.setAttribute('x', plot.sx(-b/2));    lB.setAttribute('y', plot.sy(b/2));       lB.setAttribute('fill', THEME.y); lB.textContent = 'b² = ' + (b*b);
       lC.setAttribute('x', plot.sx((a+b)/2)); lC.setAttribute('y', plot.sy((a+b)/2));   lC.setAttribute('fill', THEME.accent); lC.textContent = 'c² = ' + (a*a+b*b);
 
-      var c = Math.sqrt(a*a + b*b);
-      out.innerHTML = a + '² + ' + b + '² = ' + (a*a) + ' + ' + (b*b) + ' = ' + (a*a+b*b) + ' = c²　→　c = ' + (Number.isInteger(c) ? c : c.toFixed(2));
+      // a、b 是整數,所以 a²+b²=c² 全程精確;c 只有在 a²+b² 是完全平方數時才是整數,
+      // 否則 c 是無理數(如 √13),顯示成「√n ≈ 近似值」,不假裝它是有限小數。
+      var c2 = a*a + b*b, c = Math.sqrt(c2);
+      var cStr = Num.isInt(c, 1e-9) ? String(Math.round(c)) : '√' + c2 + ' ≈ ' + Num.show(c, 2);
+      out.innerHTML = a + '² + ' + b + '² = ' + (a*a) + ' + ' + (b*b) + ' = ' + c2 + ' = c²　→　c = ' + cStr;
     }
 
     var controls = UI.controls();
@@ -45,7 +48,8 @@ registerGraph({
     var note = UI.note(
       '直角三角形的兩股是 <span class="x">a</span>、<span class="y">b</span>,斜邊是 <span class="k">c</span>。' +
       '三邊各自畫一個正方形,面積分別是 a²、b²、c²。' +
-      '畢氏定理說:<span class="x">a²</span> + <span class="y">b²</span> = <span class="k">c²</span>——兩個小正方形面積加起來,剛好等於大正方形。試試 a=3、b=4 → c=5。'
+      '畢氏定理說:<span class="x">a²</span> + <span class="y">b²</span> = <span class="k">c²</span>——兩個小正方形面積加起來,剛好等於大正方形。試試 a=3、b=4 → c=5。' +
+      '<br><span style="color:var(--muted);font-size:13px">註:a²+b²=c² 是精確的;但當 a²+b² 不是完全平方數時,斜邊 c 是無理數(如 √13),畫面寫成「√n ≈ 近似值」。</span>'
     );
 
     var panel = document.createElement('div'); panel.className='panel';

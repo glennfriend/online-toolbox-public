@@ -33,13 +33,18 @@ registerGraph({
           conn.setAttribute('x2', p.sx(t));  conn.setAttribute('y2', p.sy(hy));
         };
       },
-      onDraw: function(t, X, Y){ out.innerHTML = '<span class="x">x = ' + t.toFixed(2) + '</span>　→　<span class="y">y = sin(x) = ' + Y.toFixed(2) + '</span>'; }
+      onDraw: function(t, X, Y){
+        // 用顯示的 x 算 y;sin 的值是無理數,顯示為四捨五入的近似值,故用 ≈
+        var xr = Num.round(t, 2), yr = Math.sin(xr);
+        out.innerHTML = '<span class="x">x = ' + Num.show(xr,2) + '</span>　→　<span class="y">y = sin(x) ≈ ' + Num.show(yr,2) + '</span>';
+      }
     });
 
     var note = UI.note(
       '把一個點繞<span class="x">單位圓</span>轉,它的<span class="y">高度</span>就是 sin。' +
       '當 <span class="x">x</span>(也就是繞圓轉的角度)一邊增加,高度一邊上上下下,把每個 x 的高度往右排開,畫出來就是正弦波。' +
-      '這就是「旋轉 → 波」:三角函數和圓其實是同一件事。按播放看它生成。'
+      '這就是「旋轉 → 波」:三角函數和圓其實是同一件事。按播放看它生成。' +
+      '<br><span style="color:var(--muted);font-size:13px">註:sin 的值通常是無理數,畫面顯示為四捨五入後的近似值(≈)。</span>'
     );
 
     var panel = document.createElement('div'); panel.className='panel';

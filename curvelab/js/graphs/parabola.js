@@ -25,7 +25,9 @@ registerGraph({
       projX.setAttribute('x1',px); projX.setAttribute('y1',plot.sy(0)); projX.setAttribute('x2',px); projX.setAttribute('y2',py);
       projY.setAttribute('x1',px); projY.setAttribute('y1',py);        projY.setAttribute('x2',plot.sx(0)); projY.setAttribute('y2',py);
       pt.setAttribute('cx',px); pt.setAttribute('cy',py);
-      out.innerHTML = '<span style="color:'+THEME.x+'">x = '+cx.toFixed(1)+'</span> → <span style="color:'+THEME.y+'">y = '+y.toFixed(1)+'</span>';
+      // 用「顯示出來的 x(到小數第 1 位)」去算 y;(k/10)² 必為精確的兩位小數,故為精確值
+      var cxr = Num.round(cx, 1), yr = cxr*cxr;
+      out.innerHTML = '<span style="color:'+THEME.x+'">x = '+Num.show(cxr,1)+'</span> → <span style="color:'+THEME.y+'">y = x² = '+Num.show(yr,2)+'</span>';
       if (slider){ slider.input.value = cx; slider.out.textContent = cx.toFixed(1); }
     }
     var playBtn = UI.button('▶ 播放', function(){

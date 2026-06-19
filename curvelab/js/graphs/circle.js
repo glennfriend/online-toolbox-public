@@ -25,13 +25,13 @@ registerGraph({
       pt.setAttribute('cx', px); pt.setAttribute('cy', py);
       projX.setAttribute('x1',px); projX.setAttribute('y1',plot.sy(0)); projX.setAttribute('x2',px); projX.setAttribute('y2',py);
       projY.setAttribute('x1',px); projY.setAttribute('y1',py);        projY.setAttribute('x2',plot.sx(0)); projY.setAttribute('y2',py);
-      // 用「顯示出來的那組座標」去算總和,畫面才內部一致、可驗算;
-      // 因座標四捨五入,總和會非常接近(但不必剛好等於)r²,故用 ≈。
-      var xs = +x.toFixed(2), ys = +y.toFixed(2);
+      // 用「顯示出來的那組座標」去算總和(WYSIWYG,可驗算);
+      // 座標多半是無理數、顯示為四捨五入的近似值,故總和會貼近但不必剛好等於 r²,用 ≈。
+      var xs = Num.round(x, 2), ys = Num.round(y, 2);
       var sum = xs*xs + ys*ys;
-      var eq = (sum.toFixed(2) === (r*r).toFixed(2)) ? '=' : '≈';
-      out.innerHTML = '(x, y) = (' + xs.toFixed(2) + ', ' + ys.toFixed(2) + ')　｜　x² + y² = ' +
-                      sum.toFixed(2) + ' ' + eq + ' r² = ' + (r*r);
+      var eq = Num.rel(sum, r*r, 2);
+      out.innerHTML = '(x, y) = (' + Num.show(xs,2) + ', ' + Num.show(ys,2) + ')　｜　x² + y² = ' +
+                      Num.show(sum,2) + ' ' + eq + ' r² = ' + (r*r);
     }
 
     var wrap = UI.plotWrap(plot.svg, true);
@@ -47,7 +47,8 @@ registerGraph({
 
     var note = UI.note(
       '<span class="x">x</span>、<span class="y">y</span> 是圓上某個點的座標,拖動橘點繞圓走就會改變它們。' +
-      '<span class="k">r</span> 是半徑,用滑桿調,決定整個圓的大小。不管點拖到哪,x²+y² 永遠等於 r²。'
+      '<span class="k">r</span> 是半徑,用滑桿調,決定整個圓的大小。不管點拖到哪,x²+y² 永遠等於 r²。' +
+      '<br><span style="color:var(--muted);font-size:13px">註:圓上的座標多半是無理數,畫面顯示四捨五入後的近似值,所以上面用 ≈。</span>'
     );
 
     var panel = document.createElement('div'); panel.className='panel';

@@ -74,7 +74,8 @@ registerGraph({
     var note = UI.note(
       '把 y 想成「f(x) 算出來的值」。曲線<span class="y">碰到 x 軸(y=0)的地方</span>,就是方程式 f(x)=0 的解。' +
       '按「只看數線」會把曲線藏起來,只留下 x 軸——這時你看到的就是「<span class="k">1 個未知數的解 = 數線上的幾個點</span>」。' +
-      '可輸入任何只含 x 的式子,例如 <span class="k">x^2-5x+6</span>、<span class="k">x^3-x</span>、<span class="k">sin(x)</span>。'
+      '可輸入任何只含 x 的式子,例如 <span class="k">x^2-5x+6</span>、<span class="k">x^3-x</span>、<span class="k">sin(x)</span>。' +
+      '<br><span style="color:var(--muted);font-size:13px">註:這裡用數值法找根,無理數的解(如 √2 ≈ 1.41)會顯示為四捨五入的近似值。</span>'
     );
 
     var panel = document.createElement('div'); panel.className='panel';

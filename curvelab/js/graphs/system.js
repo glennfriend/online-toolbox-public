@@ -27,7 +27,10 @@ registerGraph({
         var x = (b2 - b1) / (m1 - m2), y = m1*x + b1;
         dot.setAttribute('opacity', 1);
         dot.setAttribute('cx', plot.sx(x)); dot.setAttribute('cy', plot.sy(y));
-        out.innerHTML = '交點(就是解):(x, y) = (' + x.toFixed(2) + ', ' + y.toFixed(2) + ')';
+        // 用顯示的交點 x 算 y(可驗算);x 是否被四捨五入決定用 = 還是 ≈
+        var xr = Num.round(x, 2), yr = m1*xr + b1;
+        var eq = Num.sameAt(x, xr, 9) ? '=' : '≈';
+        out.innerHTML = '交點(就是解):(x, y) ' + eq + ' (' + Num.show(xr,2) + ', ' + Num.show(yr,2) + ')';
       }
     }
 
@@ -41,7 +44,8 @@ registerGraph({
     var note = UI.note(
       '兩個一次方程式各自是<span class="x">一條線</span>、<span class="y">一條線</span>。' +
       '解聯立方程式,就是找<span class="k">同時滿足兩條線的點</span>——也就是兩線的交點。' +
-      '把兩線調成平行(斜率相同)就沒有交點,代表這組聯立方程式無解。'
+      '把兩線調成平行(斜率相同)就沒有交點,代表這組聯立方程式無解。' +
+      '<br><span style="color:var(--muted);font-size:13px">註:交點座標若不是整數或簡單分數,會顯示為四捨五入的近似值(≈)。</span>'
     );
 
     var panel = document.createElement('div'); panel.className='panel';

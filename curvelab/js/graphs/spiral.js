@@ -22,7 +22,7 @@ registerGraph({
           spoke.setAttribute('x2', p.sx(b*t*Math.cos(t))); spoke.setAttribute('y2', p.sy(b*t*Math.sin(t)));
         };
       },
-      onDraw: function(t){ out.innerHTML = '轉了 ' + (t/(2*Math.PI)).toFixed(2) + ' 圈　｜　離中心距離 r = ' + (b*t).toFixed(2); }
+      onDraw: function(t){ out.innerHTML = '轉了 ≈ ' + Num.show(t/(2*Math.PI),2) + ' 圈　｜　離中心距離 r ≈ ' + Num.show(b*t,2) + '(目前位置)'; }
     });
 
     var note = UI.note(

@@ -161,6 +161,17 @@ body {
 .chip.cat-image { background: #fdf3d0; border-color: #f3e4a8; }
 .chip.cat-plain { background: #eceef1; border-color: #dce0e5; }
 .chip.cat-rich  { background: #fde2e1; border-color: #f5c6c4; }
+
+/* 暫存區(未儲存的單一草稿):虛線邊框 + 淡藍底,跟正式儲存明顯區隔 */
+.chip-draft { background: #e3f0ff; border: 1px dashed #93befb; }
+.chip-draft .chip-label { font-weight: 600; }
+/* 被覆蓋時只讓「這個 chip」閃一下(不動整個畫面背景):亮黃脈衝 + 輕微放大,約 0.45 秒回復 */
+@keyframes chip-flash {
+  0%   { background: #ffd24d; transform: scale(1.08); box-shadow: 0 0 0 3px rgba(255,179,0,.4); }
+  60%  { background: #ffe7a3; transform: scale(1.02); box-shadow: 0 0 0 2px rgba(255,179,0,.2); }
+  100% { background: #e3f0ff; transform: scale(1);    box-shadow: none; }
+}
+.chip-draft.flash { animation: chip-flash .45s ease-out; }
 .chip-label {
   font: inherit;
   font-size: .85rem;

@@ -9,12 +9,29 @@ import { openStore } from './lib/idb.js';
 
 const store = openStore({ dbName: 'scrapbook', storeName: 'items' });
 const LEGACY_KEY = 'scrapbook:items'; // 舊版 localStorage 用的 key
+const DRAFT_ID = 'scrapbook:draft';   // 暫存區:固定 id 的單一草稿(put 會覆蓋,只保護「最近一次」未存的輸入)
 
-// 取全部,依建立時間新 → 舊排序
+// 取全部「正式儲存」,依建立時間新 → 舊排序(暫存區草稿不混進來,由 main.js 另外處理)
 export async function loadItems() {
   await migrateFromLocalStorage();
   const items = await store.getAll();
-  return items.map(normalize).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  return items
+    .filter((it) => it.id !== DRAFT_ID)
+    .map(normalize)
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+// ── 暫存區(單一草稿,持久化在 IndexedDB,重整/關分頁後還在)──
+export async function saveDraft(text) {
+  const firstLine = text.split('\n').map((s) => s.trim()).find(Boolean) || '(空白)';
+  const title = firstLine.length > 30 ? `${firstLine.slice(0, 30)}…` : firstLine;
+  await store.put({ id: DRAFT_ID, type: 'draft', title, payload: text, createdAt: new Date().toISOString() });
+}
+export async function loadDraft() {
+  return (await store.get(DRAFT_ID)) || null;
+}
+export async function clearDraft() {
+  await store.delete(DRAFT_ID);
 }
 
 // 寬鬆讀取:沒有 type 的舊資料當成文字(payload 取舊欄位 content)。

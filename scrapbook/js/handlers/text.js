@@ -13,7 +13,7 @@ const RENDER_DELAY = 120; // 輸入後稍微 debounce 再 render
 
 export function initTextHandler(ctx) {
   const { input, display, badge, saveBtn, setDisplay, setBadge,
-    setCopyHandler, registerHandler, addItem, refreshSaved, showToast, notifyDisplayChanged } = ctx;
+    setCopyHandler, registerHandler, addItem, refreshSaved, showToast, notifyDisplayChanged, markInputSaved } = ctx;
   let renderTimer;
 
   registerHandler({
@@ -33,6 +33,7 @@ export function initTextHandler(ctx) {
     if (!text.trim()) { showToast('沒有內容可儲存'); return; }
     try {
       await addItem({ type: 'text', title: deriveTitle(text), payload: text });
+      markInputSaved();        // 此刻輸入 = 剛存的內容,之後切換不再被當成「未存變動」
       await refreshSaved();
       showToast('已儲存');
     } catch {

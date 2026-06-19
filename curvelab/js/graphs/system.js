@@ -35,10 +35,10 @@ registerGraph({
     }
 
     var controls = UI.controls();
-    var s1 = UI.sliderRow('m₁', { min:-3, max:3, step:0.5, value:m1 }, function(v,o){ m1=v; o.textContent=v; draw(); });
-    var s2 = UI.sliderRow('b₁', { min:-5, max:5, step:1,   value:b1 }, function(v,o){ b1=v; o.textContent=v; draw(); });
-    var s3 = UI.sliderRow('m₂', { min:-3, max:3, step:0.5, value:m2 }, function(v,o){ m2=v; o.textContent=v; draw(); });
-    var s4 = UI.sliderRow('b₂', { min:-5, max:5, step:1,   value:b2 }, function(v,o){ b2=v; o.textContent=v; draw(); });
+    var s1 = UI.sliderRow('m₁ 斜率(藍線)', { min:-3, max:3, step:0.5, value:m1 }, function(v,o){ m1=v; o.textContent=v; draw(); });
+    var s2 = UI.sliderRow('b₁ 截距(藍線)', { min:-5, max:5, step:1,   value:b1 }, function(v,o){ b1=v; o.textContent=v; draw(); });
+    var s3 = UI.sliderRow('m₂ 斜率(橘線)', { min:-3, max:3, step:0.5, value:m2 }, function(v,o){ m2=v; o.textContent=v; draw(); });
+    var s4 = UI.sliderRow('b₂ 截距(橘線)', { min:-5, max:5, step:1,   value:b2 }, function(v,o){ b2=v; o.textContent=v; draw(); });
     controls.append(s1.row, s2.row, s3.row, s4.row);
 
     var note = UI.note(

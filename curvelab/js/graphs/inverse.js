@@ -22,7 +22,7 @@ registerGraph({
     }
 
     var controls = UI.controls();
-    var ks = UI.sliderRow('k', { min:-6, max:6, step:1, value:k }, function(v,o){ if(v===0) v=1; k=v; o.textContent=v; draw(); });
+    var ks = UI.sliderRow('k (定值 = x×y)', { min:-6, max:6, step:1, value:k }, function(v,o){ if(v===0) v=1; k=v; o.textContent=v; draw(); });
     controls.append(ks.row);
 
     var note = UI.note(

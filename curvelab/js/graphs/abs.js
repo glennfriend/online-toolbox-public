@@ -22,9 +22,9 @@ registerGraph({
     }
 
     var controls = UI.controls();
-    var as = UI.sliderRow('a', { min:-2, max:2, step:0.5, value:a }, function(v,o){ a=v; o.textContent=v; draw(); });
-    var hs = UI.sliderRow('h', { min:-4, max:4, step:1,   value:h }, function(v,o){ h=v; o.textContent=v; draw(); });
-    var ks = UI.sliderRow('k', { min:-4, max:4, step:1,   value:k }, function(v,o){ k=v; o.textContent=v; draw(); });
+    var as = UI.sliderRow('a (開口 / 方向)', { min:-2, max:2, step:0.5, value:a }, function(v,o){ a=v; o.textContent=v; draw(); });
+    var hs = UI.sliderRow('h (左右平移)',    { min:-4, max:4, step:1,   value:h }, function(v,o){ h=v; o.textContent=v; draw(); });
+    var ks = UI.sliderRow('k (上下平移)',    { min:-4, max:4, step:1,   value:k }, function(v,o){ k=v; o.textContent=v; draw(); });
     controls.append(as.row, hs.row, ks.row);
 
     var note = UI.note(

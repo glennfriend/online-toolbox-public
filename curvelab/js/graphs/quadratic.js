@@ -29,9 +29,9 @@ registerGraph({
     }
 
     var controls = UI.controls();
-    var as = UI.sliderRow('a', { min:-2, max:2, step:0.5, value:a }, function(v,o){ a=v; o.textContent=v; draw(); });
-    var bs = UI.sliderRow('b', { min:-4, max:4, step:1,   value:b }, function(v,o){ b=v; o.textContent=v; draw(); });
-    var cs = UI.sliderRow('c', { min:-4, max:6, step:1,   value:c }, function(v,o){ c=v; o.textContent=v; draw(); });
+    var as = UI.sliderRow('a (開口 / 方向)', { min:-2, max:2, step:0.5, value:a }, function(v,o){ a=v; o.textContent=v; draw(); });
+    var bs = UI.sliderRow('b (頂點左右)',    { min:-4, max:4, step:1,   value:b }, function(v,o){ b=v; o.textContent=v; draw(); });
+    var cs = UI.sliderRow('c (y 截距)',      { min:-4, max:6, step:1,   value:c }, function(v,o){ c=v; o.textContent=v; draw(); });
     controls.append(as.row, bs.row, cs.row);
 
     var note = UI.note(

@@ -6,3 +6,4 @@
 | [**Calcpad**](https://glennfriend.github.io/online-toolbox-public/calcpad/ "https://glennfriend.github.io/online-toolbox-public/calcpad/") | numbr 風格逐行筆記型計算機:數學運算式 + 帶時區的日期加減 / 時區轉換,內容即時編進網址可分享 |
 | [**Curvelab**](https://glennfriend.github.io/online-toolbox-public/curvelab/ "https://glennfriend.github.io/online-toolbox-public/curvelab/") | 互動式公式圖形庫:選一個公式、拉動參數即時看圖形怎麼變,每個圖模組化可插拔(19 個圖) |
 | [**Scrollshot**](https://glennfriend.github.io/online-toolbox-public/scrollshot/ "https://glennfriend.github.io/online-toolbox-public/scrollshot/") | 輸入網址,產生整頁(含卷動)截圖,可下載 / 複製(截圖由第三方服務產生) |
+| [**Chart**](https://glennfriend.github.io/online-toolbox-public/chart/ "https://glennfriend.github.io/online-toolbox-public/chart/") | 貼上資料(JSON / CSV / TSV / Markdown),選欄位與圖種,產生清楚的靜態統計圖,可匯出 PNG / SVG(用 ECharts) |

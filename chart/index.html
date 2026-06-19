@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="貼上資料(JSON/CSV/TSV/Markdown),選欄位與圖種,產生清楚的靜態統計圖,可匯出 PNG/SVG。">
+  <title>Chart</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="head">
+    <h1>Chart</h1>
+    <p>貼上資料 → 選欄位與圖種 → 產生<strong>清楚的靜態統計圖</strong>(數值直接標在圖上,不用互動)。可匯出 PNG / SVG。</p>
+  </header>
+
+  <section class="pane">
+    <textarea id="input" class="input" spellcheck="false"
+      placeholder="貼上 JSON / CSV / 從 Excel·Google Sheet 複製(TSV)/ Markdown 表格…"></textarea>
+    <div class="row">
+      <span class="row-label">格式</span>
+      <div id="formats" class="chip-row"></div>
+    </div>
+  </section>
+
+  <section id="config" class="pane" hidden>
+    <div id="preview" class="preview"></div>
+    <div id="mapping" class="mapping"></div>
+    <div class="row">
+      <span class="row-label">圖種</span>
+      <div id="charttypes" class="chip-row"></div>
+    </div>
+  </section>
+
+  <div id="status" class="status" aria-live="polite"></div>
+
+  <div id="chart" class="chart-box"></div>
+
+  <div id="actions" class="actions" hidden>
+    <button id="download-png" class="btn" type="button">⬇ 下載 PNG</button>
+    <button id="download-svg" class="btn" type="button">⬇ 下載 SVG</button>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

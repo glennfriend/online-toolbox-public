@@ -1,0 +1,110 @@
+/* Chart — 版面與配色(延續站上風格:system-ui、藍色主色)。 */
+
+:root {
+  --fg: #24292f;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --border-soft: #d8dee4;
+  --accent: #2563eb;
+  --bg-code: #f6f8fa;
+  --bg-page: #dde2e9;
+  --danger: #cf222e;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.7;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem;
+  color: var(--fg);
+  background: var(--bg-page);
+}
+
+.head h1 { margin: 0; font-size: 1.5rem; }
+.head p { margin: .3rem 0 1.2rem; color: var(--muted); font-size: .95rem; }
+.head strong { color: var(--fg); }
+
+.pane {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9rem;
+  line-height: 1.6;
+  padding: .7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+}
+.input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+/* 一列:左標籤 + 右內容 */
+.row { display: flex; align-items: center; gap: .7rem; margin-top: .8rem; flex-wrap: wrap; }
+.row-label { font-size: .85rem; color: var(--muted); min-width: 2.4em; }
+
+/* 小膠囊按鈕(格式 / 圖種共用) */
+.chip-row { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip-btn {
+  font: inherit; font-size: .85rem; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: #fff; color: var(--fg); padding: .25em .8em;
+}
+.chip-btn:hover { background: var(--bg-code); }
+.chip-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* 解析後的表格預覽 */
+.preview { overflow: auto; }
+.preview-table { border-collapse: collapse; font-size: .82rem; }
+.preview-table th, .preview-table td { border: 1px solid var(--border-soft); padding: .25em .6em; text-align: left; white-space: nowrap; }
+.preview-table th { background: var(--bg-code); }
+.preview-table th small { display: block; font-weight: normal; color: var(--muted); font-size: .72rem; }
+.preview .more { color: var(--muted); font-size: .8rem; margin-top: .3rem; }
+
+/* 欄位對應(X / Y / 彙總) */
+.mapping { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1rem; align-items: flex-start; }
+.field { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; }
+.field-label { color: var(--muted); }
+.field select { font: inherit; padding: .3em .5em; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+.checks { display: flex; flex-wrap: wrap; gap: .2rem .9rem; max-width: 30rem; }
+.checks label { display: inline-flex; align-items: center; gap: .3rem; }
+
+.status { margin: .2rem 0 .6rem; min-height: 1.3em; font-size: .85rem; color: var(--muted); }
+.status.err { color: var(--danger); }
+
+/* 圖表容器 */
+.chart-box {
+  width: 100%;
+  height: 460px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.actions { display: flex; gap: .5rem; margin-top: .7rem; flex-wrap: wrap; }
+.btn {
+  font: inherit; font-size: .9rem; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: #fff; color: var(--fg); padding: .4em 1em;
+}
+.btn:hover { background: var(--bg-code); }
+
+.toast {
+  position: fixed; left: 50%; bottom: 2rem;
+  transform: translateX(-50%) translateY(1rem);
+  background: #24292f; color: #fff;
+  padding: .5em 1.1em; border-radius: 8px; font-size: .9rem;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

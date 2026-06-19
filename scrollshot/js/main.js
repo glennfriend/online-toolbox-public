@@ -127,9 +127,9 @@ function renderSteps() {
   stepsEl.innerHTML = steps.map((s) => {
     let html;
     if (s.state === 'error') {
-      html = `<div class="step err" title="${escAttr(s.error || '')}"><span class="mark">❌</span> ${esc(s.text)} — 失敗</div>`;
+      html = `<div class="step err" title="${escAttr(s.error || '')}"><span class="mark">✗</span> ${esc(s.text)} — 失敗</div>`;
     } else {
-      const mark = s.state === 'done' ? '→' : '--';
+      const mark = s.state === 'done' ? '✓' : '·';   // 完成 / 待處理
       html = `<div class="step ${s.state}"><span class="mark">${mark}</span> ${esc(s.text)}</div>`;
     }
     if (s.attempts && s.attempts.length) html += s.attempts.map(renderAttempt).join('');
@@ -138,7 +138,7 @@ function renderSteps() {
 }
 
 function renderAttempt(a) {
-  if (a.state === 'ok') return `<div class="attempt ok"><span class="mark">→</span> ${esc(a.name)} 成功</div>`;
+  if (a.state === 'ok') return `<div class="attempt ok"><span class="mark">✓</span> ${esc(a.name)} 成功</div>`;
   if (a.state === 'fail') return `<div class="attempt fail" title="${escAttr(a.error || '')}"><span class="mark">✗</span> ${esc(a.name)} 失敗(滑鼠移上看原因)</div>`;
   return `<div class="attempt trying"><span class="mark">…</span> 嘗試 ${esc(a.name)}…</div>`;
 }
@@ -159,7 +159,7 @@ function setBusy(busy) { goBtn.disabled = busy; goBtn.textContent = busy ? '截�
 
 // 服務順序顯示(上次成功的排第一)
 function updateSvcOrder() {
-  svcOrderEl.textContent = orderedServices().map((s) => s.shortName).join(' → ') + '(自動切換)';
+  svcOrderEl.textContent = orderedServices().map((s) => s.shortName).join(' → ');
 }
 
 let toastTimer;

@@ -21,5 +21,21 @@ function buildPie(table, m, radius) {
   return opt;
 }
 
-export const pie = { id: 'pie', name: '圓餅圖', build: (t, m) => buildPie(t, m, '62%') };
-export const doughnut = { id: 'doughnut', name: '環圈圖', build: (t, m) => buildPie(t, m, ['40%', '64%']) };
+export const pie = {
+  id: 'pie', name: '圓餅圖',
+  tips: [
+    '占比 / 組成(各部分占整體的百分比)',
+    '類別不多(建議 ≤6)時的比例',
+    '市佔率、預算分配',
+  ],
+  build: (t, m) => buildPie(t, m, '62%'),
+};
+export const doughnut = {
+  id: 'doughnut', name: '環圈圖',
+  tips: [
+    '同圓餅:看占比 / 組成',
+    '中間留白可放總計或標題',
+    '類別不多時的比例',
+  ],
+  build: (t, m) => buildPie(t, m, ['40%', '64%']),
+};

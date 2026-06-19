@@ -20,5 +20,21 @@ function buildLine(table, m, area) {
   return opt;
 }
 
-export const line = { id: 'line', name: '折線圖', build: (t, m) => buildLine(t, m, false) };
-export const area = { id: 'area', name: '區域圖', build: (t, m) => buildLine(t, m, true) };
+export const line = {
+  id: 'line', name: '折線圖',
+  tips: [
+    '隨時間變化的趨勢(逐年、逐月)',
+    '走勢、漲跌',
+    '多個系列的趨勢對照',
+  ],
+  build: (t, m) => buildLine(t, m, false),
+};
+export const area = {
+  id: 'area', name: '區域圖',
+  tips: [
+    '趨勢且想強調累積量 / 規模',
+    '隨時間的總量變化',
+    '多系列的量體比較',
+  ],
+  build: (t, m) => buildLine(t, m, true),
+};

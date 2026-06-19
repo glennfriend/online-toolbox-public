@@ -7,6 +7,11 @@ import { toNumber } from '../table.js';
 export const scatter = {
   id: 'scatter',
   name: '散布圖',
+  tips: [
+    '兩個數值之間的關係 / 相關(面積 vs 人口)',
+    '看資料分布、離群值',
+    'X、Y 都是數值欄時',
+  ],
   build(table, m) {
     const yi = m.yIdxs[0];
     const data = table.rows

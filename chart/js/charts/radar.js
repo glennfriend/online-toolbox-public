@@ -7,6 +7,11 @@ import { toNumber } from '../table.js';
 export const radar = {
   id: 'radar',
   name: '雷達圖',
+  tips: [
+    '多個指標的綜合比較(幾個對象在多面向的強弱)',
+    '能力值 / 評分對照',
+    '指標數 3 個以上時',
+  ],
   build(table, m) {
     // 每個指標(Y 欄)的最大值 → 決定該軸刻度
     const indicator = m.yIdxs.map((yi) => {

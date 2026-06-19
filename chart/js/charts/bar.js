@@ -6,6 +6,12 @@ import { aggregateByCategory } from '../table.js';
 export const bar = {
   id: 'bar',
   name: '長條圖',
+  tips: [
+    '比較各類別的數量高低(各產品銷量、各縣市人口)',
+    '排行榜 / 名次',
+    '少數幾組的對照',
+    '單一指標跨類別比較',
+  ],
   build(table, m) {
     const { categories, series } = aggregateByCategory(table, m.xIdx, m.yIdxs, m.agg);
     const opt = baseOption();
@@ -19,6 +25,11 @@ export const bar = {
 export const barHorizontal = {
   id: 'bar-h',
   name: '橫條圖',
+  tips: [
+    '類別名稱很長時的比較(長標籤橫放較好讀)',
+    '項目較多的排行榜',
+    '由大到小的排名呈現',
+  ],
   build(table, m) {
     const { categories, series } = aggregateByCategory(table, m.xIdx, m.yIdxs, m.agg);
     const opt = baseOption();

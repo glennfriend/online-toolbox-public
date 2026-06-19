@@ -163,7 +163,7 @@ function renderPreview(t) {
   const MAX = 6;
   const head = '<tr>' + t.columns.map((c) => `<th>${esc(c.name)}<small>${c.type === 'number' ? '數值' : '文字'}</small></th>`).join('') + '</tr>';
   const body = t.rows.slice(0, MAX).map((r) => '<tr>' + r.map((cell) => `<td>${esc(cell)}</td>`).join('') + '</tr>').join('');
-  const more = t.rows.length > MAX ? `<div class="more">…還有 ${t.rows.length - MAX} 列</div>` : '';
+  const more = t.rows.length > MAX ? `<div class="more">總共 ${t.rows.length} 列</div>` : '';
   preview.innerHTML = `<table class="preview-table"><thead>${head}</thead><tbody>${body}</tbody></table>${more}`;
 }
 
@@ -181,6 +181,8 @@ function buildChartButtons() {
   CHARTS.forEach((c) => {
     const b = mkButton(c.name, () => { chartId = c.id; setActive(chartBar, c.id); renderChart(); });
     b.dataset.id = c.id;
+    // 滑鼠移上去顯示「適合的情境」(最常用排前面);用換行條列
+    if (c.tips && c.tips.length) b.title = `${c.name}適合:\n・${c.tips.join('\n・')}`;
     chartBar.appendChild(b);
   });
   setActive(chartBar, chartId);

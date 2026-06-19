@@ -70,7 +70,7 @@ registerHandler({
 ```
 
 `ctx` 提供:`registerHandler / setDisplay / setBadge / setCopyHandler / addItem /
-refreshSaved / showToast / notifyDisplayChanged / onDisplayChanged` 及 DOM 參照。
+refreshSaved / showToast / notifyDisplayChanged / onDisplayChanged / markInputSaved` 及 DOM 參照。
 
 **新增一種儲存型別** = 寫一個 `handlers/xxx.js`(在裡面 `registerHandler`),並在 `main.js` 加一行 `initXxxHandler(ctx)`。
 **新增一種文字子格式**(如 diff)= 在 `detect.js` 加偵測 + `renderers/` 加一個渲染器 + dispatch 一行(不需新 handler)。

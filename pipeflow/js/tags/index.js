@@ -12,11 +12,12 @@ export function matchAny(regexes) { return (s) => regexes.some((re) => re.test(s
 // 全部 regex 都中 → 才命中(較嚴謹的結構/語意)
 export function matchAll(regexes) { return (s) => regexes.every((re) => re.test(s)); }
 
-// 回傳命中的 tag 名稱;'text' 為基底,永遠都在(讓「對任何文字都能用」的 mod 一直出現)
+// 回傳命中的 tag 名稱。若沒命中任何結構格式 → 回 ['text'],代表「純文字」。
+// (所以 JSON 不會再掛 text;「永遠都能用」的 mod 改用 appliesTo:'*',不靠 text。)
 export function detectTags(text) {
-  const found = ['text'];
+  const matched = [];
   for (const tag of TAGS) {
-    try { if (tag.match(text)) found.push(tag.name); } catch { /* 某 tag 判斷出錯就跳過 */ }
+    try { if (tag.match(text)) matched.push(tag.name); } catch { /* 某 tag 判斷出錯就跳過 */ }
   }
-  return found;
+  return matched.length ? matched : ['text'];
 }

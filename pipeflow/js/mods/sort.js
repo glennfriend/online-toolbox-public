@@ -15,7 +15,7 @@ function splitKeepHeader(input, tags) {
 defineMod({
   id: 'sort-az',
   label: 'a-z 排序',
-  appliesTo: ['text'],
+  appliesTo: '*',   // 任何內容都能逐行排序
   run(input, tags) {
     const { head, body } = splitKeepHeader(input, tags);
     body.sort((a, b) => a.localeCompare(b, 'zh-Hant'));

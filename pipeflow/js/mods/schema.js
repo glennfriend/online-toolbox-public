@@ -1,5 +1,5 @@
 // schema.js — SQL Schema(CREATE TABLE)→ Mermaid erDiagram 文字。
-// 純文字轉換、離線、不需要任何 DB 引擎。輸出是 mermaid 原始碼,再接「顯示圖 (Mermaid)」就成 ER 圖。
+// 純文字轉換、離線、不需要任何 DB 引擎。輸出是 mermaid 原始碼,再接「convert to Mermaid」就成 ER 圖。
 
 import { defineMod } from './index.js';
 

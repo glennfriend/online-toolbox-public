@@ -27,7 +27,7 @@
 
 ### v1 的轉換(pipeline mod)
 
-`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html/mermaid/sql)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`、`萃取有內容的連結`(HTML 專用)、`依第一欄分組加總`(純 JS)、`Schema → ER 圖`(SQL CREATE TABLE → mermaid erDiagram 文字,再接顯示圖)、`顯示圖 (Mermaid)`(render 類)、`SQL 查詢`(參數化 + 非同步,用 DuckDB-Wasm 對 CSV 下任意 SQL)。後兩類 + SQL 用到外部 CDN(見下)。每個 pipe 互相獨立、依 tags 出現。
+`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html/mermaid/sql)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`、`萃取有內容的連結`(HTML 專用)、`依第一欄分組加總`(純 JS)、`Schema → ER 圖`(SQL CREATE TABLE → mermaid erDiagram 文字,再接顯示圖)、`convert to Mermaid`(render 類)、`SQL 查詢`(參數化 + 非同步,用 DuckDB-Wasm 對 CSV 下任意 SQL)。後兩類 + SQL 用到外部 CDN(見下)。每個 pipe 互相獨立、依 tags 出現。
 
 ### 效能與「絕不無聲」原則
 
@@ -63,7 +63,7 @@ pipeflow/
     │   ├── urls.js        萃取 urls / 萃取有內容的連結
     │   ├── groupby.js     依第一欄分組加總(純 JS)
     │   ├── schema.js      Schema → ER 圖(SQL CREATE TABLE → mermaid 文字)
-    │   ├── diagram.js     顯示圖 (Mermaid)  ← render 類,用外部 lib/mermaid.js
+    │   ├── diagram.js     convert to Mermaid  ← render 類,用外部 lib/mermaid.js
     │   └── sql.js         SQL 查詢  ← 參數化 + 非同步,用外部 lib/duckdb.js
     └── lib/              通用模組:dom / num / sample(上限取樣) / table(表格解析)
         ├── mermaid.js   【外部相依】CDN 載入 Mermaid
@@ -83,12 +83,12 @@ pipeflow/
 
 只有兩個 mod 用到外部資源,各自集中在一個 lib 檔(其餘程式零相依),一眼看出是外部的、要換 library 只動那一檔;用到時 UI 會顯示「使用外部資源」徽章,錯誤也分「載入失敗」與「執行失敗」清楚顯示,方便除錯。
 
-- **Mermaid**(`js/lib/mermaid.js`,`顯示圖`):mermaid 原始碼 → 圖。載入失敗 →「無法載入外部 Mermaid…」;語法錯 →「Mermaid 無法繪製這段語法…(含 parse 位置)」。版本 `mermaid@11`。
+- **Mermaid**(`js/lib/mermaid.js`,`convert to Mermaid`):mermaid 原始碼 → 圖。載入失敗 →「無法載入外部 Mermaid…」;語法錯 →「Mermaid 無法繪製這段語法…(含 parse 位置)」。版本 `mermaid@11`。
 - **DuckDB-Wasm**(`js/lib/duckdb.js`,`SQL 查詢`):把 CSV 當資料表 `t`、跑任意 SQL(`group by`/join…),回傳結果 CSV。載入失敗 →「無法載入外部 DuckDB-Wasm…」;查詢錯 →「SQL 執行失敗:…」。版本 `@duckdb/duckdb-wasm@1.29.0`。
 
 要升級 / 更換,改對應 lib 檔頂端的 `CDN` 常數即可。
 
-> 補充:`SQL Schema → ER 圖` **不需要** DB 引擎——純文字解析 `CREATE TABLE` → mermaid `erDiagram`,離線可用,再接 `顯示圖` 即成 ER 圖。
+> 補充:`SQL Schema → ER 圖` **不需要** DB 引擎——純文字解析 `CREATE TABLE` → mermaid `erDiagram`,離線可用,再接 `convert to Mermaid` 即成 ER 圖。
 
 ### 版面方向可換
 
@@ -101,7 +101,7 @@ pipeflow/
 - tag 偵測是啟發式;少數內容可能多貼或漏貼 tag(刻意不追求極精確)。
 - CSV 解析用簡單切分(v1 不處理引號內逗號)。
 - 重轉換目前在主執行緒跑;因輸入有上限,實務上夠快。真有超大需求再考慮 Web Worker。
-- `顯示圖 (Mermaid)` 與 `SQL 查詢 (DuckDB)` 需要連網(CDN);離線或 CDN 失效時會顯示載入錯誤,其餘功能不受影響。DuckDB 首次載入要下載較大的 WASM,會顯示「處理中…」。
+- `convert to Mermaid` 與 `SQL 查詢 (DuckDB)` 需要連網(CDN);離線或 CDN 失效時會顯示載入錯誤,其餘功能不受影響。DuckDB 首次載入要下載較大的 WASM,會顯示「處理中…」。
 
 ## 本機開發
 

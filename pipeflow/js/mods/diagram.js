@@ -9,7 +9,7 @@ import { renderMermaid } from '../lib/mermaid.js';
 
 defineMod({
   id: 'mermaid-render',
-  label: '顯示圖 (Mermaid)',
+  label: 'convert to Mermaid',
   kind: 'render',
   appliesTo: ['mermaid'],
   external: 'Mermaid (CDN)',

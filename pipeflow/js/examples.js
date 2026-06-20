@@ -23,15 +23,23 @@ export const EXAMPLES = [
     data: '<ul>\n  <li><a href="https://news.ycombinator.com/item?id=1">Show HN: My cool project</a></li>\n  <li><a href="https://blog.example.com/duckdb-internals">DuckDB Internals Part 1</a></li>\n  <li><a href="https://x.com/css/app.css">styles</a></li>\n</ul>',
   },
   {
-    label: '流程圖 (Mermaid)', // → 顯示圖
+    label: '流程圖 (Mermaid)', // 預設直接顯示圖
     data: 'graph TD\n  A[貼上資料] --> B{偵測 tags}\n  B --> C[推薦轉換]\n  C --> D[串成管線]\n  D --> E[輸出]',
+    chain: [{ id: 'mermaid-render' }],
   },
   {
-    label: '銷售明細 (分組加總)', // → 依第一欄分組加總(地區重複)
+    label: '銷售明細 (分組加總)', // 預設直接分組加總(地區重複)
     data: '地區,金額\n北區,120\n南區,90\n北區,200\n中區,75\n南區,110\n北區,60',
+    chain: [{ id: 'group-by-first' }],
   },
   {
-    label: 'SQL Schema (ER 圖)', // → Schema → ER 圖 → 顯示圖
+    label: 'SQL Schema (ER 圖)', // 預設直接 Schema → ER → 顯示圖
     data: 'CREATE TABLE users (\n  id INT PRIMARY KEY,\n  name VARCHAR(50),\n  email VARCHAR(100)\n);\nCREATE TABLE orders (\n  id INT PRIMARY KEY,\n  user_id INT REFERENCES users(id),\n  amount DECIMAL(10,2)\n);',
+    chain: [{ id: 'sql-to-er' }, { id: 'mermaid-render' }],
+  },
+  {
+    label: 'SQL 查詢 (DuckDB)', // 預設直接跑一個 group by 查詢
+    data: '地區,產品,金額\n北區,A,120\n南區,B,90\n北區,C,200\n中區,A,75\n南區,A,110\n北區,B,60',
+    chain: [{ id: 'sql-query', param: 'SELECT 地區, sum(金額) AS 合計 FROM t GROUP BY 地區 ORDER BY 合計 DESC' }],
   },
 ];

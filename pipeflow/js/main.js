@@ -17,6 +17,7 @@ import './mods/urls.js';
 import './mods/diagram.js';   // 渲染類(Mermaid,外部 CDN)
 import './mods/groupby.js';   // 分組加總(純 JS)
 import './mods/schema.js';    // SQL Schema → ER 圖(純文字 → mermaid)
+import './mods/sql.js';       // SQL 查詢(DuckDB-Wasm,外部 CDN;參數化 + 非同步)
 import { EXAMPLES } from './examples.js';
 
 const LAYOUT = 'row'; // 'row' = 左到右(可改 'col' 上到下;見 styles.css 與 arrowIcon)
@@ -24,7 +25,8 @@ const LAYOUT = 'row'; // 'row' = 左到右(可改 'col' 上到下;見 styles.css
 const flow = document.querySelector('#flow');
 flow.classList.add(LAYOUT === 'row' ? 'flow-row' : 'flow-col');
 
-let chain = [];   // 選定的 mod 序列;chain[k] = 把 step k 轉成 step k+1 的 modId
+let chain = [];        // 選定的 mod 序列;每項 { id, param }(param 給參數化 mod,如 SQL 查詢)
+let renderToken = 0;   // 非同步重算的防舊鎖:只讓最新一次 render 寫畫面
 
 // ── step0(持久存在,打字時不重建,才不會掉游標)──
 const step0 = el('div', 'step');
@@ -36,6 +38,11 @@ textarea.placeholder = '貼上資料(CSV / TSV / JSON / Markdown 表格 / 含網
 const mods0 = el('div', 'step-mods');
 step0.append(tags0, banner0, textarea, mods0);
 flow.append(step0);
+
+// 非同步處理(如 SQL/DuckDB、Mermaid 載入)時的「處理中…」指示,避免看起來像凍住
+const statusEl = el('div', 'flow-status');
+document.querySelector('.head').append(statusEl);
+let busyTimer;
 
 let debounceTimer;
 textarea.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(render, 250); });
@@ -49,14 +56,22 @@ function buildExamples() {
   const bar = document.querySelector('#examples');
   EXAMPLES.forEach((ex) => {
     const b = el('button', 'ex-btn'); b.type = 'button'; b.textContent = ex.label;
-    b.addEventListener('click', () => { chain = []; textarea.value = ex.data; render(); });
+    // 範例可預設一條管線(ex.chain),複製一份避免改到常數
+    b.addEventListener('click', () => { chain = (ex.chain || []).map((c) => ({ ...c })); textarea.value = ex.data; render(); });
     bar.append(b);
   });
 }
 
-// ── 重算 + 重繪 ──
-function render() {
-  const stages = computeStages(textarea.value, chain);
+// ── 重算 + 重繪(非同步:有些 mod 如 SQL 要等外部 DuckDB)──
+async function render() {
+  const token = ++renderToken;
+  // 若 200ms 內還沒算完(通常是等外部 SQL/Mermaid),顯示「處理中…」
+  clearTimeout(busyTimer);
+  busyTimer = setTimeout(() => { if (token === renderToken) statusEl.textContent = '處理中…(外部資源)'; }, 200);
+
+  const stages = await computeStages(textarea.value, chain);
+  if (token !== renderToken) return; // 期間又有新的 render → 丟棄這次舊結果
+  clearTimeout(busyTimer); statusEl.textContent = '';
 
   // step0 的 tags / 取樣橫幅 / 可用 mod(不動 textarea)
   renderTags(tags0, stages[0].tags);
@@ -72,9 +87,12 @@ function render() {
 
 // 點某 step 的 mod:把它設成「該 step 往下的轉換」,並砍掉更下游(路徑改變)。再點同一個 = 取消。
 function chooseMod(stepIndex, modId) {
-  const same = chain[stepIndex] === modId;
+  const same = chain[stepIndex] && chain[stepIndex].id === modId;
   chain = chain.slice(0, stepIndex);
-  if (!same) chain.push(modId);
+  if (!same) {
+    const mod = getMod(modId);
+    chain.push({ id: modId, param: mod && mod.param ? (mod.defaultParam || '') : undefined });
+  }
   render();
   scrollToEnd();
 }
@@ -86,6 +104,20 @@ function makeStep(stage, i) {
   card.append(tags);
 
   if (stage.sampling) { const b = el('div', 'banner banner-soft'); b.textContent = '⚠ 此結果基於取樣資料'; card.append(b); }
+
+  // 這一步是由哪個 mod 產生的 → 顯示外部資源徽章 / 參數編輯器
+  const srcMod = stage.srcMod ? getMod(stage.srcMod) : null;
+  if (srcMod && srcMod.external) {
+    const badge = el('div', 'ext-badge'); badge.textContent = '使用外部資源:' + srcMod.external; card.append(badge);
+  }
+  if (srcMod && srcMod.param) {
+    const bar = el('div', 'param-bar');
+    const pin = el('textarea', 'param-input'); pin.value = stage.param || ''; pin.spellcheck = false;
+    if (srcMod.paramLabel) pin.placeholder = srcMod.paramLabel;
+    const run = el('button', 'mod-btn'); run.type = 'button'; run.textContent = '執行';
+    run.addEventListener('click', () => { chain[stage.chainIndex].param = pin.value; render(); });
+    bar.append(pin, run); card.append(bar);
+  }
 
   if (stage.error) {
     const e = el('div', 'step-error'); e.textContent = '❌ ' + stage.error; card.append(e);
@@ -127,7 +159,7 @@ function renderMods(container, stage, i) {
   const mods = modsFor(stage.tags);
   if (!mods.length) return;
   mods.forEach((m) => {
-    const b = el('button', 'mod-btn' + (chain[i] === m.id ? ' active' : ''));
+    const b = el('button', 'mod-btn' + (chain[i] && chain[i].id === m.id ? ' active' : ''));
     b.type = 'button'; b.textContent = m.label;
     b.addEventListener('click', () => chooseMod(i, m.id));
     container.append(b);

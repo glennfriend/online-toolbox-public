@@ -12,6 +12,7 @@ defineMod({
   label: '顯示圖 (Mermaid)',
   kind: 'render',
   appliesTo: ['mermaid'],
+  external: 'Mermaid (CDN)',
   // render 不回傳文字,而是把圖畫進 container(非同步,因為要先載入外部 Mermaid)
   async render(source, container) {
     container.textContent = '圖產生中…';

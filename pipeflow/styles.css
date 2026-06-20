@@ -29,6 +29,7 @@ body {
 
 /* 範例資料按鈕(一點即載入,展示功能) */
 .examples { display: flex; flex-wrap: wrap; gap: 6px; margin: .5rem 0 1rem; }
+.flow-status { min-height: 1.2em; font-size: 13px; color: var(--accent); margin-bottom: .4rem; }
 .ex-btn {
   font: inherit; font-size: 13px; cursor: pointer;
   border: 0.5px solid var(--border); border-radius: 999px;
@@ -92,6 +93,22 @@ body {
   font-size: 13px; color: var(--muted);
 }
 .step-diagram svg { max-width: 100%; height: auto; }
+
+/* 外部資源徽章(用到 CDN 的 mod,如 Mermaid / DuckDB)→ 讓使用者/開發者知道 */
+.ext-badge {
+  align-self: flex-start; font-size: 11px; color: #6b5500;
+  background: var(--warn-bg); border: 0.5px solid #f0e0a8; border-radius: 6px; padding: 2px 8px;
+}
+
+/* 參數化 mod(如 SQL 查詢)的輸入區 */
+.param-bar { display: flex; flex-direction: column; gap: 6px; }
+.param-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px;
+  min-height: 64px; resize: vertical; padding: 6px;
+  border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg);
+}
+.param-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.param-bar .mod-btn { align-self: flex-start; }
 
 .note { font-size: 12px; color: var(--muted); }
 .step-error { color: var(--danger); font-size: 13px; padding: 6px 0; }

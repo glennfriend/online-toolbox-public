@@ -1,5 +1,7 @@
 # Online Toolbox
 
+> **設計原則**:每個工具都要保持「容易擴充、容易修改」。寧可多花一點把結構做對(可插拔的模組、清楚的邊界、誠實顯示錯誤與外部相依),**絕不寫 workaround**——因為 workaround 會在日後讓人無法擴充或修改。
+
 | 工具 | 說明 |
 |---|---|
 | [**Scrapbook**](https://glennfriend.github.io/online-toolbox-public/scrapbook/ "https://glennfriend.github.io/online-toolbox-public/scrapbook/") | 貼上即時 render(Markdown / HTML / JSON / CSV / 程式碼 / 圖片)、可存於本機並複製(保留格式) |

@@ -27,7 +27,7 @@
 
 ### v1 的轉換(pipeline mod)
 
-`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html/mermaid/sql)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`、`萃取有內容的連結`(HTML 專用)、`依第一欄分組加總`(純 JS)、`Schema → ER 圖`(SQL CREATE TABLE → mermaid erDiagram 文字,再接顯示圖)、`convert to Mermaid`(render 類)、`SQL 查詢`(參數化 + 非同步,用 DuckDB-Wasm 對 CSV 下任意 SQL)。後兩類 + SQL 用到外部 CDN(見下)。每個 pipe 互相獨立、依 tags 出現。
+`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html/mermaid/sql)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`、`萃取有內容的連結`(HTML 專用)、`依第一欄分組加總`(純 JS)、`Schema → ER 圖`(SQL CREATE TABLE → mermaid erDiagram 文字,再接 `convert to Mermaid`;**容忍 phpMyAdmin / mysqldump 的雜訊**——自動略過 `--` / `#` / `/* */` 註解與 `INSERT`/`SET` 等非 DDL 語句,並正確處理 `) ENGINE=… AUTO_INCREMENT=…;` 收尾、表級 `PRIMARY KEY` 與 `CONSTRAINT … FOREIGN KEY`)、`convert to Mermaid`(render 類)、`SQL 查詢`(參數化 + 非同步,用 DuckDB-Wasm 對 CSV 下任意 SQL)。後兩類 + SQL 用到外部 CDN(見下)。每個 pipe 互相獨立、依 tags 出現。
 
 ### 效能與「絕不無聲」原則
 
@@ -88,7 +88,7 @@ pipeflow/
 
 要升級 / 更換,改對應 lib 檔頂端的 `CDN` 常數即可。
 
-> 補充:`SQL Schema → ER 圖` **不需要** DB 引擎——純文字解析 `CREATE TABLE` → mermaid `erDiagram`,離線可用,再接 `convert to Mermaid` 即成 ER 圖。
+> 補充:`SQL Schema → ER 圖` **不需要** DB 引擎——純文字解析 `CREATE TABLE` → mermaid `erDiagram`,離線可用,再接 `convert to Mermaid` 即成 ER 圖。解析採「先去註解 → 括號配對切出欄位區塊」而非脆弱的 `)\s*;` 收尾,因此能直接吃 phpMyAdmin / mysqldump 匯出的整份檔(夾雜註解、`INSERT` 資料、`ENGINE=…` 表選項都自動略過)。
 
 ### 版面方向可換
 

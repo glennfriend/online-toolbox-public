@@ -21,3 +21,10 @@ export function detectTags(text) {
   }
   return matched.length ? matched : ['text'];
 }
+
+// 某個 tag 名稱的「真正意思」(給滑鼠提示用)。'text' 是合成出來的,單獨說明。
+export function tagDesc(name) {
+  if (name === 'text') return '純文字:沒有命中任何結構格式';
+  const tag = TAGS.find((t) => t.name === name);
+  return tag && tag.desc ? tag.desc : name;
+}

@@ -55,7 +55,7 @@ pipeflow/
 
 ### 兩層可插拔
 
-- **新增一種 tag** = 在 `tags/defs.js` 多 `defineTag({ name, match })`。`match` 用 `matchAny([regex…])`(任一中即可,多數情況)或 `matchAll([regex…])`(全部中才算,較嚴謹),也可傳自訂函式。不求極精確,只求不易誤判。
+- **新增一種 tag** = 在 `tags/defs.js` 多 `defineTag({ name, desc, match })`。`desc` 是這個 tag 的「真正意思」,會顯示在 UI 的滑鼠提示上(讀程式 / 用工具時都能確認語意,減少誤會)。`match` 用 `matchAny([regex…])`(任一中即可,多數情況)或 `matchAll([regex…])`(全部中才算,較嚴謹),也可傳自訂函式。不求極精確,只求不易誤判。
 - **新增一種轉換** = 寫一個 `mods/xxx.js`,`defineMod({ id, label, appliesTo:[tag…], run(input, tags) })`(純函式),再到 `main.js` import。`appliesTo` 命中目前 step 的 tags 就會出現在按鈕列;登記順序 = 按鈕優先序。
 
 ### 版面方向可換

@@ -15,7 +15,8 @@ function splitKeepHeader(input, tags) {
 defineMod({
   id: 'sort-az',
   label: 'a-z 排序',
-  appliesTo: '*',   // 任何內容都能逐行排序
+  // 逐行排序:適用「以行為單位」的內容;排除 json / markdown(逐行排序會破壞其結構)
+  appliesTo: ['text', 'csv', 'tsv', 'number-list', 'num-lines', 'url', 'has-urls'],
   run(input, tags) {
     const { head, body } = splitKeepHeader(input, tags);
     body.sort((a, b) => a.localeCompare(b, 'zh-Hant'));

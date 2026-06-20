@@ -7,7 +7,7 @@ export const EXAMPLES = [
     data: '州,人口(百萬)\nCalifornia,39.4\nTexas,31.7\nFlorida,23.5\nNew York,20.0\nPennsylvania,13.1\nIllinois,12.7',
   },
   {
-    label: '分數 (數字清單)', // → 數字排序 / 統計
+    label: '數字列表', // → 數字排序 / 統計
     data: '88\n95\n72\n100\n63\n91',
   },
   {
@@ -15,11 +15,11 @@ export const EXAMPLES = [
     data: '[{"name":"Alice","age":30,"city":"Taipei"},{"name":"Bob","age":25,"city":"Tokyo"}]',
   },
   {
-    label: '含網址的文字', // → 萃取 urls
+    label: '網路文章', // → 萃取 urls
     data: '參考 https://example.com/a 與 https://example.org/b\n另見 http://test.com/c(重複 https://example.com/a)',
   },
   {
-    label: '網頁連結 (HTML)', // → 萃取有內容的連結(css 連結會被濾掉)
+    label: 'HTML 語法', // → 萃取有內容的連結(css 連結會被濾掉)
     data: '<ul>\n  <li><a href="https://news.ycombinator.com/item?id=1">Show HN: My cool project</a></li>\n  <li><a href="https://blog.example.com/duckdb-internals">DuckDB Internals Part 1</a></li>\n  <li><a href="https://x.com/css/app.css">styles</a></li>\n</ul>',
   },
   {

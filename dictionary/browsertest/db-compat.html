@@ -102,6 +102,13 @@ $('env-table').innerHTML = rows({
 // ── DuckDB-Wasm ──
 (async () => {
   const out = {};
+  // 看門狗:OOM 常在 worker 內丟出、try/catch 接不到 → 逾時就明確標失敗(絕不無聲)
+  const watch = setTimeout(() => {
+    if ($('duck-badge').textContent === '測試中…') {
+      setBadge($('duck-badge'), false);
+      $('duck-table').innerHTML = rows({ '結果': 'ERR:逾時或記憶體不足(大型 WASM 載不起來,例如 Firefox: InternalError: out of memory)' });
+    }
+  }, 25000);
   try {
     const t0 = performance.now();
     const duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm');
@@ -121,9 +128,11 @@ $('env-table').innerHTML = rows({
     out['載入+初始化'] = ms(t0,t1)+' ms';
     out['查詢'] = ms(t1,t2)+' ms';
     out['查詢結果'] = JSON.stringify(res.toArray().map(r=>r.toJSON()));
+    clearTimeout(watch);
     $('duck-table').innerHTML = rows(out);
     setBadge($('duck-badge'), true);
   } catch(e) {
+    clearTimeout(watch);
     out['錯誤'] = 'ERR:' + (e&&e.message||e);
     $('duck-table').innerHTML = rows(out);
     setBadge($('duck-badge'), false);

@@ -18,6 +18,7 @@ import './mods/diagram.js';   // 渲染類(Mermaid,外部 CDN)
 import './mods/groupby.js';   // 分組加總(純 JS)
 import './mods/schema.js';    // SQL Schema → ER 圖(純文字 → mermaid)
 import './mods/sql.js';       // SQL 查詢(DuckDB-Wasm,外部 CDN;參數化 + 非同步)
+import './mods/translate.js'; // 翻譯(Google 非官方端點 + MyMemory 備援;參數化 + 非同步)
 import { EXAMPLES } from './examples.js';
 
 const LAYOUT = 'row'; // 'row' = 左到右(可改 'col' 上到下;見 styles.css 與 arrowIcon)

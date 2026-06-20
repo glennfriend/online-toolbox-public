@@ -42,4 +42,9 @@ export const EXAMPLES = [
     data: '地區,產品,金額\n北區,A,120\n南區,B,90\n北區,C,200\n中區,A,75\n南區,A,110\n北區,B,60',
     chain: [{ id: 'sql-query', param: 'SELECT 地區, sum(金額) AS 合計 FROM t GROUP BY 地區 ORDER BY 合計 DESC' }],
   },
+  {
+    label: '英文文章 (翻譯)', // 預設直接翻成繁中,輸出雙語(每段原文 + 譯文)
+    data: 'DuckDB is an in-process analytical SQL database. Analytical means it is optimized for queries that scan millions of rows to filter, aggregate, and join.\n\nDuckDB has received widespread adoption because it is just so easy to use. It ships as a single binary under 20 MB with no external dependencies.',
+    chain: [{ id: 'translate', param: 'zh-TW' }],
+  },
 ];

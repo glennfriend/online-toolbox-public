@@ -27,7 +27,7 @@
 
 ### v1 的轉換(pipeline mod)
 
-`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html/mermaid/sql)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`、`萃取有內容的連結`(HTML 專用)、`依第一欄分組加總`(純 JS)、`Schema → ER 圖`(SQL CREATE TABLE → mermaid erDiagram 文字,再接 `convert to Mermaid`;**容忍 phpMyAdmin / mysqldump 的雜訊**——自動略過 `--` / `#` / `/* */` 註解與 `INSERT`/`SET` 等非 DDL 語句,並正確處理 `) ENGINE=… AUTO_INCREMENT=…;` 收尾、表級 `PRIMARY KEY` 與 `CONSTRAINT … FOREIGN KEY`)、`convert to Mermaid`(render 類)、`SQL 查詢`(參數化 + 非同步,用 DuckDB-Wasm 對 CSV 下任意 SQL)。後兩類 + SQL 用到外部 CDN(見下)。每個 pipe 互相獨立、依 tags 出現。
+`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html/mermaid/sql)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`、`萃取有內容的連結`(HTML 專用)、`依第一欄分組加總`(純 JS)、`Schema → ER 圖`(SQL CREATE TABLE → mermaid erDiagram 文字,再接 `convert to Mermaid`;**容忍 phpMyAdmin / mysqldump 的雜訊**——自動略過 `--` / `#` / `/* */` 註解與 `INSERT`/`SET` 等非 DDL 語句,並正確處理 `) ENGINE=… AUTO_INCREMENT=…;` 收尾、表級 `PRIMARY KEY` 與 `CONSTRAINT … FOREIGN KEY`)、`convert to Mermaid`(render 類)、`SQL 查詢`(參數化 + 非同步,用 DuckDB-Wasm 對 CSV 下任意 SQL)、`Google 翻譯`(參數化 + 非同步,文章逐段翻譯,輸出**雙語**:每段原文下接譯文)。render / SQL / 翻譯用到外部資源(見下)。每個 pipe 互相獨立、依 tags 出現。
 
 ### 效能與「絕不無聲」原則
 
@@ -64,10 +64,12 @@ pipeflow/
     │   ├── groupby.js     依第一欄分組加總(純 JS)
     │   ├── schema.js      Schema → ER 圖(SQL CREATE TABLE → mermaid 文字)
     │   ├── diagram.js     convert to Mermaid  ← render 類,用外部 lib/mermaid.js
-    │   └── sql.js         SQL 查詢  ← 參數化 + 非同步,用外部 lib/duckdb.js
+    │   ├── sql.js         SQL 查詢  ← 參數化 + 非同步,用外部 lib/duckdb.js
+    │   └── translate.js   Google 翻譯  ← 參數化 + 非同步,用外部 lib/translate.js
     └── lib/              通用模組:dom / num / sample(上限取樣) / table(表格解析)
         ├── mermaid.js   【外部相依】CDN 載入 Mermaid
-        └── duckdb.js    【外部相依】CDN 載入 DuckDB-Wasm(CSV 下任意 SQL)
+        ├── duckdb.js    【外部相依】CDN 載入 DuckDB-Wasm(CSV 下任意 SQL)
+        └── translate.js 【外部相依】文字翻譯(Google 非官方端點 + MyMemory 備援)
 ```
 
 ### 兩層可插拔
@@ -85,6 +87,7 @@ pipeflow/
 
 - **Mermaid**(`js/lib/mermaid.js`,`convert to Mermaid`):mermaid 原始碼 → 圖。載入失敗 →「無法載入外部 Mermaid…」;語法錯 →「Mermaid 無法繪製這段語法…(含 parse 位置)」。版本 `mermaid@11`。
 - **DuckDB-Wasm**(`js/lib/duckdb.js`,`SQL 查詢`):把 CSV 當資料表 `t`、跑任意 SQL(`group by`/join…),回傳結果 CSV。載入失敗 →「無法載入外部 DuckDB-Wasm…」;查詢錯 →「SQL 執行失敗:…」。版本 `@duckdb/duckdb-wasm@1.29.0`。
+- **翻譯**(`js/lib/translate.js`,`Google 翻譯`):文章逐段翻譯,輸出雙語(原文 + 譯文)。主用 Google 非官方端點(`translate_a/single`,client=gtx,實測瀏覽器 CORS 可用),被限流 / 失效時自動退到 **MyMemory**;某段兩邊都失敗只在「那一段」標紅。**注意:Google 這個端點是非官方、不保證的**,可能改版 / 擋 IP 而失效——因隔離在此檔,要換引擎只動這裡。長段會按句界切塊再翻。
 
 要升級 / 更換,改對應 lib 檔頂端的 `CDN` 常數即可。
 

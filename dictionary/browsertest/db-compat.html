@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>DB 相容性測試 — sql.js / DuckDB-Wasm</title>
+<style>
+  :root{--fg:#24292f;--muted:#57606a;--border:#d0d7de;--ok:#1a7f37;--bad:#cf222e;--bg:#dde2e9;--code:#f6f8fa;}
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI","Noto Sans CJK TC","Microsoft JhengHei",sans-serif;line-height:1.6;
+    max-width:880px;margin:0 auto;padding:1.5rem 1.1rem;color:var(--fg);background:var(--bg);}
+  h1{font-size:1.4rem;margin:0 0 .3rem;}
+  .sub{color:var(--muted);font-size:.9rem;margin-bottom:1.2rem;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem;}
+  .card h2{font-size:1.05rem;margin:0 0 .6rem;display:flex;align-items:center;gap:.5rem;}
+  .badge{font-size:.8rem;font-weight:600;padding:.1em .6em;border-radius:999px;}
+  .badge.ok{background:#dafbe1;color:var(--ok);} .badge.bad{background:#ffebe9;color:var(--bad);} .badge.run{background:#fff3cd;color:#7a5b00;}
+  table{border-collapse:collapse;width:100%;font-size:.85rem;}
+  td,th{border:1px solid var(--border);padding:.3em .6em;text-align:left;vertical-align:top;}
+  th{background:var(--code);width:11rem;}
+  code{font-family:ui-monospace,Consolas,monospace;background:var(--code);padding:.05em .35em;border-radius:5px;font-size:.85em;}
+  .err{color:var(--bad);white-space:pre-wrap;word-break:break-word;}
+  .note{color:var(--muted);font-size:.82rem;margin-top:.5rem;}
+</style>
+</head>
+<body>
+  <h1>DB 相容性實測:sql.js / DuckDB-Wasm</h1>
+  <div class="sub">在你要測的瀏覽器(Chrome / Firefox / Edge / Safari / 手機)直接開這頁,下面會自動跑、即時顯示結果。</div>
+
+  <div class="card" id="env">
+    <h2>這台瀏覽器的環境</h2>
+    <table id="env-table"></table>
+  </div>
+
+  <div class="card">
+    <h2>sql.js (SQLite/WASM) <span id="sql-badge" class="badge run">測試中…</span></h2>
+    <table id="sql-table"></table>
+    <div class="note">純 WASM + JS,無特殊需求 → 相容性最廣。預設整個 DB 載入記憶體才能查。</div>
+  </div>
+
+  <div class="card">
+    <h2>DuckDB-Wasm <span id="duck-badge" class="badge run">測試中…</span></h2>
+    <table id="duck-table"></table>
+    <div class="note">用 Web Worker + WASM;高效版需 SharedArrayBuffer(要 COOP/COEP,GitHub Pages 設不了)→ 會自動退非多執行緒版,WASM 較大、首次載入較久。</div>
+  </div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const rows = (obj) => Object.entries(obj).map(([k,v]) =>
+  `<tr><th>${k}</th><td>${typeof v==='string'&&v.startsWith('ERR:')?`<span class="err">${v.slice(4)}</span>`:v}</td></tr>`).join('');
+const setBadge = (el, ok) => { el.className = 'badge ' + (ok?'ok':'bad'); el.textContent = ok?'可用 ✓':'失敗 ✗'; };
+const ms = (a,b)=>Math.round(b-a);
+
+// ── 環境 ──
+function guessEngine(ua){
+  if(/Edg\//.test(ua)) return 'Edge (Chromium)';
+  if(/Firefox\//.test(ua)) return 'Firefox (Gecko)';
+  if(/Chrome\//.test(ua)) return 'Chrome/Chromium (Blink)';
+  if(/Safari\//.test(ua)&&/Version\//.test(ua)) return 'Safari (WebKit)';
+  return '其他';
+}
+$('env-table').innerHTML = rows({
+  '引擎(推測)': guessEngine(navigator.userAgent),
+  'User-Agent': navigator.userAgent,
+  'WebAssembly': typeof WebAssembly,
+  'instantiateStreaming': (WebAssembly && WebAssembly.instantiateStreaming) ? '有' : '無',
+  'Web Worker': typeof Worker,
+  'SharedArrayBuffer': typeof SharedArrayBuffer,
+  'crossOriginIsolated': String(self.crossOriginIsolated),
+});
+
+// ── sql.js ──
+(async () => {
+  const out = {};
+  try {
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/';
+    const t0 = performance.now();
+    await new Promise((res,rej)=>{const s=document.createElement('script');s.src=base+'sql-wasm.js';s.onload=res;s.onerror=()=>rej(new Error('sql-wasm.js 載入失敗'));document.head.appendChild(s);});
+    const t1 = performance.now();
+    const SQL = await initSqlJs({ locateFile: f => base + f });
+    const t2 = performance.now();
+    const db = new SQL.Database();
+    db.run("CREATE TABLE t(w TEXT,pos TEXT); INSERT INTO t VALUES ('affect','verb'),('effect','noun');");
+    const r = db.exec("SELECT w,pos FROM t WHERE w LIKE 'aff%'");
+    const t3 = performance.now();
+    const w = performance.getEntriesByType('resource').find(e=>e.name.includes('sql-wasm.wasm'));
+    out['JS 載入'] = ms(t0,t1)+' ms';
+    out['WASM 初始化'] = ms(t1,t2)+' ms';
+    out['查詢'] = ms(t2,t3)+' ms';
+    out['WASM 傳輸大小'] = w ? Math.round((w.transferSize||w.encodedBodySize)/1024)+' KB' : 'n/a';
+    out['查詢結果'] = JSON.stringify(r[0].values);
+    $('sql-table').innerHTML = rows(out);
+    setBadge($('sql-badge'), true);
+  } catch(e) {
+    out['錯誤'] = 'ERR:' + (e&&e.message||e);
+    $('sql-table').innerHTML = rows(out);
+    setBadge($('sql-badge'), false);
+  }
+})();
+
+// ── DuckDB-Wasm ──
+(async () => {
+  const out = {};
+  try {
+    const t0 = performance.now();
+    const duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm');
+    const bundles = duckdb.getJsDelivrBundles();
+    const bundle = await duckdb.selectBundle(bundles);
+    out['選用 bundle'] = bundle.mainModule.split('/').pop();
+    const workerUrl = URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], {type:'text/javascript'}));
+    const worker = new Worker(workerUrl);
+    const db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    URL.revokeObjectURL(workerUrl);
+    const t1 = performance.now();
+    const conn = await db.connect();
+    const res = await conn.query("SELECT 'affect' AS w, sum(x) AS n FROM (VALUES (1),(2),(3)) AS t(x)");
+    const t2 = performance.now();
+    await conn.close();
+    out['載入+初始化'] = ms(t0,t1)+' ms';
+    out['查詢'] = ms(t1,t2)+' ms';
+    out['查詢結果'] = JSON.stringify(res.toArray().map(r=>r.toJSON()));
+    $('duck-table').innerHTML = rows(out);
+    setBadge($('duck-badge'), true);
+  } catch(e) {
+    out['錯誤'] = 'ERR:' + (e&&e.message||e);
+    $('duck-table').innerHTML = rows(out);
+    setBadge($('duck-badge'), false);
+  }
+})();
+</script>
+</body>
+</html>

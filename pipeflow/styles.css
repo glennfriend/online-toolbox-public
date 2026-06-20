@@ -26,6 +26,15 @@ body {
 
 .head { max-width: 1100px; margin: 0 auto .2rem; }
 .head h1 { margin: 0; font-size: 1.5rem; }
+
+/* 範例資料按鈕(一點即載入,展示功能) */
+.examples { display: flex; flex-wrap: wrap; gap: 6px; margin: .5rem 0 1rem; }
+.ex-btn {
+  font: inherit; font-size: 13px; cursor: pointer;
+  border: 0.5px solid var(--border); border-radius: 999px;
+  background: #fff; color: var(--fg); padding: .25em .8em;
+}
+.ex-btn:hover { background: var(--bg-code); border-color: var(--accent); color: var(--accent); }
 .head p { margin: .3rem 0 1rem; color: var(--muted); font-size: .92rem; }
 .head strong { color: var(--fg); }
 

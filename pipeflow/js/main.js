@@ -15,10 +15,9 @@ import './mods/json.js';
 import './mods/stats.js';
 import './mods/urls.js';
 import './mods/diagram.js';   // 渲染類(Mermaid,外部 CDN)
+import { EXAMPLES } from './examples.js';
 
 const LAYOUT = 'row'; // 'row' = 左到右(可改 'col' 上到下;見 styles.css 與 arrowIcon)
-
-const EXAMPLE = '州,人口(百萬)\nCalifornia,39.4\nTexas,31.7\nFlorida,23.5\nNew York,20.0\nPennsylvania,13.1';
 
 const flow = document.querySelector('#flow');
 flow.classList.add(LAYOUT === 'row' ? 'flow-row' : 'flow-col');
@@ -39,8 +38,19 @@ flow.append(step0);
 let debounceTimer;
 textarea.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(render, 250); });
 
-textarea.value = EXAMPLE;
+buildExamples();
+textarea.value = EXAMPLES[0].data;   // 預設帶第一個範例,一開啟就看得到
 render();
+
+// 範例按鈕:一點就載入,並清掉舊管線從頭開始
+function buildExamples() {
+  const bar = document.querySelector('#examples');
+  EXAMPLES.forEach((ex) => {
+    const b = el('button', 'ex-btn'); b.type = 'button'; b.textContent = ex.label;
+    b.addEventListener('click', () => { chain = []; textarea.value = ex.data; render(); });
+    bar.append(b);
+  });
+}
 
 // ── 重算 + 重繪 ──
 function render() {

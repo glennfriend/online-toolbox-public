@@ -18,11 +18,21 @@ defineTag({
   match: matchAny([/https?:\/\/\S+/i]),
 });
 
-// CSV:有逗號、多行,且開頭不是 < { [(避免把 HTML / JSON 誤判成 CSV)
+// CSV:有逗號、多行、開頭不是 < { [,且開頭不是 SQL 關鍵字(避免把 HTML/JSON/SQL 誤判成 CSV)
 defineTag({
   name: 'csv',
-  desc: '逗號分隔、多行的表格(開頭不是 < { [)',
-  match: matchAll([/,/, /\n\s*\S/, /^\s*[^<{[\s]/]),
+  desc: '逗號分隔、多行的表格(開頭不是 < { [ 或 SQL 關鍵字)',
+  match: matchAll([
+    /,/, /\n\s*\S/, /^\s*[^<{[\s]/,
+    /^\s*(?!(create|insert|select|update|delete|drop|alter)\b)/i,
+  ]),
+});
+
+// SQL:含 CREATE TABLE / SELECT … FROM / INSERT INTO 等
+defineTag({
+  name: 'sql',
+  desc: 'SQL 語法(CREATE TABLE / SELECT … FROM / INSERT INTO …)',
+  match: matchAny([/\bcreate\s+table\b/i, /\bselect\b[\s\S]*\bfrom\b/i, /\binsert\s+into\b/i]),
 });
 
 // HTML 原始碼:有 DOCTYPE/<html> 或常見成對/自閉合標籤

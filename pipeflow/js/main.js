@@ -15,6 +15,8 @@ import './mods/json.js';
 import './mods/stats.js';
 import './mods/urls.js';
 import './mods/diagram.js';   // 渲染類(Mermaid,外部 CDN)
+import './mods/groupby.js';   // 分組加總(純 JS)
+import './mods/schema.js';    // SQL Schema → ER 圖(純文字 → mermaid)
 import { EXAMPLES } from './examples.js';
 
 const LAYOUT = 'row'; // 'row' = 左到右(可改 'col' 上到下;見 styles.css 與 arrowIcon)

@@ -26,4 +26,12 @@ export const EXAMPLES = [
     label: '流程圖 (Mermaid)', // → 顯示圖
     data: 'graph TD\n  A[貼上資料] --> B{偵測 tags}\n  B --> C[推薦轉換]\n  C --> D[串成管線]\n  D --> E[輸出]',
   },
+  {
+    label: '銷售明細 (分組加總)', // → 依第一欄分組加總(地區重複)
+    data: '地區,金額\n北區,120\n南區,90\n北區,200\n中區,75\n南區,110\n北區,60',
+  },
+  {
+    label: 'SQL Schema (ER 圖)', // → Schema → ER 圖 → 顯示圖
+    data: 'CREATE TABLE users (\n  id INT PRIMARY KEY,\n  name VARCHAR(50),\n  email VARCHAR(100)\n);\nCREATE TABLE orders (\n  id INT PRIMARY KEY,\n  user_id INT REFERENCES users(id),\n  amount DECIMAL(10,2)\n);',
+  },
 ];

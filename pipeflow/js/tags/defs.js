@@ -84,6 +84,16 @@ defineTag({
   },
 });
 
+// Mermaid 圖表原始碼(flowchart / sequence / class …)
+defineTag({
+  name: 'mermaid',
+  desc: 'Mermaid 圖表原始碼(flowchart / sequence / class …)',
+  match: matchAny([
+    /^\s*(graph|flowchart)\s+(TB|TD|BT|RL|LR)\b/im,
+    /^\s*(sequenceDiagram|classDiagram|stateDiagram(-v2)?|erDiagram|journey|gantt|pie|mindmap|gitGraph|timeline|quadrantChart)\b/im,
+  ]),
+});
+
 // 多行(兩行以上)。hidden:不顯示成 chip,只用來閘控「排序」這類需要多行才有意義的 mod。
 defineTag({
   name: 'multi-line',

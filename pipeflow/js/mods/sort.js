@@ -12,8 +12,8 @@ function splitKeepHeader(input, tags) {
     : { head: [], body: lines };
 }
 
-// 逐行排序的整塊結構不能拆(json/markdown/html);這些只要出現就不提供逐行排序
-const STRUCTURED = ['json', 'markdown', 'html'];
+// 逐行排序的整塊結構不能拆(json/markdown/html/mermaid);這些只要出現就不提供逐行排序
+const STRUCTURED = ['json', 'markdown', 'html', 'mermaid'];
 
 defineMod({
   id: 'sort-az',

@@ -4,7 +4,7 @@
 // 版面方向用 LAYOUT 常數控制(目前左到右);改成上到下只要改這個常數 + CSS,step 邏輯不動。
 
 import { computeStages } from './pipeline.js';
-import { modsFor } from './mods/index.js';
+import { modsFor, getMod } from './mods/index.js';
 import { tagDesc, tagHidden } from './tags/index.js';
 import { countLines } from './lib/sample.js';
 import { el } from './lib/dom.js';
@@ -14,6 +14,7 @@ import './mods/sort.js';
 import './mods/json.js';
 import './mods/stats.js';
 import './mods/urls.js';
+import './mods/diagram.js';   // 渲染類(Mermaid,外部 CDN)
 
 const LAYOUT = 'row'; // 'row' = 左到右(可改 'col' 上到下;見 styles.css 與 arrowIcon)
 
@@ -76,6 +77,13 @@ function makeStep(stage, i) {
 
   if (stage.error) {
     const e = el('div', 'step-error'); e.textContent = '❌ ' + stage.error; card.append(e);
+  } else if (stage.renderId) {
+    // 渲染類步驟:用圖顯示(資料仍是原本的文字)
+    const dia = el('div', 'step-diagram');
+    card.append(dia);
+    const mod = getMod(stage.renderId);
+    if (mod && mod.render) mod.render(stage.input, dia);   // 非同步畫圖,內部自理錯誤
+    const mods = el('div', 'step-mods'); renderMods(mods, stage, i); card.append(mods);
   } else {
     const view = el('pre', 'step-view');
     const d = capDisplay(stage.input);

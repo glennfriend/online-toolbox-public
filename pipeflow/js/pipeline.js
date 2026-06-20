@@ -25,6 +25,14 @@ export function computeStages(source, chain) {
   for (let k = 0; k < chain.length; k++) {
     const mod = getMod(chain[k]);
     if (!mod) break;
+
+    // 渲染類(如 Mermaid):不改資料,只標記「這一步用圖顯示」。
+    // 資料仍是原本的文字 → 後續若再轉換,都是對這份原始文字做。
+    if (mod.kind === 'render') {
+      stages.push({ input: current, tags: detectTags(current), sampling, modId: chain[k + 1] || null, error: null, renderId: mod.id });
+      continue;
+    }
+
     let out;
     try { out = mod.run(current, stages[k].tags); error = null; }
     catch (e) { out = ''; error = `「${mod.label}」處理失敗:${e.message}`; }

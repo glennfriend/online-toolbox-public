@@ -44,7 +44,7 @@ body {
   flex-direction: column;
   gap: 8px;
 }
-.flow-row .step { flex: 0 0 340px; }   /* 左到右:固定寬 */
+.flow-row .step { flex: 0 0 400px; min-width: 0; }   /* 左到右:固定寬(min-width:0 避免被長內容撐爆) */
 .flow-col .step { width: 100%; }
 
 /* tags 列 */
@@ -69,11 +69,12 @@ body {
   padding: 8px; margin: 0;
   background: var(--bg-code);
   min-height: 220px; max-height: 360px; overflow: auto;
-  white-space: pre; color: var(--fg);
+  color: var(--fg);
+  white-space: pre-wrap;        /* 保留換行,且長行自動折行 */
+  overflow-wrap: anywhere;      /* 連沒有空白的長網址也能斷 */
 }
 .step-input { width: 100%; resize: vertical; background: #fff; }
 .step-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-.step-view { white-space: pre; }
 
 .note { font-size: 12px; color: var(--muted); }
 .step-error { color: var(--danger); font-size: 13px; padding: 6px 0; }

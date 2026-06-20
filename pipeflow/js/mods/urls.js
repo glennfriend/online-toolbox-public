@@ -5,14 +5,34 @@
 
 import { defineMod } from './index.js';
 
+// 把抓到的「候選網址」修掉尾巴混進來的內文字元。
+//   • 括號平衡:URL 可以含成對的 ( )(如維基 ..._(disambiguation));但「沒關閉的 (」之後、
+//     或「多出來的 )」之前,多半是文章內容(例:c(重複…、結尾的 )),從那裡切掉。
+//   • 去尾端標點:句尾的 . , ! ? : ; 與中文標點不算網址的一部分。
+// 這樣比「粗暴排除某些字元」更準:既不會吞掉後面的中文,也不會切斷正常含括號的網址。
+function cleanUrl(u) {
+  let depth = 0, openAt = -1;
+  for (let i = 0; i < u.length; i++) {
+    if (u[i] === '(') { if (depth === 0) openAt = i; depth++; }
+    else if (u[i] === ')') {
+      depth--;
+      if (depth < 0) { u = u.slice(0, i); depth = 0; break; } // 多出來的 ) → 切掉
+    }
+  }
+  if (depth > 0 && openAt >= 0) u = u.slice(0, openAt);        // 沒關閉的 ( → 切掉
+  return u.replace(/[.,;:!?'"’”，。、；：！？]+$/u, '');         // 尾端標點(') 由上面的括號平衡處理)
+}
+
 // 純文字含網址、但不是 HTML、也不是「整段就是一個網址」時才有意義
 defineMod({
   id: 'extract-urls',
   label: '萃取 urls',
   appliesTo: (tags) => tags.includes('has-urls') && !tags.includes('html') && !tags.includes('url'),
   run(input) {
-    const found = input.match(/https?:\/\/[^\s)<>"']+/g) || [];
-    const unique = [...new Set(found)];
+    // 允許成對括號;只在空白、角括號/引號、中文標點處斷開(尾巴再交給 cleanUrl 修)
+    const found = input.match(/https?:\/\/[^\s<>"'，。、；：！？「」『』【】（）《》]+/g) || [];
+    const cleaned = found.map(cleanUrl).filter(Boolean);
+    const unique = [...new Set(cleaned)];
     return unique.length ? unique.join('\n') : '(找不到網址)';
   },
 });

@@ -1,0 +1,93 @@
+/* Pipeflow — 版面與配色(延續站上風格:system-ui、藍色主色)。 */
+
+:root {
+  --fg: #24292f;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --border-soft: #d8dee4;
+  --accent: #2563eb;
+  --bg-code: #f6f8fa;
+  --bg-page: #dde2e9;
+  --danger: #cf222e;
+  --warn-bg: #fff8e6;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.7;
+  margin: 0;
+  padding: 1.6rem 1.2rem;
+  color: var(--fg);
+  background: var(--bg-page);
+}
+
+.head { max-width: 1100px; margin: 0 auto .2rem; }
+.head h1 { margin: 0; font-size: 1.5rem; }
+.head p { margin: .3rem 0 1rem; color: var(--muted); font-size: .92rem; }
+.head strong { color: var(--fg); }
+
+/* ── 管線容器:左到右(可捲)。改 .flow-col 即上到下 ── */
+.flow { display: flex; gap: 10px; }
+.flow-row { flex-direction: row; align-items: flex-start; overflow-x: auto; padding-bottom: 12px; }
+.flow-col { flex-direction: column; align-items: stretch; max-width: 900px; margin: 0 auto; }
+
+/* 每個步驟卡 */
+.step {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flow-row .step { flex: 0 0 340px; }   /* 左到右:固定寬 */
+.flow-col .step { width: 100%; }
+
+/* tags 列 */
+.step-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; min-height: 1.6em; }
+.tags-label { font-size: 12px; color: var(--muted); }
+.tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px; color: var(--accent);
+  border: 0.5px solid var(--border-soft); border-radius: 999px; padding: 1px 8px;
+  background: var(--bg-code);
+}
+
+/* 取樣/提醒橫幅(明顯,讓使用者一定看到) */
+.banner { background: var(--warn-bg); border: 1px solid #f0e0a8; border-radius: 8px; padding: 6px 10px; font-size: 13px; color: #6b5500; }
+.banner-soft { background: transparent; border: 0; padding: 0; font-size: 12px; color: var(--muted); }
+
+/* 輸入框 / 唯讀結果 */
+.step-input, .step-view {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px; line-height: 1.55;
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px; margin: 0;
+  background: var(--bg-code);
+  min-height: 220px; max-height: 360px; overflow: auto;
+  white-space: pre; color: var(--fg);
+}
+.step-input { width: 100%; resize: vertical; background: #fff; }
+.step-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.step-view { white-space: pre; }
+
+.note { font-size: 12px; color: var(--muted); }
+.step-error { color: var(--danger); font-size: 13px; padding: 6px 0; }
+
+/* mod 按鈕列 */
+.step-mods { display: flex; flex-wrap: wrap; gap: 6px; }
+.mod-btn {
+  font: inherit; font-size: 13px; cursor: pointer;
+  border: 0.5px solid var(--border-secondary, var(--border)); border-radius: 8px;
+  background: #fff; color: var(--fg); padding: .3em .7em;
+}
+.mod-btn:hover { background: var(--bg-code); }
+.mod-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* 步驟之間的箭頭 */
+.arrow { color: var(--muted); font-size: 20px; align-self: center; padding: 0 2px; }
+.flow-col .arrow { align-self: center; }

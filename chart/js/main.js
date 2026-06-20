@@ -6,7 +6,7 @@
 import { loadECharts } from './echarts-loader.js';
 import { parse } from './parse/index.js';
 import { FORMAT_LABELS, detectFormat } from './detect.js';
-import { numericColumns, firstStringColumn } from './table.js';
+import { numericColumns, firstStringColumn, toNumber } from './table.js';
 import { CHARTS, getChart } from './charts/index.js';
 import { loadItems, addItem, removeItem } from './storage.js';
 import { EXAMPLES } from './examples.js';
@@ -17,6 +17,9 @@ const saveBtn = qs('#save');
 const savedList = qs('#saved');
 const exampleSel = qs('#example');
 const sizeBar = qs('#sizes');
+const ioSwitch = qs('#io-switch');
+const ioText = qs('#io-text');
+const ioTable = qs('#io-table');
 
 // 輸出尺寸預設(資料驅動,要增減就改這個陣列)。w/h 省略 = 自適應(跟著容器寬、固定高)。
 const SIZES = [
@@ -51,6 +54,7 @@ init();
 async function init() {
   buildFormatButtons();
   buildChartButtons();
+  buildIoSwitch();
   qs('#download-png').addEventListener('click', downloadPng);
   qs('#download-svg').addEventListener('click', downloadSvg);
 
@@ -112,14 +116,27 @@ function renderChart() {
 function rebuildMappingIfColumnsChanged(t) {
   const sig = t.columns.map((c) => c.name + ':' + c.type).join('|');
   if (sig === colSig) return;
+
+  // 沿用上次選的 Y(依「欄名」):只要那些欄還在,就保留勾選,不因改資料而被重置。
+  const prevNames = colSig ? colSig.split('|').map((s) => s.slice(0, s.lastIndexOf(':'))) : null;
+  const keepNames = prevNames ? map.yIdxs.map((i) => prevNames[i]).filter((n) => n != null) : [];
   colSig = sig;
 
   const nums = numericColumns(t);
   map.xIdx = firstStringColumn(t);
-  map.yIdxs = nums.length ? [nums.find((i) => i !== map.xIdx) ?? nums[0]] : [];
-  map.agg = 'sum';
-  map.radarMax = null; // 換資料 → 上限回到自動
+  const preserved = nums.filter((i) => keepNames.includes(t.columns[i].name));
+  map.yIdxs = preserved.length ? preserved : (nums.length ? [nums.find((i) => i !== map.xIdx) ?? nums[0]] : []);
+  map.radarMax = seedRadarMax(t, map.yIdxs); // 換資料 → 種一個合理的上限預設值(之後手動可改)
   buildMappingControls(t);
+}
+
+// 依目前資料種一個合理的雷達圖上限(所有選取數值的最大值往上取整;沒有就 100)
+function seedRadarMax(t, yIdxs) {
+  let mx = 0;
+  for (const r of t.rows) for (const yi of yIdxs) { const n = toNumber(r[yi]); if (Number.isFinite(n) && n > mx) mx = n; }
+  if (!(mx > 0)) return 100;
+  const mag = Math.pow(10, Math.floor(Math.log10(mx)));
+  return Math.ceil(mx / mag) * mag;
 }
 
 function buildMappingControls(t) {
@@ -153,16 +170,24 @@ function buildMappingControls(t) {
   aggSel.addEventListener('change', () => { map.agg = aggSel.value; renderChart(); });
   mapBox.appendChild(field('重複類別', aggSel));
 
-  // 雷達圖上限(共用刻度頂點;空白=自動)。只在選雷達圖時顯示,見 renderChart()。
+  // 雷達圖上限(全手動,共用刻度頂點):欄位永遠是一個具體數字;「依資料」一鍵套用目前資料最大值。
+  // 只在選雷達圖時顯示,見 renderChart()。
   const maxInput = document.createElement('input');
-  maxInput.type = 'number'; maxInput.min = '0'; maxInput.placeholder = '自動';
-  maxInput.value = map.radarMax ?? '';
+  maxInput.type = 'number'; maxInput.min = '1'; maxInput.className = 'radar-max-input';
+  maxInput.value = map.radarMax;
   maxInput.addEventListener('input', () => {
     const v = parseFloat(maxInput.value);
-    map.radarMax = Number.isFinite(v) && v > 0 ? v : null;
+    if (Number.isFinite(v) && v > 0) { map.radarMax = v; renderChart(); }
+  });
+  const fitBtn = mkButton('依資料', () => {
+    map.radarMax = seedRadarMax(table, map.yIdxs);
+    maxInput.value = map.radarMax;
     renderChart();
   });
-  radarMaxField = field('雷達圖上限', maxInput);
+  fitBtn.classList.add('mini');
+  const maxWrap = document.createElement('div'); maxWrap.className = 'radar-max';
+  maxWrap.append(maxInput, fitBtn);
+  radarMaxField = field('雷達圖上限', maxWrap);
   radarMaxField.hidden = chartId !== 'radar';
   mapBox.appendChild(radarMaxField);
 }
@@ -202,6 +227,22 @@ function buildChartButtons() {
     chartBar.appendChild(b);
   });
   setActive(chartBar, chartId);
+}
+
+// 「資料」區塊的文字 / 表格切換(把原本兩個同質區塊併成一個,右上角切換)
+function buildIoSwitch() {
+  [['text', '文字'], ['table', '表格']].forEach(([mode, label]) => {
+    const b = mkButton(label, () => setIoMode(mode));
+    b.dataset.id = mode;
+    ioSwitch.appendChild(b);
+  });
+  setIoMode('text');
+}
+
+function setIoMode(mode) {
+  setActive(ioSwitch, mode);
+  ioText.hidden = mode !== 'text';
+  ioTable.hidden = mode !== 'table';
 }
 
 function buildSizeButtons() {

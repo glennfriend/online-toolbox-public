@@ -25,16 +25,24 @@
   </header>
 
   <section class="pane">
-    <textarea id="input" class="input" spellcheck="false"
-      placeholder="貼上 JSON / CSV / 從 Excel·Google Sheet 複製(TSV)/ Markdown 表格…"></textarea>
-    <div class="row">
-      <span class="row-label">格式</span>
-      <div id="formats" class="chip-row"></div>
+    <div class="io-head">
+      <span class="row-label">資料</span>
+      <div id="io-switch" class="chip-row"></div>
+    </div>
+    <div id="io-text" class="io-view">
+      <textarea id="input" class="input" spellcheck="false"
+        placeholder="貼上 JSON / CSV / 從 Excel·Google Sheet 複製(TSV)/ Markdown 表格…"></textarea>
+      <div class="row">
+        <span class="row-label">格式</span>
+        <div id="formats" class="chip-row"></div>
+      </div>
+    </div>
+    <div id="io-table" class="io-view" hidden>
+      <div id="preview" class="preview"></div>
     </div>
   </section>
 
   <section id="config" class="pane" hidden>
-    <div id="preview" class="preview"></div>
     <div id="mapping" class="mapping"></div>
     <div class="row">
       <span class="row-label">圖種</span>

@@ -18,11 +18,23 @@ defineTag({
   match: matchAny([/https?:\/\/\S+/i]),
 });
 
-// CSV:有逗號、多行,且開頭不是 { 或 [(避免把 JSON 誤判成 CSV)
+// CSV:有逗號、多行,且開頭不是 < { [(避免把 HTML / JSON 誤判成 CSV)
 defineTag({
   name: 'csv',
-  desc: '逗號分隔、多行的表格(開頭不是 { 或 [)',
-  match: matchAll([/,/, /\n\s*\S/, /^\s*[^{[\s]/]),
+  desc: '逗號分隔、多行的表格(開頭不是 < { [)',
+  match: matchAll([/,/, /\n\s*\S/, /^\s*[^<{[\s]/]),
+});
+
+// HTML 原始碼:有 DOCTYPE/<html> 或常見成對/自閉合標籤
+defineTag({
+  name: 'html',
+  desc: 'HTML 原始碼',
+  match: matchAny([
+    /<!doctype html/i,
+    /<html[\s>]/i,
+    /<(div|p|a|span|table|ul|li|h[1-6]|body|head|section|article)\b[^>]*>[\s\S]*<\/\1>/i,
+    /<(br|img|meta|link|hr|input)\b[^>]*\/?>/i,
+  ]),
 });
 
 // TSV:有 Tab 且 多行
@@ -70,4 +82,12 @@ defineTag({
     const lines = s.trim().split(/\r?\n/).filter((l) => l.trim());
     return lines.length > 0 && lines.every((l) => /^\s*-?\d/.test(l));
   },
+});
+
+// 多行(兩行以上)。hidden:不顯示成 chip,只用來閘控「排序」這類需要多行才有意義的 mod。
+defineTag({
+  name: 'multi-line',
+  desc: '有兩行以上',
+  hidden: true,
+  match: (s) => s.trim().split(/\r?\n/).filter((l) => l.trim()).length >= 2,
 });

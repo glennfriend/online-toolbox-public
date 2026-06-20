@@ -17,9 +17,13 @@ export function matchAll(regexes) { return (s) => regexes.every((re) => re.test(
 export function detectTags(text) {
   const matched = [];
   for (const tag of TAGS) {
-    try { if (tag.match(text)) matched.push(tag.name); } catch { /* 某 tag 判斷出錯就跳過 */ }
+    try { if (tag.match(text)) matched.push(tag); } catch { /* 某 tag 判斷出錯就跳過 */ }
   }
-  return matched.length ? matched : ['text'];
+  // 只要沒命中任何「可見」格式(隱藏的結構 tag 如 multi-line 不算),就是純文字
+  const hasVisibleFormat = matched.some((t) => !t.hidden);
+  const names = matched.map((t) => t.name);
+  if (!hasVisibleFormat) names.push('text');
+  return names;
 }
 
 // 某個 tag 名稱的「真正意思」(給滑鼠提示用)。'text' 是合成出來的,單獨說明。
@@ -27,4 +31,10 @@ export function tagDesc(name) {
   if (name === 'text') return '純文字:沒有命中任何結構格式';
   const tag = TAGS.find((t) => t.name === name);
   return tag && tag.desc ? tag.desc : name;
+}
+
+// 是否為隱藏 tag(只用於閘控 mod,不顯示成 chip,例如 multi-line)
+export function tagHidden(name) {
+  const tag = TAGS.find((t) => t.name === name);
+  return !!(tag && tag.hidden);
 }

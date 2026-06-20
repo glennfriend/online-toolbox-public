@@ -5,7 +5,7 @@
 
 import { computeStages } from './pipeline.js';
 import { modsFor } from './mods/index.js';
-import { tagDesc } from './tags/index.js';
+import { tagDesc, tagHidden } from './tags/index.js';
 import { countLines } from './lib/sample.js';
 import { el } from './lib/dom.js';
 import './tags/defs.js';     // 註冊 tags
@@ -91,7 +91,9 @@ function makeStep(stage, i) {
 function renderTags(container, tags) {
   container.innerHTML = '';
   const lab = el('span', 'tags-label'); lab.textContent = 'tags:'; container.append(lab);
-  tags.forEach((t) => { const chip = el('span', 'tag'); chip.textContent = t; chip.title = tagDesc(t); container.append(chip); });
+  tags.filter((t) => !tagHidden(t)).forEach((t) => {
+    const chip = el('span', 'tag'); chip.textContent = t; chip.title = tagDesc(t); container.append(chip);
+  });
 }
 
 function renderBanner(container, sampling) {

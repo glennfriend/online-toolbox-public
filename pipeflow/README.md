@@ -10,14 +10,14 @@
 
 把零散的「整理 / 轉換 / 萃取」工作串成一條看得見的管線。每一步都是純函式轉換,前一步的輸出餵給下一步(像 Unix pipe 或 notebook 的 cell 鏈)。
 
-- 貼上任何資料 → 自動判斷 **tags**(`csv` `tsv` `json` `markdown` `url` `has-urls` `number-list`…);沒命中任何結構格式時才是 `text`(純文字)。「永遠都能用」的 mod 用 `appliesTo:'*'`,不靠 `text`。
+- 貼上任何資料 → 自動判斷 **tags**(`csv` `tsv` `json` `markdown` `html` `url` `has-urls` `number-list`…);沒命中任何「可見」格式時才是 `text`(純文字)。另有隱藏的結構 tag(如 `multi-line`)只用來閘控 mod、不顯示成 chip。每個 tag 有 `desc`,滑鼠移上去看真正意思。
 - 依 tags 列出**最可能用得到的轉換**,點一下就進到下一格,該格再產生自己的 tags 與可用轉換。
 - **reactive**:改第一格輸入,下游每一步都跟著重算(純函式 → 結果穩定)。
 - 目前是**線性鏈**(一條 cell→cell→cell);分支之後再加。
 
 ### v1 的轉換(pipeline mod)
 
-`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`。
+`轉成 JSON` / `轉成 Markdown 表格`、`a-z 排序` / `數字排序`(需多行;a-z 不套用 json/markdown/html)、`JSON 美化` / `JSON 縮成一行`、`統計資訊`、`萃取 urls`(純文字裡夾帶的網址)、`萃取有內容的連結`(HTML 專用:解析 `<a>` 錨文字、濾掉 css/js/icon 等資源)。每個 pipe 都是獨立的純函式,依目前 step 的 tags 出現,彼此不影響。
 
 ### 效能與「絕不無聲」原則
 

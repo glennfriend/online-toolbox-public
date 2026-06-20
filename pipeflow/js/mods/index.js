@@ -1,7 +1,7 @@
 // mods/index.js — pipeline 模組登記表。
 //
 // 每個 mod:{ id, label, appliesTo:[tag…], run(input, tags) -> output }
-//   appliesTo:此 mod 適用於哪些 tag(命中任一就出現在按鈕列);或 '*' 代表對任何內容都適用
+//   appliesTo:可以是 [tag…](命中任一就出現)、'*'(永遠出現)、或 function(tags)->bool(自訂條件)
 //   run:純函式,輸入字串 → 輸出字串(同輸入同 mod 永遠同輸出 → 可重算、可快取)
 //   登記順序 = 按鈕列的優先順序(由前到後 / 由上到下)
 //
@@ -10,9 +10,14 @@
 export const MODS = [];
 export function defineMod(mod) { MODS.push(mod); }
 
-// 目前 step 的 tags → 可用的 mod(依登記順序)。appliesTo:'*' 代表對任何內容都適用。
+// 目前 step 的 tags → 可用的 mod(依登記順序)。
 export function modsFor(tags) {
-  return MODS.filter((m) => m.appliesTo === '*' || m.appliesTo.some((t) => tags.includes(t)));
+  return MODS.filter((m) => {
+    const a = m.appliesTo;
+    if (a === '*') return true;
+    if (typeof a === 'function') return a(tags);
+    return a.some((t) => tags.includes(t));
+  });
 }
 
 export function getMod(id) {

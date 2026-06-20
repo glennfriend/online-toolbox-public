@@ -12,11 +12,14 @@ function splitKeepHeader(input, tags) {
     : { head: [], body: lines };
 }
 
+// 逐行排序的整塊結構不能拆(json/markdown/html);這些只要出現就不提供逐行排序
+const STRUCTURED = ['json', 'markdown', 'html'];
+
 defineMod({
   id: 'sort-az',
   label: 'a-z 排序',
-  // 逐行排序:適用「以行為單位」的內容;排除 json / markdown(逐行排序會破壞其結構)
-  appliesTo: ['text', 'csv', 'tsv', 'number-list', 'num-lines', 'url', 'has-urls'],
+  // 需要多行,且不是整塊結構(逐行排序會破壞 json/markdown/html)
+  appliesTo: (tags) => tags.includes('multi-line') && !STRUCTURED.some((t) => tags.includes(t)),
   run(input, tags) {
     const { head, body } = splitKeepHeader(input, tags);
     body.sort((a, b) => a.localeCompare(b, 'zh-Hant'));
@@ -27,7 +30,8 @@ defineMod({
 defineMod({
   id: 'sort-number',
   label: '數字排序',
-  appliesTo: ['num-lines'],   // 只在「每行開頭都是數字」時出現
+  // 每行開頭都是數字,且要多行(單行不需要排序)
+  appliesTo: (tags) => tags.includes('multi-line') && tags.includes('num-lines'),
   run(input, tags) {
     const { head, body } = splitKeepHeader(input, tags);
     const num = (l) => { const m = l.match(/-?[\d,]+(\.\d+)?/); return m ? toNumber(m[0]) : NaN; };

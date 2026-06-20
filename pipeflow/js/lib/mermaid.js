@@ -30,13 +30,23 @@ function load() {
 
 let seq = 0;
 
-// 把 mermaid 原始碼算成 SVG 字串(失敗會丟出可讀的錯誤)
+// 把 mermaid 原始碼算成 SVG 字串(失敗會丟出可讀的錯誤)。
+// 重點:render 到一個我們自建的離畫面容器,finally 一定移除它——否則 mermaid 解析失敗時
+// 會把它自己的「錯誤圖(炸彈)」留在 <body>,賴著不走。
 export async function renderMermaid(source) {
   const mermaid = await load();
+  const id = 'pf-mermaid-' + (++seq);
+  const host = document.createElement('div');
+  host.style.cssText = 'position:absolute; left:-99999px; top:0;';
+  document.body.appendChild(host);
   try {
-    const { svg } = await mermaid.render('pf-mermaid-' + (++seq), source);
+    const { svg } = await mermaid.render(id, source, host);
     return svg;
   } catch (e) {
     throw new Error('Mermaid 無法繪製這段語法:' + (e && e.message ? e.message : e));
+  } finally {
+    host.remove();
+    document.getElementById(id)?.remove();       // 保險:清掉 mermaid 可能另外留下的暫時節點
+    document.getElementById('d' + id)?.remove();
   }
 }

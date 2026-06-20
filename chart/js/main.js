@@ -43,7 +43,8 @@ let format = 'auto';     // 目前選的輸入格式
 let chartId = 'bar';     // 目前選的圖種
 let lastOption = null;   // 最近一次的 option(供匯出 SVG 重繪)
 let colSig = '';         // 欄位簽章:變了才重設欄位對應、重建控制項
-const map = { xIdx: 0, yIdxs: [], agg: 'sum' }; // 欄位對應
+const map = { xIdx: 0, yIdxs: [], agg: 'sum', radarMax: null }; // 欄位對應(radarMax:雷達圖共用上限,null=自動)
+let radarMaxField = null; // 「雷達圖上限」控制項(只在選雷達圖時顯示)
 
 init();
 
@@ -98,6 +99,7 @@ function parseAndRender() {
 function renderChart() {
   if (!table || !chart) return;
   if (!map.yIdxs.length) { chart.clear(); actions.hidden = true; showError('請至少勾選一個數值欄(Y)'); return; }
+  if (radarMaxField) radarMaxField.hidden = chartId !== 'radar'; // 上限欄位只在雷達圖時出現
   const option = getChart(chartId).build(table, map);
   lastOption = option;
   chart.setOption(option, true);
@@ -116,6 +118,7 @@ function rebuildMappingIfColumnsChanged(t) {
   map.xIdx = firstStringColumn(t);
   map.yIdxs = nums.length ? [nums.find((i) => i !== map.xIdx) ?? nums[0]] : [];
   map.agg = 'sum';
+  map.radarMax = null; // 換資料 → 上限回到自動
   buildMappingControls(t);
 }
 
@@ -149,6 +152,19 @@ function buildMappingControls(t) {
   aggSel.value = map.agg;
   aggSel.addEventListener('change', () => { map.agg = aggSel.value; renderChart(); });
   mapBox.appendChild(field('重複類別', aggSel));
+
+  // 雷達圖上限(共用刻度頂點;空白=自動)。只在選雷達圖時顯示,見 renderChart()。
+  const maxInput = document.createElement('input');
+  maxInput.type = 'number'; maxInput.min = '0'; maxInput.placeholder = '自動';
+  maxInput.value = map.radarMax ?? '';
+  maxInput.addEventListener('input', () => {
+    const v = parseFloat(maxInput.value);
+    map.radarMax = Number.isFinite(v) && v > 0 ? v : null;
+    renderChart();
+  });
+  radarMaxField = field('雷達圖上限', maxInput);
+  radarMaxField.hidden = chartId !== 'radar';
+  mapBox.appendChild(radarMaxField);
 }
 
 function field(label, control) {

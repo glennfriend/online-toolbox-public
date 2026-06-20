@@ -26,7 +26,7 @@ defineMod({
 defineMod({
   id: 'sort-number',
   label: '數字排序',
-  appliesTo: ['text', 'number-list'],
+  appliesTo: ['num-lines'],   // 只在「每行開頭都是數字」時出現
   run(input, tags) {
     const { head, body } = splitKeepHeader(input, tags);
     const num = (l) => { const m = l.match(/-?[\d,]+(\.\d+)?/); return m ? toNumber(m[0]) : NaN; };

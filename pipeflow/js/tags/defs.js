@@ -53,3 +53,12 @@ defineTag({
     return numeric >= lines.length * 0.7;
   },
 });
+
+// 每一行的開頭都是數字(供「數字排序」用:只要有一行開頭不是數字,就不提供)
+defineTag({
+  name: 'num-lines',
+  match: (s) => {
+    const lines = s.trim().split(/\r?\n/).filter((l) => l.trim());
+    return lines.length > 0 && lines.every((l) => /^\s*-?\d/.test(l));
+  },
+});

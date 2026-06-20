@@ -1,4 +1,5 @@
-// stats.js — 統計資訊:對每個數值欄算 筆數 / 總和 / 平均 / 最小 / 最大,輸出成 Markdown 表格。
+// stats.js — 統計資訊:對每個數值欄算 筆數 / 總和 / 平均 / 最小 / 最大。
+// 輸出成「格式化 JSON」(沒有 preview 時比 Markdown 表格好讀,也能再接 JSON 美化/縮成一行)。
 
 import { defineMod } from './index.js';
 import { parseTable } from '../lib/table.js';
@@ -18,16 +19,21 @@ defineMod({
       rows = input.trim().split(/\r?\n/).filter((l) => l.trim()).map((l) => [l.trim()]);
     }
 
-    const out = [['欄位', '筆數', '總和', '平均', '最小', '最大'], ['---', '---', '---', '---', '---', '---']];
+    const result = {};
     header.forEach((name, i) => {
       const nums = rows.map((r) => toNumber(r[i])).filter(Number.isFinite);
       if (!nums.length) return; // 非數值欄跳過
       const sum = nums.reduce((a, b) => a + b, 0);
-      out.push([name, String(nums.length), String(round(sum)), String(round(sum / nums.length)),
-        String(round(Math.min(...nums))), String(round(Math.max(...nums)))]);
+      result[name] = {
+        count: nums.length,
+        sum: round(sum, 2),
+        mean: round(sum / nums.length, 2),
+        min: round(Math.min(...nums), 2),
+        max: round(Math.max(...nums), 2),
+      };
     });
 
-    if (out.length === 2) return '(沒有可統計的數值欄)';
-    return out.map((r) => '| ' + r.join(' | ') + ' |').join('\n');
+    if (!Object.keys(result).length) return '(沒有可統計的數值欄)';
+    return JSON.stringify(result, null, 2);
   },
 });

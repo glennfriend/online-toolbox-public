@@ -4,6 +4,7 @@
 // 日後加新角度(同義 / 易混淆 / 押韻…)= 在 lookup 多查一張表 + 多一個 render 區塊,主流程不動。
 
 import { db } from './db.js';
+import { pronounce, prefetch } from './pronounce.js';
 
 const MIN_PREFIX = 2;   // 打幾個字開始自動完成(2 比 4 好:短字也查得到、索引查詢本來就即時)
 const MAX_SUGGEST = 10;
@@ -106,10 +107,15 @@ async function search(word) {
 function renderEntry(entry) {
   const head = document.createElement('div');
   head.className = 'entry-head';
+  const cam = 'https://dictionary.cambridge.org/dictionary/english/' + encodeURIComponent(entry.word);
   const parts = [`<span class="headword">${esc(entry.word)}</span>`];
+  parts.push(`<button class="speak" type="button" title="發音" aria-label="發音">🔊</button>`);
   if (entry.ipa) parts.push(`<span class="ipa">/${esc(entry.ipa)}/</span>`);
+  parts.push(`<a class="more-pron" href="${cam}" target="_blank" rel="noopener">劍橋發音 ↗</a>`);
   parts.push(`<span class="freq">${freqLabel(entry.freq)}</span>`);
   head.innerHTML = parts.join('');
+  head.querySelector('.speak').addEventListener('click', () => pronounce(entry.word));
+  prefetch(entry.word);   // 先抓真人錄音網址,讓點擊能即時播
   entryBox.appendChild(head);
 
   // 依詞性分組(連續相同 pos 併為一組)

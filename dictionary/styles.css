@@ -41,6 +41,14 @@ kbd {
 .entry-head { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: .6rem; }
 .headword { font-size: 1.7rem; font-weight: 700; }
 .ipa { font-size: 1.05rem; color: var(--muted); font-family: "Noto Sans", "Segoe UI", sans-serif; }
+.speak {
+  font-size: 1.05rem; line-height: 1; cursor: pointer; padding: .15em .35em;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+}
+.speak:hover { background: var(--bg-code); }
+.speak:active { transform: scale(.92); }
+.more-pron { font-size: .8rem; color: var(--accent); text-decoration: none; }
+.more-pron:hover { text-decoration: underline; }
 .freq { font-size: .8rem; color: var(--muted); margin-left: auto; }
 .pos-group {
   background: #fff; border: 1px solid var(--border); border-radius: 10px;

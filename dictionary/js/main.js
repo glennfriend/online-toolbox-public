@@ -187,8 +187,8 @@ function makeSearch(boxEl) {
 
   input.addEventListener('keydown', (e) => {
     const open = suggestions.length > 0 && !sugBox.hidden;
-    if (e.key === 'ArrowDown' && open) { e.preventDefault(); active = (active + 1) % suggestions.length; renderSuggest(); }
-    else if (e.key === 'ArrowUp' && open) { e.preventDefault(); active = (active <= 0 ? suggestions.length : active) - 1; renderSuggest(); }
+    if (e.key === 'ArrowDown' && open) { e.preventDefault(); active = (active + 1) % suggestions.length; renderSuggest(); preview(); }
+    else if (e.key === 'ArrowUp' && open) { e.preventDefault(); active = (active <= 0 ? suggestions.length : active) - 1; renderSuggest(); preview(); }
     else if (e.key === 'Tab') { if (open) { e.preventDefault(); input.value = suggestions[active >= 0 ? active : 0].word; closeSuggest(); if (mode === 'live') search(input.value); } }
     else if (e.key === 'Enter') { e.preventDefault(); const w = (open && active >= 0) ? suggestions[active].word : input.value.trim(); if (w) { input.value = w; closeSuggest(); search(w); } }
     else if (e.key === 'Escape') closeSuggest();
@@ -210,6 +210,8 @@ function makeSearch(boxEl) {
     sugBox.hidden = false;
   }
   function closeSuggest() { sugBox.hidden = true; sugBox.innerHTML = ''; suggestions = []; active = -1; }
+  // 方向鍵移到反白項時,即時預覽該字(本機查詢、不打外部;quiet:查不到也不報錯)
+  function preview() { if (active >= 0 && suggestions[active]) search(suggestions[active].word, { quiet: true }); }
 
   return {
     enable: () => { input.disabled = false; },

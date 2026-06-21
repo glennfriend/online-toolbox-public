@@ -50,7 +50,7 @@ kbd {
 #word:disabled { background: var(--bg-code); color: var(--muted); }
 .suggest {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
-  background: rgba(255, 255, 255, .05);          /* 很透(0.05);字典卡已移到右欄,所以不會疊到字 */
+  background: rgba(255, 255, 255, .05);          /* 不透明度(越小越透);白疊白時看起來仍偏白屬正常 */
   border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,.1);
 }

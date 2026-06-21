@@ -56,7 +56,7 @@ function lookup({ word }) {
   const w = (word || '').trim();
   if (!w) return { entry: null };
   const head = DB.selectObject(
-    'SELECT word, ipa, freq FROM words WHERE wordlc = ? ORDER BY freq DESC LIMIT 1',
+    'SELECT word, ipa, freq, cn, tag FROM words WHERE wordlc = ? ORDER BY freq DESC LIMIT 1',
     [w.toLowerCase()]
   );
   if (!head) return { entry: null };

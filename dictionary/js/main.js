@@ -118,6 +118,21 @@ function renderEntry(entry) {
   prefetch(entry.word);   // 先抓真人錄音網址,讓點擊能即時播
   entryBox.appendChild(head);
 
+  // 繁中釋義(主角:看不懂英文時先看這個);可能含多行(不同詞性)
+  if (entry.cn) {
+    const cn = document.createElement('div');
+    cn.className = 'cn';
+    cn.innerHTML = String(entry.cn).split('\n').map((l) => esc(l.trim())).filter(Boolean).map((l) => `<div>${l}</div>`).join('');
+    entryBox.appendChild(cn);
+  }
+
+  // 難度標籤(國中 / 高中 / 四級 / 六級 / 考研 / TOEFL / IELTS / GRE)
+  if (entry.tag) {
+    const TAGS = { zk: '國中', gk: '高中', cet4: '四級', cet6: '六級', ky: '考研', toefl: 'TOEFL', ielts: 'IELTS', gre: 'GRE' };
+    const badges = entry.tag.split(/\s+/).filter(Boolean).map((t) => `<span class="tag-badge">${esc(TAGS[t] || t)}</span>`).join('');
+    if (badges) { const box = document.createElement('div'); box.className = 'tags'; box.innerHTML = badges; entryBox.appendChild(box); }
+  }
+
   // 依詞性分組(連續相同 pos 併為一組)
   let curPos = null, list = null;
   entry.meanings.forEach((m) => {

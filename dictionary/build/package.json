@@ -1,0 +1,8 @@
+{
+  "name": "dictionary-build",
+  "private": true,
+  "description": "離線建置腳本(不部署);把 raw/ 建成 data/dictionary-<版本>.db.gz",
+  "dependencies": {
+    "opencc-js": "^1.0.5"
+  }
+}

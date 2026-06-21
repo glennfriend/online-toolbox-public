@@ -50,6 +50,16 @@ kbd {
 .more-pron { font-size: .8rem; color: var(--accent); text-decoration: none; }
 .more-pron:hover { text-decoration: underline; }
 .freq { font-size: .8rem; color: var(--muted); margin-left: auto; }
+/* 繁中釋義(主角) */
+.cn {
+  background: #eef6ff; border: 1px solid #cfe3ff; border-radius: 10px;
+  padding: .6rem .9rem; margin-bottom: .6rem; font-size: 1.02rem; color: #1f2d3d;
+}
+.cn > div { margin: .1rem 0; }
+/* 難度標籤 */
+.tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .8rem; }
+.tag-badge { font-size: .72rem; color: var(--accent); background: #eef2ff; border: 1px solid #d4ddff; border-radius: 999px; padding: .1em .6em; }
+
 .pos-group {
   background: #fff; border: 1px solid var(--border); border-radius: 10px;
   padding: .7rem 1rem; margin-bottom: .7rem;

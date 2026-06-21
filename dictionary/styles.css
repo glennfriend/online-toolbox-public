@@ -5,6 +5,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+/* 永遠保留捲軸空間:內容變高冒出捲軸時,版面寬度不會變、不會左右跳 */
+html { scrollbar-gutter: stable; }
 body {
   font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
   line-height: 1.7; max-width: 720px; margin: 0 auto; padding: 2rem 1.2rem;
@@ -48,8 +50,7 @@ kbd {
 #word:disabled { background: var(--bg-code); color: var(--muted); }
 .suggest {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
-  background: rgba(255, 255, 255, .62);          /* 半透明:打字時看得到背後的字典卡 */
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, .82);          /* 半透明:看得到背後的字典卡,但不模糊、字仍清楚 */
   border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,.1);
 }

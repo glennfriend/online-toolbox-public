@@ -1,30 +1,27 @@
-// main.js — 殼層:載入字典 → 輸入框自動完成(Tab 補完 / Enter 查詢)→ 渲染字典卡。
+// main.js — 殼層:載入字典 → 兩個輸入框(commit 按 Enter / live 即時)→ 共用字典卡。
 //
-// 顯示哪些「角度」由各 render 函式決定,目前 v1:發音 / 常用度 / 各詞性的定義與例句。
-// 日後加新角度(同義 / 易混淆 / 押韻…)= 在 lookup 多查一張表 + 多一個 render 區塊,主流程不動。
+// 每個輸入框是一個獨立的 SearchBox 控制器(mode='commit'|'live'),共用同一個渲染與發音。
+// 要拿掉 A/B 對比時:刪掉其中一欄的 HTML + 對應的 makeSearch(...) 呼叫即可,互不影響。
 
 import { db } from './db.js';
-import { pronounce, prefetch } from './pronounce.js';
+import { pronounce } from './pronounce.js';
 
-const MIN_PREFIX = 2;   // 打幾個字開始自動完成(2 比 4 好:短字也查得到、索引查詢本來就即時)
+const MIN_PREFIX = 2;   // 打幾個字開始自動完成
 const MAX_SUGGEST = 10;
 
 const $ = (s) => document.querySelector(s);
-const input = $('#word');
-const sugBox = $('#suggest');
 const entryBox = $('#entry');
 const statusEl = $('#status');
 const versionEl = $('#version');
 const rebuildBtn = $('#rebuild');
 
 let ready = false;
-let suggestions = [];
-let active = -1;        // 目前選取的建議索引(-1 = 無)
+let lastSearch = 0;   // 防舊鎖:多個查詢競態時,只讓最後一次寫畫面(兩個輸入框共用一個字典卡)
 
 boot();
 
 async function boot() {
-  setStatus('載入字典中…(第一次約 11MB,只載這一次,之後免下載)');
+  setStatus('載入字典中…(第一次約 13MB,只載這一次,之後免下載)');
   try {
     const manifest = await (await fetch('data/manifest.json?t=' + Date.now())).json();
     const dbUrl = new URL('data/' + manifest.db, location.href).href;
@@ -33,84 +30,28 @@ async function boot() {
     setStatus('');
     versionEl.textContent = `資料版本 ${res.version}・${(res.counts.words || 0).toLocaleString()} 字` +
       (res.downloaded ? '(剛下載)' : '(本機快取)');
-    input.disabled = false;
-    input.focus();
+    boxes.forEach((b) => b.enable());
+    boxes[0].focus();
   } catch (e) {
     setStatus('字典載入失敗:' + e.message);
   }
 }
 
-// ── 輸入 / 自動完成 ──
-let t;
-input.addEventListener('input', () => {
-  clearTimeout(t);
-  t = setTimeout(runSuggest, 100);
-});
-
-async function runSuggest() {
-  if (!ready) return;
-  const prefix = input.value.trim();
-  if (prefix.length < MIN_PREFIX) return closeSuggest();
-  try {
-    const { words } = await db.suggest(prefix, MAX_SUGGEST);
-    suggestions = words;
-    active = -1;
-    renderSuggest();
-  } catch (_) { closeSuggest(); }
-}
-
-input.addEventListener('keydown', (e) => {
-  const open = suggestions.length > 0 && !sugBox.hidden;
-  if (e.key === 'ArrowDown' && open) { e.preventDefault(); active = (active + 1) % suggestions.length; renderSuggest(); }
-  else if (e.key === 'ArrowUp' && open) { e.preventDefault(); active = (active <= 0 ? suggestions.length : active) - 1; renderSuggest(); }
-  else if (e.key === 'Tab') {
-    // 補完:填入選取(或第一個)建議,不查詢
-    if (open) { e.preventDefault(); input.value = suggestions[active >= 0 ? active : 0]; closeSuggest(); }
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    const word = (open && active >= 0) ? suggestions[active] : input.value.trim();
-    if (word) { input.value = word; closeSuggest(); search(word); }
-  } else if (e.key === 'Escape') {
-    closeSuggest();
-  }
-});
-
-document.addEventListener('click', (e) => { if (!e.target.closest('.search-box')) closeSuggest(); });
-
-// 「Enter」按鈕:等同按 Enter 查詢
-document.querySelector('#go').addEventListener('click', () => {
-  const word = input.value.trim();
-  if (word) { closeSuggest(); search(word); }
-});
-
-function renderSuggest() {
-  if (!suggestions.length) return closeSuggest();
-  sugBox.innerHTML = '';
-  suggestions.forEach((w, i) => {
-    const item = document.createElement('div');
-    item.className = 'suggest-item' + (i === active ? ' active' : '');
-    item.textContent = w;
-    item.addEventListener('mousedown', (ev) => { ev.preventDefault(); input.value = w; closeSuggest(); search(w); });
-    sugBox.appendChild(item);
-  });
-  sugBox.hidden = false;
-}
-
-function closeSuggest() { sugBox.hidden = true; sugBox.innerHTML = ''; suggestions = []; active = -1; }
-
-// ── 查詢 + 渲染 ──
-async function search(word) {
-  entryBox.innerHTML = '';
-  try {
-    const { entry } = await db.lookup(word);
-    if (!entry) { entryBox.innerHTML = `<div class="empty">查無此字「${esc(word)}」</div>`; return; }
+// ── 共用:查詢 + 渲染字典卡 ──
+// quiet:true → 查不到就「什麼都不做」(即時模式用:沒命中就保留前一個結果)
+function search(word, { quiet = false } = {}) {
+  const w = (word || '').trim();
+  if (!w) return;
+  const my = ++lastSearch;
+  db.lookup(w).then(({ entry }) => {
+    if (my !== lastSearch) return;            // 已有更新的查詢 → 丟棄這次舊結果
+    if (!entry) { if (!quiet) entryBox.innerHTML = `<div class="empty">查無此字「${esc(w)}」</div>`; return; }
     renderEntry(entry);
-  } catch (e) {
-    entryBox.innerHTML = `<div class="empty">查詢失敗:${esc(e.message)}</div>`;
-  }
+  }).catch((e) => { if (my === lastSearch && !quiet) entryBox.innerHTML = `<div class="empty">查詢失敗:${esc(e.message)}</div>`; });
 }
 
 function renderEntry(entry) {
+  entryBox.innerHTML = '';
   const head = document.createElement('div');
   head.className = 'entry-head';
   const cam = 'https://dictionary.cambridge.org/dictionary/english/' + encodeURIComponent(entry.word);
@@ -120,11 +61,9 @@ function renderEntry(entry) {
   parts.push(`<a class="more-pron" href="${cam}" target="_blank" rel="noopener">劍橋發音 ↗</a>`);
   parts.push(`<span class="freq">${freqLabel(entry.freq)}</span>`);
   head.innerHTML = parts.join('');
-  head.querySelector('.speak').addEventListener('click', () => pronounce(entry.word));
-  prefetch(entry.word);   // 先抓真人錄音網址,讓點擊能即時播
+  head.querySelector('.speak').addEventListener('click', () => pronounce(entry.word));  // 點了才打發音 API
   entryBox.appendChild(head);
 
-  // 繁中釋義(主角:看不懂英文時先看這個);可能含多行(不同詞性)
   if (entry.cn) {
     const cn = document.createElement('div');
     cn.className = 'cn';
@@ -132,33 +71,27 @@ function renderEntry(entry) {
     entryBox.appendChild(cn);
   }
 
-  // 難度標籤(國中 / 高中 / 四級 / 六級 / 考研 / TOEFL / IELTS / GRE)
   if (entry.tag) {
     const TAGS = { zk: '國中', gk: '高中', cet4: '四級', cet6: '六級', ky: '考研', toefl: 'TOEFL', ielts: 'IELTS', gre: 'GRE' };
     const badges = entry.tag.split(/\s+/).filter(Boolean).map((t) => `<span class="tag-badge">${esc(TAGS[t] || t)}</span>`).join('');
     if (badges) { const box = document.createElement('div'); box.className = 'tags'; box.innerHTML = badges; entryBox.appendChild(box); }
   }
 
-  // 依詞性分組(連續相同 pos 併為一組)
   let curPos = null, list = null;
   entry.meanings.forEach((m) => {
     if (m.pos !== curPos) {
       curPos = m.pos;
-      const group = document.createElement('div');
-      group.className = 'pos-group';
+      const group = document.createElement('div'); group.className = 'pos-group';
       group.innerHTML = `<div class="pos">${esc(m.pos || '—')}</div>`;
       list = document.createElement('ol'); list.className = 'defs';
-      group.appendChild(list);
-      entryBox.appendChild(group);
+      group.appendChild(list); entryBox.appendChild(group);
     }
     const li = document.createElement('li');
-    li.innerHTML = `<span class="def">${esc(m.definition)}</span>` +
-      (m.example ? `<span class="eg">“${esc(m.example)}”</span>` : '');
+    li.innerHTML = `<span class="def">${esc(m.definition)}</span>` + (m.example ? `<span class="eg">“${esc(m.example)}”</span>` : '');
     list.appendChild(li);
   });
 }
 
-// 詞頻 → 常用度標籤(粗略分級;0 表示不在詞頻表)
 function freqLabel(f) {
   if (!f) return '常用度 —';
   if (f > 1e8) return '常用度 ★★★★★';
@@ -167,6 +100,61 @@ function freqLabel(f) {
   if (f > 1e5) return '常用度 ★★';
   return '常用度 ★';
 }
+
+// ── 一個輸入框的控制器(自動完成 + 鍵盤 + 依模式查詢)──
+function makeSearch(boxEl) {
+  const mode = boxEl.dataset.mode;          // 'commit' | 'live'
+  const input = boxEl.querySelector('.word');
+  const sugBox = boxEl.querySelector('.suggest');
+  const goBtn = boxEl.querySelector('.go-btn');
+  let suggestions = [], active = -1, t;
+
+  input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(onType, 120); });
+
+  async function onType() {
+    if (!ready) return;
+    const v = input.value.trim();
+    if (v.length >= MIN_PREFIX) {
+      try { const { words } = await db.suggest(v, MAX_SUGGEST); suggestions = words; active = -1; renderSuggest(); }
+      catch (_) { closeSuggest(); }
+    } else closeSuggest();
+    if (mode === 'live' && v) search(v, { quiet: true });   // 即時:命中才換,沒命中保留前一個
+  }
+
+  input.addEventListener('keydown', (e) => {
+    const open = suggestions.length > 0 && !sugBox.hidden;
+    if (e.key === 'ArrowDown' && open) { e.preventDefault(); active = (active + 1) % suggestions.length; renderSuggest(); }
+    else if (e.key === 'ArrowUp' && open) { e.preventDefault(); active = (active <= 0 ? suggestions.length : active) - 1; renderSuggest(); }
+    else if (e.key === 'Tab') { if (open) { e.preventDefault(); input.value = suggestions[active >= 0 ? active : 0]; closeSuggest(); if (mode === 'live') search(input.value); } }
+    else if (e.key === 'Enter') { e.preventDefault(); const w = (open && active >= 0) ? suggestions[active] : input.value.trim(); if (w) { input.value = w; closeSuggest(); search(w); } }
+    else if (e.key === 'Escape') closeSuggest();
+  });
+
+  if (goBtn) goBtn.addEventListener('click', () => { const w = input.value.trim(); if (w) { closeSuggest(); search(w); } });
+
+  function renderSuggest() {
+    if (!suggestions.length) return closeSuggest();
+    sugBox.innerHTML = '';
+    suggestions.forEach((w, i) => {
+      const item = document.createElement('div');
+      item.className = 'suggest-item' + (i === active ? ' active' : '');
+      item.textContent = w;
+      item.addEventListener('mousedown', (ev) => { ev.preventDefault(); input.value = w; closeSuggest(); search(w); });
+      sugBox.appendChild(item);
+    });
+    sugBox.hidden = false;
+  }
+  function closeSuggest() { sugBox.hidden = true; sugBox.innerHTML = ''; suggestions = []; active = -1; }
+
+  return { enable: () => { input.disabled = false; }, focus: () => input.focus() };
+}
+
+const boxes = [...document.querySelectorAll('.search-box')].map(makeSearch);
+
+// 點到搜尋框以外 → 關掉所有下拉
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-box')) document.querySelectorAll('.suggest').forEach((s) => { s.hidden = true; s.innerHTML = ''; });
+});
 
 rebuildBtn.addEventListener('click', async () => {
   if (!confirm('清除本機快取的字典資料?下次會重新下載最新版。')) return;

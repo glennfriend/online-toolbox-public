@@ -18,6 +18,11 @@ kbd {
   border-radius: 5px; padding: .05em .4em;
 }
 
+/* 兩欄輸入(左:原本/按 Enter,右:即時)——對比用,日後刪一欄即可 */
+.boxes { display: flex; gap: 1rem; flex-wrap: wrap; }
+.search-col { flex: 1; min-width: 260px; }
+.col-label { font-size: .78rem; color: var(--muted); margin-bottom: .3rem; }
+
 /* 搜尋框 + 自動完成 */
 .search-box { position: relative; display: flex; gap: .5rem; align-items: stretch; }
 #word {
@@ -43,7 +48,9 @@ kbd {
 #word:disabled { background: var(--bg-code); color: var(--muted); }
 .suggest {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
-  background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  background: rgba(255, 255, 255, .62);          /* 半透明:打字時看得到背後的字典卡 */
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,.1);
 }
 .suggest-item { padding: .45rem .9rem; cursor: pointer; font-size: 1rem; }

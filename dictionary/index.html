@@ -14,7 +14,16 @@
       <div id="entry" class="entry"></div>
     </div>
     <div class="right">
-      <h1 class="title">Dictionary</h1>
+      <div class="title-row">
+        <h1 class="title">Dictionary</h1>
+        <div class="info">
+          <button id="info-btn" class="info-btn" type="button" aria-label="資料版本與重建" title="資料版本 / 重建本機資料">ⓘ</button>
+          <div id="info-pop" class="info-pop" hidden>
+            <div id="version" class="version"></div>
+            <button id="rebuild" type="button" class="rebuild" title="清除本機快取、重新下載最新字典">重建本機資料</button>
+          </div>
+        </div>
+      </div>
       <div class="search-box" data-mode="live">
         <input class="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
                placeholder="" disabled>
@@ -35,11 +44,6 @@
       <div id="status" class="status" aria-live="polite"></div>
     </div>
   </div>
-
-  <footer class="foot">
-    <span id="version" class="version"></span>
-    <button id="rebuild" type="button" class="rebuild" title="清除本機快取、重新下載最新字典">重建本機資料</button>
-  </footer>
 
   <script type="module" src="js/main.js"></script>
 </body>

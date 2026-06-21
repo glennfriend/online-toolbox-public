@@ -12,7 +12,19 @@ body {
   line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 2rem 1.2rem;
   color: var(--fg); background: var(--bg-page);
 }
-.right .title { margin: 0 0 .6rem; font-size: 1.5rem; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
+.right .title { margin: 0; font-size: 1.5rem; }
+
+/* 角落 ⓘ:點開小浮層(版本 + 重建);平常不佔版面 */
+.info { position: relative; }
+.info-btn { background: transparent; border: 0; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; padding: .1em .25em; }
+.info-btn:hover { color: var(--accent); }
+.info-pop {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 30;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; width: max-content; max-width: 260px;
+}
+.info-pop .version { display: block; font-size: .78rem; color: var(--muted); margin: 0 0 .5rem; }
 
 /* 兩欄:左=字典卡內容,右=搜尋框/下拉;兩欄上緣對齊(下拉留在右欄,不蓋內容) */
 .layout { display: flex; align-items: flex-start; gap: 1.5rem; }

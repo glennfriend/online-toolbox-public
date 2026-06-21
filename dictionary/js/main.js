@@ -236,6 +236,12 @@ tabsToggle.addEventListener('change', () => {
   if (currentEntry) renderEntry(currentEntry);
 });
 
+// 角落 ⓘ:點開/收起版本+重建浮層;點別處關閉
+const infoBtn = document.querySelector('#info-btn');
+const infoPop = document.querySelector('#info-pop');
+infoBtn.addEventListener('click', (e) => { e.stopPropagation(); infoPop.hidden = !infoPop.hidden; });
+document.addEventListener('click', (e) => { if (!e.target.closest('.info')) infoPop.hidden = true; });
+
 rebuildBtn.addEventListener('click', async () => {
   if (!confirm('清除本機快取的字典資料?下次會重新下載最新版。')) return;
   try { await db.clear(); location.reload(); }

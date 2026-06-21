@@ -8,6 +8,7 @@
 | [**Scrollshot**](https://glennfriend.github.io/online-toolbox-public/scrollshot/ "https://glennfriend.github.io/online-toolbox-public/scrollshot/") | 網頁截圖 |
 | [**Chart**](https://glennfriend.github.io/online-toolbox-public/chart/ "https://glennfriend.github.io/online-toolbox-public/chart/") | 統計圖表 |
 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/ "https://glennfriend.github.io/online-toolbox-public/pipeflow/") | 簡易資料轉換 |
+| [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/ "https://glennfriend.github.io/online-toolbox-public/dictionary/") | 英文單字字典(發音 / 常用度 / 定義 / 例句,自動完成) |
 
 ---
 

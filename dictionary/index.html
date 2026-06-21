@@ -13,26 +13,31 @@
     <h1>Dictionary</h1>
   </header>
 
-  <div class="search-box" data-mode="live">
-    <input class="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-           placeholder="" disabled>
-    <button class="go-btn" type="button">Enter
-      <span class="go-tip">
-        <span><kbd>Enter</kbd> 查詢這個單字</span>
-        <span><kbd>Tab</kbd> 補完最上面的建議</span>
-        <span><kbd>↑</kbd> <kbd>↓</kbd> 選擇建議</span>
-      </span>
-    </button>
-    <label class="toggle" title="分頁顯示詞性(避免太長要一直卷動)">
-      <span class="toggle-label">分頁</span>
-      <input type="checkbox" id="tabs-toggle">
-      <span class="slider"></span>
-    </label>
-    <div class="suggest" hidden></div>
+  <div class="layout">
+    <div class="left">
+      <div class="search-box" data-mode="live">
+        <input class="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="" disabled>
+        <button class="go-btn" type="button">Enter
+          <span class="go-tip">
+            <span><kbd>Enter</kbd> 查詢這個單字</span>
+            <span><kbd>Tab</kbd> 補完最上面的建議</span>
+            <span><kbd>↑</kbd> <kbd>↓</kbd> 選擇建議</span>
+          </span>
+        </button>
+        <label class="toggle" title="分頁顯示詞性(避免太長要一直卷動)">
+          <span class="toggle-label">分頁</span>
+          <input type="checkbox" id="tabs-toggle">
+          <span class="slider"></span>
+        </label>
+        <div class="suggest" hidden></div>
+      </div>
+      <div id="status" class="status" aria-live="polite"></div>
+    </div>
+    <div class="right">
+      <div id="entry" class="entry"></div>
+    </div>
   </div>
-
-  <div id="status" class="status" aria-live="polite"></div>
-  <div id="entry" class="entry"></div>
 
   <footer class="foot">
     <span id="version" class="version"></span>

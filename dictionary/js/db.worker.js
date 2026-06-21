@@ -45,10 +45,10 @@ function suggest({ prefix, limit }) {
   const p = (prefix || '').toLowerCase().replace(/[%_\\]/g, '');
   if (!p) return { words: [] };
   const rows = DB.selectObjects(
-    'SELECT word FROM words WHERE wordlc LIKE ? ORDER BY freq DESC, wordlc ASC LIMIT ?',
+    'SELECT word, cn FROM words WHERE wordlc LIKE ? ORDER BY freq DESC, wordlc ASC LIMIT ?',
     [p + '%', limit || 10]
   );
-  return { words: rows.map((r) => r.word) };
+  return { words: rows.map((r) => ({ word: r.word, cn: r.cn || '' })) };
 }
 
 // 查一個單字 → 發音 / 詞頻 / 各詞性的釋義與例句

@@ -189,8 +189,8 @@ function makeSearch(boxEl) {
     const open = suggestions.length > 0 && !sugBox.hidden;
     if (e.key === 'ArrowDown' && open) { e.preventDefault(); active = (active + 1) % suggestions.length; renderSuggest(); }
     else if (e.key === 'ArrowUp' && open) { e.preventDefault(); active = (active <= 0 ? suggestions.length : active) - 1; renderSuggest(); }
-    else if (e.key === 'Tab') { if (open) { e.preventDefault(); input.value = suggestions[active >= 0 ? active : 0]; closeSuggest(); if (mode === 'live') search(input.value); } }
-    else if (e.key === 'Enter') { e.preventDefault(); const w = (open && active >= 0) ? suggestions[active] : input.value.trim(); if (w) { input.value = w; closeSuggest(); search(w); } }
+    else if (e.key === 'Tab') { if (open) { e.preventDefault(); input.value = suggestions[active >= 0 ? active : 0].word; closeSuggest(); if (mode === 'live') search(input.value); } }
+    else if (e.key === 'Enter') { e.preventDefault(); const w = (open && active >= 0) ? suggestions[active].word : input.value.trim(); if (w) { input.value = w; closeSuggest(); search(w); } }
     else if (e.key === 'Escape') closeSuggest();
   });
 
@@ -199,11 +199,12 @@ function makeSearch(boxEl) {
   function renderSuggest() {
     if (!suggestions.length) return closeSuggest();
     sugBox.innerHTML = '';
-    suggestions.forEach((w, i) => {
+    suggestions.forEach((s, i) => {
       const item = document.createElement('div');
       item.className = 'suggest-item' + (i === active ? ' active' : '');
-      item.textContent = w;
-      item.addEventListener('mousedown', (ev) => { ev.preventDefault(); input.value = w; closeSuggest(); search(w); });
+      // 英文(左)+ 中文(右);中文整行不斷行,超出下拉右緣由 CSS overflow 直接切掉
+      item.innerHTML = `<span class="sw">${esc(s.word)}</span>` + (s.cn ? `<span class="sc">${esc(s.cn.replace(/\n/g, ' / '))}</span>` : '');
+      item.addEventListener('mousedown', (ev) => { ev.preventDefault(); input.value = s.word; closeSuggest(); search(s.word); });
       sugBox.appendChild(item);
     });
     sugBox.hidden = false;

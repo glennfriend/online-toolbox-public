@@ -9,7 +9,7 @@
 html { scrollbar-gutter: stable; }
 body {
   font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
-  line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 2rem 1.2rem;
+  line-height: 1.7; max-width: 1040px; margin: 0 auto; padding: 2rem 1.2rem;
   color: var(--fg); background: var(--bg-page);
 }
 .title-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
@@ -29,7 +29,7 @@ body {
 /* 兩欄:左=字典卡內容,右=搜尋框/下拉;兩欄上緣對齊(下拉留在右欄,不蓋內容) */
 .layout { display: flex; align-items: flex-start; gap: 1.5rem; }
 .left { flex: 1 1 auto; min-width: 0; }
-.right { flex: 0 0 360px; max-width: 100%; }
+.right { flex: 0 0 460px; max-width: 100%; }
 @media (max-width: 760px) { .layout { flex-direction: column; } .right { order: -1; flex-basis: auto; width: 100%; } }
 kbd {
   font-family: ui-monospace, Consolas, monospace; font-size: .8em;
@@ -69,8 +69,8 @@ kbd {
 /* 英文(左)+ 中文(右,淡色);整列不斷行,超出下拉右緣直接切掉(不是 …,是硬截斷) */
 .suggest-item { padding: .45rem .9rem; cursor: pointer; font-size: 1rem; white-space: nowrap; overflow: hidden; }
 .suggest-item .sc { color: var(--muted); margin-left: .7rem; }
-.suggest-item:hover, .suggest-item.active { background: rgba(37, 99, 235, .4); color: #fff; }    /* 反光棒同步 0.4 */
-.suggest-item:hover .sc, .suggest-item.active .sc { color: rgba(255, 255, 255, .85); }
+.suggest-item:hover, .suggest-item.active { background: var(--accent); color: #fff; }            /* 實心藍+白字,反差清楚 */
+.suggest-item:hover .sc, .suggest-item.active .sc { color: rgba(255, 255, 255, .9); }
 
 .status { margin: .8rem 0; font-size: .9rem; color: var(--muted); }
 

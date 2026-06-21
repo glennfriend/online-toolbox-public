@@ -45,6 +45,13 @@
     <div class="note">用 Web Worker + WASM;高效版需 SharedArrayBuffer(要 COOP/COEP,GitHub Pages 設不了)→ 會自動退非多執行緒版,WASM 較大、首次載入較久。</div>
   </div>
 
+  <div class="card">
+    <h2>官方 SQLite-Wasm + OPFS <span id="opfs-badge" class="badge run">測試中…</span></h2>
+    <table id="opfs-table"></table>
+    <button id="opfs-clear" type="button" style="display:none;margin-top:.6rem;font:inherit;font-size:.85rem;cursor:pointer;border:1px solid var(--border);border-radius:8px;background:#fff;padding:.35em .9em;">清除這個 OPFS 測試 DB(等同 clear cache)</button>
+    <div class="note">DB 放在瀏覽器 OPFS、按頁讀取(不整包載入記憶體)。<b>重新整理本頁,「累計開啟次數」會 +1 → 代表持久化成功</b>(這就是「第二次免下載、超快」的快取)。用 SAHPool VFS,不需 COOP/COEP。</div>
+  </div>
+
 <script type="module">
 const $ = (id) => document.getElementById(id);
 const rows = (obj) => Object.entries(obj).map(([k,v]) =>
@@ -68,6 +75,8 @@ $('env-table').innerHTML = rows({
   'Web Worker': typeof Worker,
   'SharedArrayBuffer': typeof SharedArrayBuffer,
   'crossOriginIsolated': String(self.crossOriginIsolated),
+  'OPFS (storage.getDirectory)': (navigator.storage && navigator.storage.getDirectory) ? '有' : '無',
+  'secureContext': String(self.isSecureContext),
 });
 
 // ── sql.js ──
@@ -137,6 +146,77 @@ $('env-table').innerHTML = rows({
     $('duck-table').innerHTML = rows(out);
     setBadge($('duck-badge'), false);
   }
+})();
+
+// ── 官方 SQLite-Wasm + OPFS (SAHPool VFS) ──
+// SAHPool 需要 createSyncAccessHandle = Worker 限定 API → 整段跑在 module worker(不需 COOP/COEP)。
+(() => {
+  const badge = $('opfs-badge');
+  const CDN = 'https://cdn.jsdelivr.net/npm/@sqlite.org/sqlite-wasm@3.53.0-build1/dist/index.mjs';
+  const workerSrc = `
+import sqlite3InitModule from '${CDN}';
+let sqlite3, pool;
+async function ensure(){
+  if(!sqlite3) sqlite3 = await sqlite3InitModule();
+  if(!pool) pool = await sqlite3.installOpfsSAHPoolVfs({name:'opfs-dictionary-test'});
+}
+self.onmessage = async (e)=>{
+  const {cmd,id}=e.data;
+  try{
+    await ensure();
+    if(cmd==='clear'){ await pool.wipeFiles(); self.postMessage({id,ok:true,cleared:true}); return; }
+    const db=new pool.OpfsSAHPoolDb('/dict-test.sqlite');
+    db.exec("CREATE TABLE IF NOT EXISTS visits(t TEXT)");
+    db.exec("INSERT INTO visits(t) VALUES(datetime('now'))");
+    let visits=0; db.exec({sql:"SELECT count(*) c FROM visits",rowMode:'object',callback:r=>visits=r.c});
+    db.exec("CREATE TABLE IF NOT EXISTS t(w TEXT,pos TEXT)");
+    let ex=0; db.exec({sql:"SELECT count(*) c FROM t",rowMode:'object',callback:r=>ex=r.c});
+    if(ex===0) db.exec("INSERT INTO t VALUES('affect','verb'),('effect','noun')");
+    let q=[]; db.exec({sql:"SELECT w,pos FROM t WHERE w LIKE 'aff%'",rowMode:'object',callback:r=>q.push(r)});
+    db.close();
+    self.postMessage({id,ok:true,visits,query:q,version:sqlite3.version.libVersion});
+  }catch(err){ self.postMessage({id,ok:false,error:String(err&&err.message||err)}); }
+};
+`;
+  let worker;
+  const call = (cmd) => new Promise((resolve) => {
+    const id = Math.random();
+    const h = (e) => { if (e.data && e.data.id === id) { worker.removeEventListener('message', h); resolve(e.data); } };
+    worker.addEventListener('message', h);
+    worker.postMessage({ cmd, id });
+  });
+  (async () => {
+    const out = {};
+    const watch = setTimeout(() => { if (badge.textContent === '測試中…') { setBadge(badge, false); $('opfs-table').innerHTML = rows({ '結果': 'ERR:逾時(載入失敗或此瀏覽器 OPFS/Worker 不支援)' }); } }, 30000);
+    try {
+      if (!self.isSecureContext) throw new Error('非安全環境(OPFS 需 https 或 localhost)');
+      if (!(navigator.storage && navigator.storage.getDirectory)) throw new Error('此瀏覽器無 OPFS');
+      const url = URL.createObjectURL(new Blob([workerSrc], { type: 'text/javascript' }));
+      worker = new Worker(url, { type: 'module' });
+      worker.addEventListener('error', (ev) => { if (badge.textContent === '測試中…') { clearTimeout(watch); setBadge(badge, false); $('opfs-table').innerHTML = rows({ '錯誤': 'ERR:Worker 載入失敗 — ' + (ev.message || '可能不支援 module worker / 跨域 import') }); } });
+      const t0 = performance.now();
+      const res = await call('run');
+      const t1 = performance.now();
+      clearTimeout(watch);
+      if (!res.ok) throw new Error(res.error);
+      out['SQLite 版本'] = res.version;
+      out['首次載入+查詢'] = Math.round(t1 - t0) + ' ms';
+      out['累計開啟次數'] = res.visits + (res.visits > 1 ? '  ← 重整後沒歸零 = 持久化成功 ✓' : '  (再重整一次本頁,應變成 2)');
+      out['查詢結果'] = JSON.stringify(res.query);
+      $('opfs-table').innerHTML = rows(out);
+      setBadge(badge, true);
+      $('opfs-clear').style.display = 'inline-block';
+    } catch (e) {
+      clearTimeout(watch);
+      out['錯誤'] = 'ERR:' + (e && e.message || e);
+      $('opfs-table').innerHTML = rows(out);
+      setBadge(badge, false);
+    }
+    $('opfs-clear').addEventListener('click', async () => {
+      const r = await call('clear');
+      $('opfs-clear').textContent = r.ok ? '已清除 ✓ 重新整理本頁,累計次數會歸零' : ('清除失敗:' + r.error);
+    });
+  })();
 })();
 </script>
 </body>

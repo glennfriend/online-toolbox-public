@@ -12,7 +12,7 @@ body {
   line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 2rem 1.2rem;
   color: var(--fg); background: var(--bg-page);
 }
-.head h1 { margin: 0 0 1.2rem; font-size: 1.6rem; }
+.right .title { margin: 0 0 .6rem; font-size: 1.5rem; }
 
 /* 兩欄:左=字典卡內容,右=搜尋框/下拉;兩欄上緣對齊(下拉留在右欄,不蓋內容) */
 .layout { display: flex; align-items: flex-start; gap: 1.5rem; }

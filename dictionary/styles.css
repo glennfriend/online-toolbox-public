@@ -71,6 +71,21 @@ kbd {
 }
 .speak:hover { background: var(--bg-code); }
 .speak:active { transform: scale(.92); }
+/* 切換鍵(分頁顯示);狀態記在 localStorage */
+.toggle { display: inline-flex; align-items: center; gap: .35rem; flex: 0 0 auto; cursor: pointer; font-size: .78rem; color: var(--muted); }
+.toggle input { display: none; }
+.toggle .slider { width: 34px; height: 20px; border-radius: 999px; background: var(--border); position: relative; transition: background .15s; }
+.toggle .slider::before { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.toggle input:checked + .slider { background: var(--accent); }
+.toggle input:checked + .slider::before { left: 16px; }
+
+/* 詞性分頁(toggle 開啟時):tab 列 + 內容面板。滑鼠移到 tab 即切換,hover 顯示中文詞性 */
+.tabs-strip { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .7rem; }
+.tab { font-size: .85rem; cursor: pointer; padding: .3em .9em; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); }
+.tab:hover { border-color: var(--accent); }
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tab-panel { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .7rem 1rem; }
+
 .more-pron { font-size: .8rem; color: var(--accent); text-decoration: none; }
 .more-pron:hover { text-decoration: underline; }
 .freq { font-size: .8rem; color: var(--muted); margin-left: auto; }

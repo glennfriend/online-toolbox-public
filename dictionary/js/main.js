@@ -17,6 +17,18 @@ const rebuildBtn = $('#rebuild');
 
 let ready = false;
 let lastSearch = 0;   // 防舊鎖:多個查詢競態時,只讓最後一次寫畫面
+let currentEntry = null;   // 目前顯示的字(切換分頁時用來重繪)
+
+// 詞性中文(tab hover 顯示);未收錄的就原樣
+const POS_ZH = {
+  noun: '名詞', verb: '動詞', adjective: '形容詞', adverb: '副詞', pronoun: '代名詞',
+  preposition: '介系詞', conjunction: '連接詞', interjection: '感嘆詞', determiner: '限定詞',
+  article: '冠詞', numeral: '數詞', 'proper noun': '專有名詞',
+};
+
+// 分頁顯示模式(切換鍵狀態,記在 localStorage,回到網頁會記得)
+let tabsMode = false;
+try { tabsMode = localStorage.getItem('dict-tabs') === '1'; } catch (_) {}
 
 // 網址跟著查到的字變化:…/dictionary/book(只算一次基底目錄)
 const BASE = new URL('.', location.href);
@@ -67,6 +79,7 @@ function search(word, { quiet = false } = {}) {
 }
 
 function renderEntry(entry) {
+  currentEntry = entry;
   entryBox.innerHTML = '';
   setUrl(entry.word);   // 查到真的字 → 網址跟著變
 
@@ -95,19 +108,52 @@ function renderEntry(entry) {
     if (badges) { const box = document.createElement('div'); box.className = 'tags'; box.innerHTML = badges; entryBox.appendChild(box); }
   }
 
-  let curPos = null, list = null;
+  // 依詞性分組(保留出現順序)
+  const groups = [];
+  const at = new Map();
   entry.meanings.forEach((m) => {
-    if (m.pos !== curPos) {
-      curPos = m.pos;
-      const group = document.createElement('div'); group.className = 'pos-group';
-      group.innerHTML = `<div class="pos">${esc(m.pos || '—')}</div>`;
-      list = document.createElement('ol'); list.className = 'defs';
-      group.appendChild(list); entryBox.appendChild(group);
-    }
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="def">${esc(m.definition)}</span>` + (m.example ? `<span class="eg">“${esc(m.example)}”</span>` : '');
-    list.appendChild(li);
+    const key = m.pos || '—';
+    if (!at.has(key)) { at.set(key, groups.length); groups.push({ pos: key, items: [] }); }
+    groups[at.get(key)].items.push(m);
   });
+  if (!groups.length) return;
+
+  const defsList = (items) => {
+    const ol = document.createElement('ol'); ol.className = 'defs';
+    items.forEach((m) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="def">${esc(m.definition)}</span>` + (m.example ? `<span class="eg">“${esc(m.example)}”</span>` : '');
+      ol.appendChild(li);
+    });
+    return ol;
+  };
+
+  if (tabsMode) {
+    // 分頁:tab 列(滑過即切換、hover 顯示中文詞性)+ 單一內容面板
+    const strip = document.createElement('div'); strip.className = 'tabs-strip';
+    const panel = document.createElement('div'); panel.className = 'tab-panel';
+    const show = (g, tab) => { strip.querySelectorAll('.tab').forEach((t) => t.classList.remove('active')); tab.classList.add('active'); panel.innerHTML = ''; panel.appendChild(defsList(g.items)); };
+    groups.forEach((g, i) => {
+      const tab = document.createElement('div');
+      tab.className = 'tab' + (i === 0 ? ' active' : '');
+      tab.textContent = g.pos;
+      tab.title = POS_ZH[g.pos] || g.pos;
+      const act = () => show(g, tab);
+      tab.addEventListener('mouseenter', act);   // 移到哪個就切哪個(不用點)
+      tab.addEventListener('click', act);
+      strip.appendChild(tab);
+    });
+    entryBox.appendChild(strip); entryBox.appendChild(panel);
+    panel.appendChild(defsList(groups[0].items));
+  } else {
+    // 堆疊:每個詞性一張卡
+    groups.forEach((g) => {
+      const group = document.createElement('div'); group.className = 'pos-group';
+      group.innerHTML = `<div class="pos">${esc(g.pos)}</div>`;
+      group.appendChild(defsList(g.items));
+      entryBox.appendChild(group);
+    });
+  }
 }
 
 function freqLabel(f) {
@@ -176,6 +222,15 @@ const boxes = [...document.querySelectorAll('.search-box')].map(makeSearch);
 // 點到搜尋框以外 → 關掉所有下拉
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.search-box')) document.querySelectorAll('.suggest').forEach((s) => { s.hidden = true; s.innerHTML = ''; });
+});
+
+// 分頁切換鍵:狀態記在 localStorage;切換時把目前這個字重繪成新版面
+const tabsToggle = document.querySelector('#tabs-toggle');
+tabsToggle.checked = tabsMode;
+tabsToggle.addEventListener('change', () => {
+  tabsMode = tabsToggle.checked;
+  try { localStorage.setItem('dict-tabs', tabsMode ? '1' : '0'); } catch (_) {}
+  if (currentEntry) renderEntry(currentEntry);
 });
 
 rebuildBtn.addEventListener('click', async () => {

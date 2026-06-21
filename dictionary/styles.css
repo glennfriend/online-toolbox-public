@@ -9,32 +9,22 @@
 html { scrollbar-gutter: stable; }
 body {
   font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
-  line-height: 1.7; max-width: 960px; margin: 0 auto; padding: 2rem 1.2rem;
+  line-height: 1.7; max-width: 820px; margin: 0 auto; padding: 2rem 1.2rem;
   color: var(--fg); background: var(--bg-page);
 }
-.head h1 { margin: 0; font-size: 1.6rem; }
-.tagline { color: var(--muted); font-size: .9rem; margin: .4rem 0 1.2rem; }
+/* 標題列:標題(左)+ 搜尋框(右);內容在下方,與下拉上緣對齊 */
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0; }
+.head-row h1 { margin: 0; font-size: 1.6rem; }
 kbd {
   font-family: ui-monospace, Consolas, monospace; font-size: .8em;
   background: #fff; border: 1px solid var(--border); border-bottom-width: 2px;
   border-radius: 5px; padding: .05em .4em;
 }
 
-/* 兩欄輸入(左:原本/按 Enter,右:即時)——對比用,日後刪一欄即可 */
-.boxes { display: flex; gap: 1rem; flex-wrap: wrap; }
-.search-col { flex: 1; min-width: 260px; }
-.col-label { font-size: .78rem; color: var(--muted); margin-bottom: .3rem; }
-
-/* 左右兩欄:左=搜尋框/下拉,右=字典卡 */
-.layout { display: flex; gap: 1.5rem; align-items: flex-start; }
-.left { flex: 0 0 360px; max-width: 100%; }
-.right { flex: 1 1 380px; min-width: 0; }
-@media (max-width: 760px) { .layout { flex-direction: column; } .left { flex-basis: auto; width: 100%; } }
-
 /* 搜尋框 + 自動完成 */
-.search-box { position: relative; display: flex; gap: .5rem; align-items: stretch; }
-#word {
-  flex: 1; min-width: 0; font: inherit; font-size: 1.15rem; padding: .7rem .9rem;
+.search-box { position: relative; display: flex; gap: .5rem; align-items: center; }
+.word {
+  width: 240px; max-width: 100%; font: inherit; font-size: 1.05rem; padding: .55rem .8rem;
   border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--fg);
 }
 
@@ -52,11 +42,11 @@ kbd {
 .go-btn:hover .go-tip { display: block; }
 .go-tip > span { display: block; margin: .2rem 0; color: var(--muted); }
 .go-tip kbd { color: var(--fg); }
-#word:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-#word:disabled { background: var(--bg-code); color: var(--muted); }
+.word:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.word:disabled { background: var(--bg-code); color: var(--muted); }
 .suggest {
-  position: absolute; left: 0; right: auto; top: calc(100% + 4px); z-index: 10;
-  width: min(740px, 86vw);                       /* 超寬:比左欄寬,往右蓋到字典卡(靠透明度看穿) */
+  position: absolute; right: 0; left: auto; top: calc(100% + 1.2rem); z-index: 10;  /* 上緣對齊下方的字典卡 */
+  width: min(740px, 86vw);                       /* 超寬:從輸入框往左蓋到內容(靠透明度看穿) */
   background: rgba(255, 255, 255, .4);           /* 不透明度 0.4(越小越透) */
   border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,.1);

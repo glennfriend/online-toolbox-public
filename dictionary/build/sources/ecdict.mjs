@@ -18,7 +18,8 @@ export function loadEcdict(path) {
       if (!header) { header = true; }                  // 第一列是表頭
       else {
         const w = row[COL_WORD];
-        const cn = (row[COL_TRANSLATION] || '').trim();
+        // ECDICT 用「字面的 \n」(反斜線+n)分隔多義項 → 正規化成真換行,前端才好斷行
+        const cn = (row[COL_TRANSLATION] || '').trim().replace(/\\n/g, '\n');
         if (w && cn) {
           const lc = w.toLowerCase();
           if (!map.has(lc)) map.set(lc, { cn, tag: (row[COL_TAG] || '').trim() });

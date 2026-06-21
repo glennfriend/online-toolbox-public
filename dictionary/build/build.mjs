@@ -87,7 +87,7 @@ db.exec('CREATE INDEX idx_meanings_word ON meanings(word)');
 // ── 版本章 + meta ────────────────────────────────────────
 const today = new Date().toISOString().slice(0, 10);            // build 腳本可用 Date(非 workflow)
 // schema 版號:改 build 結構/欄位時手動 +1,確保版本一定變、使用者會重抓
-const SCHEMA = 'v2';
+const SCHEMA = 'v3';
 const hash = crypto.createHash('sha1').update(`${SCHEMA}:${nWords}:${nMeanings}:${nWithIpa}:${nWithCn}:${freq.size}:${ipa.size}`).digest('hex').slice(0, 7);
 const version = `${today}-${hash}`;
 const builtAt = new Date().toISOString();

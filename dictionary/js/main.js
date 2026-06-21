@@ -77,6 +77,12 @@ input.addEventListener('keydown', (e) => {
 
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-box')) closeSuggest(); });
 
+// 「Enter」按鈕:等同按 Enter 查詢
+document.querySelector('#go').addEventListener('click', () => {
+  const word = input.value.trim();
+  if (word) { closeSuggest(); search(word); }
+});
+
 function renderSuggest() {
   if (!suggestions.length) return closeSuggest();
   sugBox.innerHTML = '';

@@ -1,9 +1,9 @@
 {
-  "version": "2026-06-21-39226cf",
-  "db": "dictionary-2026-06-21-39226cf.db.gz",
-  "built_at": "2026-06-21T04:11:20.728Z",
-  "db_bytes": 32075776,
-  "gz_bytes": 13602255,
+  "version": "2026-06-21-3b83757",
+  "db": "dictionary-2026-06-21-3b83757.db.gz",
+  "built_at": "2026-06-21T09:58:26.103Z",
+  "db_bytes": 32047104,
+  "gz_bytes": 13598244,
   "sources": [
     "wordset",
     "cmudict",

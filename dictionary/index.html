@@ -10,12 +10,18 @@
 <body>
   <header class="head">
     <h1>Dictionary</h1>
-    <p class="tagline">輸入英文單字,查發音、常用度、各詞性的定義與例句。打字會自動完成,<kbd>Tab</kbd> 補完、<kbd>Enter</kbd> 查詢。</p>
   </header>
 
   <div class="search-box">
     <input id="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
            placeholder="輸入英文單字…" disabled>
+    <button id="go" class="go-btn" type="button">Enter
+      <span class="go-tip">
+        <span><kbd>Enter</kbd> 查詢這個單字</span>
+        <span><kbd>Tab</kbd> 補完最上面的建議</span>
+        <span><kbd>↑</kbd> <kbd>↓</kbd> 選擇建議</span>
+      </span>
+    </button>
     <div id="suggest" class="suggest" hidden></div>
   </div>
 

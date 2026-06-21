@@ -50,12 +50,12 @@ kbd {
 #word:disabled { background: var(--bg-code); color: var(--muted); }
 .suggest {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
-  background: rgba(255, 255, 255, .85);          /* 半透明但仍讀得清楚(太透會和背後文字疊在一起變亂) */
+  background: rgba(255, 255, 255, .7);           /* 不透明度(數字越小越透);太低會和背後文字疊在一起變亂 */
   border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,.1);
 }
 .suggest-item { padding: .45rem .9rem; cursor: pointer; font-size: 1rem; }
-.suggest-item:hover, .suggest-item.active { background: rgba(37, 99, 235, .85); color: #fff; }  /* 反光棒同樣半透明,一致 */
+.suggest-item:hover, .suggest-item.active { background: rgba(37, 99, 235, .7); color: #fff; }   /* 反光棒同步同一個不透明度,一致 */
 
 .status { margin: .8rem 0; font-size: .9rem; color: var(--muted); }
 

@@ -1,0 +1,4 @@
+# 二進位產物/資產一律 byte 原樣(不可被換行轉換動到,否則解壓/載入會壞)。
+*.gz   binary
+*.wasm binary
+*.db   binary

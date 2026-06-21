@@ -23,6 +23,7 @@
 | `frequency-google-10k/` | 最常用 10000 英文字 | 常用字排序 | github: first20hours/google-10000-english | MIT(資料源自 Google 語料) | 152K | 10,000 ×2 | 2026-06-20 |
 | `wordlist-dwyl/` | 英文單字總表 | 大字表(變位字/拼相近) | github: dwyl/english-words | Unlicense(公共領域) | 4.1M | 370,105 | 2026-06-20 |
 | `hyphenation/` | en_US 連字符樣式 | 音節斷點(Liang/TeX) | github: LibreOffice/dictionaries | 見 repo(TeX 樣式,寬鬆) | 104K | 11,130 樣式 | 2026-06-20 |
+| `ecdict/` | 英漢字典(ECDICT,7.8k★) | **英→中釋義**、難度分級、詞頻、詞形變化 | github: skywind3000/ECDICT | MIT | 66M | 770,612 | 2026-06-21 |
 
 `moby/` 細目:`mthesaur.txt`(同義詞庫,30,259 主條目,24M)、`roget13a.txt`(Roget 1913,1.5M)、`mobypos.txt`(詞性,233,356 詞,2.9M)、`mpron.txt`(發音,177,266 詞,5.3M)。
 

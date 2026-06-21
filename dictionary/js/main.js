@@ -16,7 +16,21 @@ const versionEl = $('#version');
 const rebuildBtn = $('#rebuild');
 
 let ready = false;
-let lastSearch = 0;   // 防舊鎖:多個查詢競態時,只讓最後一次寫畫面(兩個輸入框共用一個字典卡)
+let lastSearch = 0;   // 防舊鎖:多個查詢競態時,只讓最後一次寫畫面
+
+// 網址跟著查到的字變化:…/dictionary/book(只算一次基底目錄)
+const BASE = new URL('.', location.href);
+function setUrl(word) {
+  try { history.replaceState(null, '', new URL(encodeURIComponent(word), BASE).pathname); } catch (_) {}
+}
+// 開頁時從網址取要查的字:支援 ?w=book(404 轉址用)與 …/dictionary/book(直接路徑)
+function initialWordFromUrl() {
+  const q = new URLSearchParams(location.search).get('w');
+  if (q) return q.trim();
+  const rest = location.pathname.startsWith(BASE.pathname) ? location.pathname.slice(BASE.pathname.length) : '';
+  const seg = decodeURIComponent((rest.split('/')[0] || '').trim());
+  return (seg && seg !== 'index.html') ? seg : '';
+}
 
 boot();
 
@@ -31,6 +45,8 @@ async function boot() {
     versionEl.textContent = `資料版本 ${res.version}・${(res.counts.words || 0).toLocaleString()} 字` +
       (res.downloaded ? '(剛下載)' : '(本機快取)');
     boxes.forEach((b) => b.enable());
+    const iw = initialWordFromUrl();
+    if (iw) boxes[0].query(iw);   // 直接開 …/dictionary/book 或 ?w=book → 先查它
     boxes[0].focus();
   } catch (e) {
     setStatus('字典載入失敗:' + e.message);
@@ -52,6 +68,8 @@ function search(word, { quiet = false } = {}) {
 
 function renderEntry(entry) {
   entryBox.innerHTML = '';
+  setUrl(entry.word);   // 查到真的字 → 網址跟著變
+
   const head = document.createElement('div');
   head.className = 'entry-head';
   const cam = 'https://dictionary.cambridge.org/dictionary/english/' + encodeURIComponent(entry.word);
@@ -146,7 +164,11 @@ function makeSearch(boxEl) {
   }
   function closeSuggest() { sugBox.hidden = true; sugBox.innerHTML = ''; suggestions = []; active = -1; }
 
-  return { enable: () => { input.disabled = false; }, focus: () => input.focus() };
+  return {
+    enable: () => { input.disabled = false; },
+    focus: () => input.focus(),
+    query: (w) => { input.value = w; closeSuggest(); search(w); },
+  };
 }
 
 const boxes = [...document.querySelectorAll('.search-box')].map(makeSearch);

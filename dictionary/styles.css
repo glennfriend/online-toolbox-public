@@ -50,7 +50,7 @@ kbd {
 #word:disabled { background: var(--bg-code); color: var(--muted); }
 .suggest {
   position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
-  background: rgba(255, 255, 255, .82);          /* 半透明:看得到背後的字典卡,但不模糊、字仍清楚 */
+  background: rgba(255, 255, 255, .1);           /* 很透(90% 透明):看得到背後的字典卡;不模糊 */
   border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,.1);
 }

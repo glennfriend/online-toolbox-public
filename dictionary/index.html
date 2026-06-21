@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dictionary</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="head">
+    <h1>Dictionary</h1>
+    <p class="tagline">輸入英文單字,查發音、常用度、各詞性的定義與例句。打字會自動完成,<kbd>Tab</kbd> 補完、<kbd>Enter</kbd> 查詢。</p>
+  </header>
+
+  <div class="search-box">
+    <input id="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+           placeholder="輸入英文單字…" disabled>
+    <div id="suggest" class="suggest" hidden></div>
+  </div>
+
+  <div id="status" class="status" aria-live="polite"></div>
+  <div id="entry" class="entry"></div>
+
+  <footer class="foot">
+    <span id="version" class="version"></span>
+    <button id="rebuild" type="button" class="rebuild" title="清除本機快取、重新下載最新字典">重建本機資料</button>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

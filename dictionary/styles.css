@@ -1,0 +1,63 @@
+/* Dictionary — 延續站上風格:system-ui、藍色主色、淺灰底。 */
+:root {
+  --fg: #24292f; --muted: #57606a; --border: #d0d7de; --border-soft: #d8dee4;
+  --accent: #2563eb; --bg-code: #f6f8fa; --bg-page: #dde2e9; --danger: #cf222e;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.7; max-width: 720px; margin: 0 auto; padding: 2rem 1.2rem;
+  color: var(--fg); background: var(--bg-page);
+}
+.head h1 { margin: 0; font-size: 1.6rem; }
+.tagline { color: var(--muted); font-size: .9rem; margin: .4rem 0 1.2rem; }
+kbd {
+  font-family: ui-monospace, Consolas, monospace; font-size: .8em;
+  background: #fff; border: 1px solid var(--border); border-bottom-width: 2px;
+  border-radius: 5px; padding: .05em .4em;
+}
+
+/* 搜尋框 + 自動完成 */
+.search-box { position: relative; }
+#word {
+  width: 100%; font: inherit; font-size: 1.15rem; padding: .7rem .9rem;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--fg);
+}
+#word:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+#word:disabled { background: var(--bg-code); color: var(--muted); }
+.suggest {
+  position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
+}
+.suggest-item { padding: .45rem .9rem; cursor: pointer; font-size: 1rem; }
+.suggest-item:hover, .suggest-item.active { background: var(--accent); color: #fff; }
+
+.status { margin: .8rem 0; font-size: .9rem; color: var(--muted); }
+
+/* 字典卡 */
+.entry { margin-top: 1.2rem; }
+.entry-head { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.headword { font-size: 1.7rem; font-weight: 700; }
+.ipa { font-size: 1.05rem; color: var(--muted); font-family: "Noto Sans", "Segoe UI", sans-serif; }
+.freq { font-size: .8rem; color: var(--muted); margin-left: auto; }
+.pos-group {
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  padding: .7rem 1rem; margin-bottom: .7rem;
+}
+.pos { font-size: .82rem; font-weight: 600; color: var(--accent); text-transform: lowercase; margin-bottom: .3rem; }
+.defs { margin: 0; padding-left: 1.3rem; }
+.defs li { margin: .25rem 0; }
+.def { }
+.eg { display: block; color: var(--muted); font-size: .9rem; font-style: italic; }
+.empty { color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+
+/* 頁尾:版本 + 重建 */
+.foot { display: flex; align-items: center; gap: .8rem; margin-top: 2rem; padding-top: .8rem; border-top: 1px solid var(--border-soft); }
+.version { font-size: .78rem; color: var(--muted); }
+.rebuild {
+  margin-left: auto; font: inherit; font-size: .78rem; cursor: pointer; color: var(--muted);
+  background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: .25em .7em;
+}
+.rebuild:hover { color: var(--fg); background: #fff; }

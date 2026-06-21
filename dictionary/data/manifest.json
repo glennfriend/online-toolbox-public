@@ -1,0 +1,17 @@
+{
+  "version": "2026-06-21-b068218",
+  "db": "dictionary-2026-06-21-b068218.db.gz",
+  "built_at": "2026-06-21T03:03:39.552Z",
+  "db_bytes": 27934720,
+  "gz_bytes": 11291058,
+  "sources": [
+    "wordset",
+    "cmudict",
+    "frequency-norvig"
+  ],
+  "counts": {
+    "words": 108128,
+    "meanings": 163274,
+    "withIpa": 31704
+  }
+}

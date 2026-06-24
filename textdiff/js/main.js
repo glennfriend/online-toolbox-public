@@ -101,8 +101,8 @@ function run() {
   bannerEl.hidden = !capped;
   if (capped) bannerEl.textContent = `⚠ 內容過大，只比較前 ${MAX_LINES} 行`;
 
-  const rows = diffRows(aLines.join('\n'), bLines.join('\n'), { ignoreCase: opt('ignoreCase'), ignoreSpace: opt('ignoreSpace') });
-  renderDiff(rows, mode.collapse, showSpaces);
+  const cmp = { ignoreCase: opt('ignoreCase'), ignoreSpace: opt('ignoreSpace') };
+  renderDiff(diffRows(aLines.join('\n'), bLines.join('\n'), cmp), mode.collapse, showSpaces, cmp);
 }
 
 // ── JSON 結構化比對 ──
@@ -138,7 +138,7 @@ function renderReport({ verdict, findings }) {
   reportBox.innerHTML = html;
 }
 
-function renderDiff(rows, collapse, showSpaces) {
+function renderDiff(rows, collapse, showSpaces, cmp) {
   const CTX = 2;
   const keep = rows.map(() => !collapse);
   if (collapse) rows.forEach((r, i) => { if (r.type !== 'eq') for (let j = Math.max(0, i - CTX); j <= Math.min(rows.length - 1, i + CTX); j++) keep[j] = true; });
@@ -155,7 +155,7 @@ function renderDiff(rows, collapse, showSpaces) {
     if (!keep[i]) { skipped++; return; }
     flushSkip();
     if (row.type === 'eq') html += line(la, revealHtml(row.left, { showSpaces }), 'eq', lb, revealHtml(row.right, { showSpaces }), 'eq');
-    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right); html += line(la, side(ops, 'left', showSpaces), 'chg', lb, side(ops, 'right', showSpaces), 'chg'); }
+    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); html += line(la, side(ops, 'left', showSpaces), 'chg', lb, side(ops, 'right', showSpaces), 'chg'); }
     else if (row.type === 'del') html += line(la, revealHtml(row.left, { showSpaces }), 'del', '', '', 'blank');
     else html += line('', '', 'blank', lb, revealHtml(row.right, { showSpaces }), 'add');
   });
@@ -169,7 +169,7 @@ function renderDiff(rows, collapse, showSpaces) {
 function side(ops, which, showSpaces) {
   let out = '';
   for (const op of ops) {
-    if (op.t === 'eq') out += revealChar(op.v, { showSpaces });
+    if (op.t === 'eq') out += revealChar(which === 'right' ? (op.v2 ?? op.v) : op.v, { showSpaces });   // eq 各顯示自己那邊的原字
     else if (op.t === 'del' && which === 'left') out += `<span class="c-del">${revealChar(op.v, { showSpaces })}</span>`;
     else if (op.t === 'add' && which === 'right') out += `<span class="c-add">${revealChar(op.v, { showSpaces })}</span>`;
   }

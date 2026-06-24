@@ -20,7 +20,32 @@ export function lcsDiff(a, b) {
   return ops;
 }
 
-export function charDiff(a, b) { return lcsDiff(Array.from(a), Array.from(b)); }
+// 字元級 diff。opts:{ ignoreCase, ignoreSpace } 也作用在這裡(用正規化鍵比對、保留原字),
+// 所以忽略大小寫時 W/w 不會被標成差異;eq 仍各自帶左右原字(v 左、v2 右)。
+export function charDiff(a, b, opts = {}) {
+  const A = Array.from(a), B = Array.from(b);
+  if (!A.length) return B.map((v) => ({ t: 'add', v }));
+  if (!B.length) return A.map((v) => ({ t: 'del', v }));
+  const norm = (ch) => {
+    if (opts.ignoreSpace && /\s/.test(ch)) return ' ';
+    return opts.ignoreCase ? ch.toLowerCase() : ch;
+  };
+  const ak = A.map(norm), bk = B.map(norm);
+  const n = ak.length, m = bk.length;
+  const dp = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--)
+    for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = ak[i] === bk[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const ops = []; let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (ak[i] === bk[j]) { ops.push({ t: 'eq', v: A[i], v2: B[j] }); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) ops.push({ t: 'del', v: A[i++] });
+    else ops.push({ t: 'add', v: B[j++] });
+  }
+  while (i < n) ops.push({ t: 'del', v: A[i++] });
+  while (j < m) ops.push({ t: 'add', v: B[j++] });
+  return ops;
+}
 
 // 行級 → 並排列。opts:{ ignoreCase, ignoreSpace } 只影響「配對」(用正規化後的鍵比對),
 // 但顯示時仍用原文(所以忽略大小寫時,大小寫不同的行會被當相同、各自顯示原樣)。

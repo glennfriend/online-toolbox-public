@@ -40,11 +40,12 @@ const JSON_A = '{\n  "name": "Alice",\n  "age": 30,\n  "tags": ["a", "b"],\n  "c
 const JSON_B = '{\n  "age": 31,\n  "name": "Alice",\n  "tags": ["a", "c", "d"],\n  "country": "TW"\n}';
 
 const MODES = [
+  // 逐字嚴格 與 逐字嚴格(直接編輯)是同一種比對、不同顯示方式,所以並排放一起
   { id: 'strict', label: '逐字嚴格', view: 'lines', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
+  { id: 'inline', label: '逐字嚴格 (直接編輯)', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
   { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: TEXT_OPTS, a: CODE_A, b: CODE_B },
   { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
-  { id: 'inline', label: '原地比對', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
 ];
 
 const optState = {};

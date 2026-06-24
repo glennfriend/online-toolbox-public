@@ -10,9 +10,20 @@
 </head>
 <body>
   <header class="head">
-    <h1>TextDiff</h1>
-    <p class="tagline">兩邊貼上文字,嚴格比對差異——連<strong>看不見的字元(空白、零寬、NBSP)、Unicode 同形字、NFC/NFD、行尾</strong>都抓出來。純前端、不上傳。</p>
+    <h1>TextDiff
+      <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">ⓘ</span>
+        <span class="info-tip">
+          <span>連「看不見的字元」(空白 / Tab / 零寬 / NBSP / 全形空格)都抓出來</span>
+          <span>Unicode 同形字(肉眼相同、其實不同的字)</span>
+          <span>NFC / NFD 正規化差異</span>
+          <span>行尾(CRLF / LF / CR)與 BOM</span>
+          <span>純前端、不上傳</span>
+        </span>
+      </span>
+    </h1>
   </header>
+
+  <div class="modes" id="modes"></div>
 
   <section class="inputs">
     <textarea id="a" class="ta" spellcheck="false" placeholder="貼上文字 A…"></textarea>

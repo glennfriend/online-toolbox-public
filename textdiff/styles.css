@@ -44,6 +44,17 @@ body {
 }
 .ta:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
+/* inline 模式:就地上色層,覆蓋在 textarea 上(read-only 檢視) */
+.ta-ov {
+  position: absolute; inset: 0; overflow: auto; background: #fff;
+  border: 1px solid var(--border); border-radius: 8px; padding: .7rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.6;
+}
+.iline { white-space: pre-wrap; overflow-wrap: anywhere; padding: 0 .2rem; border-radius: 3px; }
+.iline.del { background: var(--del-bg); } .iline.add { background: var(--add-bg); } .iline.moved { background: #f3e8ff; }
+/* inline 模式時:隱藏下方面板,改用輸入區上色層 */
+body.mode-inline .diff { display: none; }
+
 /* 工具列 */
 .toolbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: .8rem 0; }
 .btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); padding: .3em .8em; }

@@ -26,12 +26,13 @@
   <div class="modebar"><span class="bar-label">模式</span><div class="modes" id="modes"></div></div>
 
   <section class="inputs">
-    <div class="ta-wrap"><textarea id="a" class="ta" spellcheck="false" placeholder="貼上文字 A…"></textarea><span class="ta-mark">Origin</span></div>
-    <div class="ta-wrap"><textarea id="b" class="ta" spellcheck="false" placeholder="貼上文字 B…"></textarea><span class="ta-mark">Changed</span></div>
+    <div class="ta-wrap"><textarea id="a" class="ta" spellcheck="false" placeholder="貼上文字 A…"></textarea><span class="ta-mark">Origin</span><div class="ta-ov" id="ov-a" hidden></div></div>
+    <div class="ta-wrap"><textarea id="b" class="ta" spellcheck="false" placeholder="貼上文字 B…"></textarea><span class="ta-mark">Changed</span><div class="ta-ov" id="ov-b" hidden></div></div>
   </section>
 
   <div class="toolbar">
     <div id="options" class="opts"></div>
+    <button id="viewedit" class="btn" type="button" hidden>編輯</button>
     <button id="swap" class="btn" type="button">⇄ 對調</button>
     <button id="clear" class="btn" type="button">清空</button>
     <span id="summary" class="summary"></span>

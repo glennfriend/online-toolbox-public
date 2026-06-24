@@ -1,7 +1,10 @@
-// main.js — 殼層:兩個輸入框 → 比對 → 顯示差異 + 嚴格報告。
+// main.js — 殼層:兩個輸入框 → 比對 → 呈現。
 //
-// 結構重點:每個「模式」自己宣告「有哪些選項可用」,而且每個模式各自記住自己的選項狀態。
-//   → 不適用的選項在那個模式下「不顯示」;切換模式不會把別的模式的選項帶過來。
+// 結構:每個「模式」宣告自己的 view 種類(lines / json / inline),run() 依 view 分派到對應渲染函式。
+//   lines  = 下方並排逐行 diff(逐字嚴格 / 文章 / 程式碼)
+//   json   = 下方 JSON 結構化清單
+//   inline = 在「輸入區」就地上色(read-only 檢視,可切回編輯)——不影響上面兩種
+// 每個模式自己宣告支援哪些選項,並各自記住選項狀態。
 
 import { diffRows, charDiff, jsonDiff } from './diff.js';
 import { revealHtml, revealChar } from './reveal.js';
@@ -9,17 +12,16 @@ import { strictReport } from './inspect.js';
 import { esc } from './unicode.js';
 
 const $ = (s) => document.querySelector(s);
-const inA = $('#a'), inB = $('#b');
+const inA = $('#a'), inB = $('#b'), ovA = $('#ov-a'), ovB = $('#ov-b');
 const diffBox = $('#diff'), reportBox = $('#report'), summaryEl = $('#summary'), bannerEl = $('#banner');
-const modesEl = $('#modes'), optsEl = $('#options');
+const modesEl = $('#modes'), optsEl = $('#options'), editBtn = $('#viewedit');
 
 const MAX_LINES = 5000;
 const cp = (...a) => String.fromCodePoint(...a);
 
-// 選項定義(id → {標籤, 群組})。模式用 id 宣告自己支援哪些;群組用來分區顯示。
 const OPTIONS = {
   showSpaces: { label: '顯示空白字元', group: '顯示' },
-  movedBlock: { label: '搬移偵測', group: '顯示' },        // 認出被搬移的行,改標「移動」而非刪+增
+  movedBlock: { label: '搬移偵測', group: '顯示' },
   ignoreCase: { label: '忽略大小寫', group: '比對規則' },
   ignoreSpace: { label: '忽略空白', group: '比對規則' },
 };
@@ -34,27 +36,20 @@ const CODE_B = ['function add(a, b) {', '  if (typeof a !== "number") throw new 
 const JSON_A = '{\n  "name": "Alice",\n  "age": 30,\n  "tags": ["a", "b"],\n  "city": "Taipei"\n}';
 const JSON_B = '{\n  "age": 31,\n  "name": "Alice",\n  "tags": ["a", "c", "d"],\n  "country": "TW"\n}';
 
-// 模式:options = 該模式支援的選項 id(JSON 結構化沒有可用選項)
 const MODES = [
-  { id: 'strict', label: '逐字嚴格', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
-  { id: 'article', label: '文章(只看差異)', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
-  { id: 'code', label: '程式碼', collapse: true, options: TEXT_OPTS, a: CODE_A, b: CODE_B },
-  { id: 'json', label: 'JSON 結構化', json: true, options: [], a: JSON_A, b: JSON_B },
+  { id: 'strict', label: '逐字嚴格', view: 'lines', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
+  { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
+  { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: TEXT_OPTS, a: CODE_A, b: CODE_B },
+  { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
+  { id: 'inline', label: '原地比對', view: 'inline', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
 ];
 
-// 每個模式各自記住自己的選項狀態:optState[modeId][optId] = bool
 const optState = {};
 MODES.forEach((m) => { optState[m.id] = {}; m.options.forEach((o) => { optState[m.id][o] = false; }); });
 
 let mode = MODES[0];
+let editing = false;   // inline 模式:true=編輯中(隱藏上色層)、false=檢視(顯示上色層)
 let timer;
-
-buildModes();
-setMode(MODES[0]);
-
-[inA, inB].forEach((el) => el.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 200); }));
-$('#swap').addEventListener('click', () => { const t = inA.value; inA.value = inB.value; inB.value = t; run(); });
-$('#clear').addEventListener('click', () => { inA.value = ''; inB.value = ''; run(); });
 
 function buildModes() {
   MODES.forEach((m) => {
@@ -67,24 +62,30 @@ function buildModes() {
 
 function setMode(m) {
   mode = m;
+  editing = false;
   [...modesEl.children].forEach((b) => b.classList.toggle('active', b.dataset.id === m.id));
-  renderOptions(m);            // 只顯示此模式支援的選項,並還原此模式之前的選擇
+  document.body.classList.toggle('mode-inline', m.view === 'inline');   // 切換輸入區 vs 下方面板的顯示
+  editBtn.hidden = m.view !== 'inline';
+  updateEditUI();
+  renderOptions(m);
   inA.value = m.a; inB.value = m.b;
   run();
 }
 
-// 依模式產生選項開關,並依群組(顯示 / 比對規則)分區;狀態取自該模式自己的記憶
+function updateEditUI() {
+  editBtn.textContent = editing ? '✓ 完成' : '編輯';
+  ovA.hidden = ovB.hidden = (mode.view !== 'inline') || editing;   // 編輯中隱藏上色層,露出 textarea
+}
+
 function renderOptions(m) {
   optsEl.innerHTML = '';
   const groups = {};
   m.options.forEach((o) => { const g = OPTIONS[o].group; (groups[g] = groups[g] || []).push(o); });
   for (const g of Object.keys(groups)) {
-    const wrap = document.createElement('div');
-    wrap.className = 'opt-group';
+    const wrap = document.createElement('div'); wrap.className = 'opt-group';
     wrap.innerHTML = `<span class="opt-label">${g}</span>`;
     groups[g].forEach((o) => {
-      const lab = document.createElement('label');
-      lab.className = 'toggle';
+      const lab = document.createElement('label'); lab.className = 'toggle';
       lab.innerHTML = `<input type="checkbox"><span class="slider"></span><span>${OPTIONS[o].label}</span>`;
       const cb = lab.querySelector('input');
       cb.checked = optState[m.id][o];
@@ -95,33 +96,31 @@ function renderOptions(m) {
   }
 }
 
-// 目前模式的選項狀態(讀取用;沒宣告的選項一律 false)
 function opt(id) { return !!optState[mode.id][id]; }
+function cmpOpts() { return { ignoreCase: opt('ignoreCase'), ignoreSpace: opt('ignoreSpace') }; }
 
-function run() {
-  const rawA = inA.value, rawB = inB.value;
-  if (mode.json) { jsonRun(rawA, rawB); return; }
+// ── 依模式 view 分派 ──
+const VIEWS = { lines: linesView, json: jsonView, inline: inlineView };
+function run() { VIEWS[mode.view](inA.value, inB.value); }
 
+// view: lines — 下方並排逐行 diff
+function linesView(rawA, rawB) {
   renderReport(strictReport(rawA, rawB));
-  const showSpaces = opt('showSpaces');
-
   let aLines = rawA.replace(/\r\n?/g, '\n').split('\n');
   let bLines = rawB.replace(/\r\n?/g, '\n').split('\n');
   let capped = false;
-  if (aLines.length > MAX_LINES || bLines.length > MAX_LINES) {
-    aLines = aLines.slice(0, MAX_LINES); bLines = bLines.slice(0, MAX_LINES); capped = true;
-  }
+  if (aLines.length > MAX_LINES || bLines.length > MAX_LINES) { aLines = aLines.slice(0, MAX_LINES); bLines = bLines.slice(0, MAX_LINES); capped = true; }
   bannerEl.hidden = !capped;
   if (capped) bannerEl.textContent = `⚠ 內容過大，只比較前 ${MAX_LINES} 行`;
 
-  const cmp = { ignoreCase: opt('ignoreCase'), ignoreSpace: opt('ignoreSpace') };
+  const cmp = cmpOpts();
   const rows = diffRows(aLines.join('\n'), bLines.join('\n'), cmp);
   if (opt('movedBlock')) markMoved(rows);
-  renderDiff(rows, mode.collapse, showSpaces, cmp);
+  renderRows(rows, mode.collapse, opt('showSpaces'), cmp);
 }
 
-// ── JSON 結構化比對 ──
-function jsonRun(rawA, rawB) {
+// view: json — 下方結構化清單
+function jsonView(rawA, rawB) {
   bannerEl.hidden = true;
   let A, B;
   try { A = JSON.parse(rawA); } catch (e) { return jsonErr('A', e.message); }
@@ -140,11 +139,34 @@ function jsonRun(rawA, rawB) {
   }).join('') + '</div>';
   summaryEl.textContent = `${diffs.length} 處不同`;
 }
-function jsonErr(side, msg) {
-  reportBox.innerHTML = `<div class="verdict warn">⚠ ${side} 不是合法 JSON:${esc(msg)}</div>`;
-  diffBox.innerHTML = ''; summaryEl.textContent = '';
+function jsonErr(side, msg) { reportBox.innerHTML = `<div class="verdict warn">⚠ ${side} 不是合法 JSON:${esc(msg)}</div>`; diffBox.innerHTML = ''; summaryEl.textContent = ''; }
+
+// view: inline — 在輸入區就地上色(每一邊各自呈現自己的文件,加上 移除/新增 上色)
+function inlineView(rawA, rawB) {
+  renderReport(strictReport(rawA, rawB));
+  bannerEl.hidden = true;
+  const cmp = cmpOpts(), showSpaces = opt('showSpaces');
+  const rows = diffRows(rawA.replace(/\r\n?/g, '\n'), rawB.replace(/\r\n?/g, '\n'), cmp);
+  if (opt('movedBlock')) markMoved(rows);
+
+  let left = '', right = '', nChg = 0, nAdd = 0, nDel = 0, nMoved = 0;
+  const iline = (html, cls) => `<div class="iline ${cls}">${html || '&nbsp;'}</div>`;
+  for (const row of rows) {
+    if (row.type === 'eq') { left += iline(revealHtml(row.left, { showSpaces }), 'eq'); right += iline(revealHtml(row.right, { showSpaces }), 'eq'); }
+    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); left += iline(side(ops, 'left', showSpaces), 'del'); right += iline(side(ops, 'right', showSpaces), 'add'); nChg++; }
+    else if (row.type === 'del') { left += iline(movedTag(row.moved, '移出') + revealHtml(row.left, { showSpaces }), row.moved ? 'moved' : 'del'); row.moved ? nMoved++ : nDel++; }
+    else { right += iline(movedTag(row.moved, '移入') + revealHtml(row.right, { showSpaces }), row.moved ? 'moved' : 'add'); if (!row.moved) nAdd++; }
+  }
+  ovA.innerHTML = left; ovB.innerHTML = right;
+  updateEditUI();   // 依 editing 決定是否顯示上色層
+
+  const same = !nChg && !nAdd && !nDel && !nMoved;
+  let s = `修改 ${nChg} 行・新增 ${nAdd} 行・刪除 ${nDel} 行`;
+  if (nMoved) s += `・移動 ${nMoved} 行`;
+  summaryEl.textContent = same ? '兩邊逐行相同' : s + (editing ? '(編輯中)' : '');
 }
 
+// ── 共用 ──
 function renderReport({ verdict, findings }) {
   let html = '';
   if (verdict.level === 'same') html += `<div class="verdict same">✓ ${verdict.text}</div>`;
@@ -153,7 +175,6 @@ function renderReport({ verdict, findings }) {
   reportBox.innerHTML = html;
 }
 
-// 搬移偵測:同內容的行在 A 被刪、在 B 被加 → 標為「移動」(不改判定,只改呈現)
 function markMoved(rows) {
   const dels = new Map(), adds = new Map();
   rows.forEach((r, i) => {
@@ -168,7 +189,7 @@ function markMoved(rows) {
 }
 const movedTag = (on, t) => (on ? `<span class="moved-tag">${t}</span>` : '');
 
-function renderDiff(rows, collapse, showSpaces, cmp) {
+function renderRows(rows, collapse, showSpaces, cmp) {
   const CTX = 2;
   const keep = rows.map(() => !collapse);
   if (collapse) rows.forEach((r, i) => { if (r.type !== 'eq') for (let j = Math.max(0, i - CTX); j <= Math.min(rows.length - 1, i + CTX); j++) keep[j] = true; });
@@ -185,7 +206,7 @@ function renderDiff(rows, collapse, showSpaces, cmp) {
     if (!keep[i]) { skipped++; return; }
     flushSkip();
     if (row.type === 'eq') html += line(la, revealHtml(row.left, { showSpaces }), 'eq', lb, revealHtml(row.right, { showSpaces }), 'eq');
-    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); html += line(la, side(ops, 'left', showSpaces), 'del', lb, side(ops, 'right', showSpaces), 'add'); }   // 左移除(紅)/右新增(綠)
+    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); html += line(la, side(ops, 'left', showSpaces), 'del', lb, side(ops, 'right', showSpaces), 'add'); }
     else if (row.type === 'del') html += line(la, movedTag(row.moved, '移出') + revealHtml(row.left, { showSpaces }), row.moved ? 'moved' : 'del', '', '', 'blank');
     else html += line('', '', 'blank', lb, movedTag(row.moved, '移入') + revealHtml(row.right, { showSpaces }), row.moved ? 'moved' : 'add');
   });
@@ -202,7 +223,7 @@ function renderDiff(rows, collapse, showSpaces, cmp) {
 function side(ops, which, showSpaces) {
   let out = '';
   for (const op of ops) {
-    if (op.t === 'eq') out += revealChar(which === 'right' ? (op.v2 ?? op.v) : op.v, { showSpaces });   // eq 各顯示自己那邊的原字
+    if (op.t === 'eq') out += revealChar(which === 'right' ? (op.v2 ?? op.v) : op.v, { showSpaces });
     else if (op.t === 'del' && which === 'left') out += `<span class="c-del">${revealChar(op.v, { showSpaces })}</span>`;
     else if (op.t === 'add' && which === 'right') out += `<span class="c-add">${revealChar(op.v, { showSpaces })}</span>`;
   }
@@ -215,3 +236,11 @@ function line(nl, lh, lc, nr, rh, rc) {
     `<div class="num numr">${nr}</div><div class="cell ${rc}">${rh}</div>` +
     '</div>';
 }
+
+// ── 啟動(放在最後:確保上面的 const VIEWS 等都已初始化才呼叫 run)──
+buildModes();
+setMode(MODES[0]);
+[inA, inB].forEach((el) => el.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 200); }));
+$('#swap').addEventListener('click', () => { const t = inA.value; inA.value = inB.value; inB.value = t; run(); });
+$('#clear').addEventListener('click', () => { inA.value = ''; inB.value = ''; run(); });
+editBtn.addEventListener('click', () => { editing = !editing; if (editing) { inA.focus(); } updateEditUI(); run(); });

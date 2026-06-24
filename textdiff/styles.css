@@ -85,8 +85,8 @@ body {
 .c-add { background: var(--add-mark); border-radius: 3px; }
 .c-del { background: var(--del-mark); border-radius: 3px; }
 
-/* JSON 結構化差異清單 */
-.jdiff { padding: .3rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem; }
+/* JSON 結構化差異清單(跨滿整個寬度,不受 .diff 的格線欄寬影響) */
+.jdiff { grid-column: 1 / -1; padding: .3rem 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem; }
 .jrow { padding: .3rem .8rem; border-bottom: 1px solid var(--border-soft); display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
 .jtag { flex: 0 0 auto; font-size: .72rem; padding: .05em .5em; border-radius: 999px; color: #fff; }
 .jtag.add { background: #1a7f37; } .jtag.del { background: var(--danger); } .jtag.chg { background: #9a6700; }

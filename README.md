@@ -9,6 +9,7 @@
 | [**Chart**](https://glennfriend.github.io/online-toolbox-public/chart/ "https://glennfriend.github.io/online-toolbox-public/chart/") | 統計圖表 |
 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/ "https://glennfriend.github.io/online-toolbox-public/pipeflow/") | 簡易資料轉換 |
 | [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/ "https://glennfriend.github.io/online-toolbox-public/dictionary/") | 英文單字字典(發音 / 常用度 / 定義 / 例句,自動完成) |
+| [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/ "https://glennfriend.github.io/online-toolbox-public/textdiff/") | 文字比對(嚴格:含不可見字元 / Unicode 同形字 / NFC·NFD / 行尾) |
 
 ---
 

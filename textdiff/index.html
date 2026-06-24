@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>TextDiff</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔬%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="head">
+    <h1>TextDiff</h1>
+    <p class="tagline">兩邊貼上文字,嚴格比對差異——連<strong>看不見的字元(空白、零寬、NBSP)、Unicode 同形字、NFC/NFD、行尾</strong>都抓出來。純前端、不上傳。</p>
+  </header>
+
+  <section class="inputs">
+    <textarea id="a" class="ta" spellcheck="false" placeholder="貼上文字 A…"></textarea>
+    <textarea id="b" class="ta" spellcheck="false" placeholder="貼上文字 B…"></textarea>
+  </section>
+
+  <div class="toolbar">
+    <label class="toggle"><input type="checkbox" id="ws-toggle"><span class="slider"></span><span>顯示空白字元</span></label>
+    <button id="swap" class="btn" type="button">⇄ 對調</button>
+    <button id="clear" class="btn" type="button">清空</button>
+    <span id="summary" class="summary"></span>
+  </div>
+
+  <div id="report" class="report"></div>
+  <div id="banner" class="banner" hidden></div>
+  <div id="diff" class="diff"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

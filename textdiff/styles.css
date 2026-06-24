@@ -1,0 +1,74 @@
+/* TextDiff — 延續站上風格:system-ui、藍色主色、淺灰底。 */
+:root {
+  --fg: #24292f; --muted: #57606a; --border: #d0d7de; --border-soft: #d8dee4;
+  --accent: #2563eb; --bg-code: #f6f8fa; --bg-page: #dde2e9; --danger: #cf222e;
+  --add-bg: #e6ffec; --add-mark: #abf2bc; --del-bg: #ffebe9; --del-mark: #ffc1bc;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scrollbar-gutter: stable; }
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.7; max-width: 1100px; margin: 0 auto; padding: 2rem 1.2rem; color: var(--fg); background: var(--bg-page);
+}
+.head h1 { margin: 0; font-size: 1.5rem; }
+.tagline { color: var(--muted); font-size: .9rem; margin: .4rem 0 1.2rem; }
+
+/* 兩個輸入框 */
+.inputs { display: flex; gap: 1rem; }
+.ta {
+  flex: 1; min-width: 0; min-height: 140px; resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.6;
+  padding: .7rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg);
+}
+.ta:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+/* 工具列 */
+.toolbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: .8rem 0; }
+.btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); padding: .3em .8em; }
+.btn:hover { background: var(--bg-code); }
+.summary { font-size: .85rem; color: var(--muted); margin-left: auto; }
+.toggle { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; font-size: .82rem; color: var(--muted); }
+.toggle input { display: none; }
+.toggle .slider { width: 34px; height: 20px; border-radius: 999px; background: var(--border); position: relative; transition: background .15s; }
+.toggle .slider::before { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.toggle input:checked + .slider { background: var(--accent); }
+.toggle input:checked + .slider::before { left: 16px; }
+
+/* 嚴格報告 */
+.report { margin-bottom: .8rem; }
+.verdict { font-weight: 600; padding: .5rem .8rem; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+.verdict.same { color: #1a7f37; background: #e6ffec; border-color: #abf2bc; }
+.verdict.warn { color: #9a6700; background: #fff8c5; border-color: #f0e0a0; }
+.verdict.diff { color: var(--fg); }
+.findings { list-style: none; margin: .5rem 0 0; padding: 0; }
+.findings li { font-size: .85rem; padding: .25rem .8rem; border-left: 3px solid var(--accent); background: #fff; margin-top: .3rem; border-radius: 0 6px 6px 0; }
+.findings .k { display: inline-block; min-width: 7em; font-weight: 600; color: var(--accent); margin-right: .5rem; }
+
+.banner { background: #fff8c5; border: 1px solid #f0e0a0; border-radius: 8px; padding: .5rem .8rem; font-size: .85rem; margin-bottom: .8rem; }
+
+/* 差異視圖:四欄 grid(行號|左|行號|右),等寬字型 */
+.diff {
+  display: grid; grid-template-columns: 2.6em 1fr 2.6em 1fr;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;
+}
+.row { display: contents; }
+.num { text-align: right; padding: .1rem .5rem; color: var(--muted); background: var(--bg-code); border-bottom: 1px solid var(--border-soft); user-select: none; font-size: .8rem; }
+.cell { padding: .1rem .6rem; white-space: pre-wrap; overflow-wrap: anywhere; border-bottom: 1px solid var(--border-soft); }
+.cell.add { background: var(--add-bg); }
+.cell.del { background: var(--del-bg); }
+.cell.chg { background: #fffbe6; }
+.cell.blank { background: #fafbfc; }
+.empty { grid-column: 1 / -1; padding: 1rem; color: var(--muted); }
+
+/* 字元級高亮 */
+.c-add { background: var(--add-mark); border-radius: 3px; }
+.c-del { background: var(--del-mark); border-radius: 3px; }
+
+/* 不可見/危險字元的標記 */
+.ws { color: #b0b8c0; }
+.inv {
+  display: inline-block; color: var(--danger); background: #ffebe9; border: 1px solid var(--del-mark);
+  border-radius: 4px; font-size: .8em; padding: 0 .15em; margin: 0 .05em; cursor: help; vertical-align: middle;
+}

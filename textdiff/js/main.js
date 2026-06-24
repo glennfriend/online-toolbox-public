@@ -1,6 +1,7 @@
-// main.js — 殼層:兩個輸入框 → 比對 → 並排顯示差異 + 嚴格報告。
-// 比較模式(可插拔):逐字嚴格 / 文章(只看差異)/ 程式碼 / JSON 結構化。
-// 選項開關(疊加在模式上):顯示空白字元、忽略大小寫、忽略空白。
+// main.js — 殼層:兩個輸入框 → 比對 → 顯示差異 + 嚴格報告。
+//
+// 結構重點:每個「模式」自己宣告「有哪些選項可用」,而且每個模式各自記住自己的選項狀態。
+//   → 不適用的選項在那個模式下「不顯示」;切換模式不會把別的模式的選項帶過來。
 
 import { diffRows, charDiff, jsonDiff } from './diff.js';
 import { revealHtml, revealChar } from './reveal.js';
@@ -9,40 +10,44 @@ import { esc } from './unicode.js';
 
 const $ = (s) => document.querySelector(s);
 const inA = $('#a'), inB = $('#b');
-const diffBox = $('#diff'), reportBox = $('#report'), summaryEl = $('#summary'), bannerEl = $('#banner'), modesEl = $('#modes');
-const wsToggle = $('#ws-toggle'), icToggle = $('#ignore-case'), isToggle = $('#ignore-space');
+const diffBox = $('#diff'), reportBox = $('#report'), summaryEl = $('#summary'), bannerEl = $('#banner');
+const modesEl = $('#modes'), optsEl = $('#options');
 
 const MAX_LINES = 5000;
 const cp = (...a) => String.fromCodePoint(...a);
 
+// 選項定義(id → 標籤)。模式用 id 宣告自己支援哪些。
+const OPTIONS = { showSpaces: '顯示空白字元', ignoreCase: '忽略大小寫', ignoreSpace: '忽略空白' };
+const TEXT_OPTS = ['showSpaces', 'ignoreCase', 'ignoreSpace'];
+
 const STRICT_A = 'caf' + cp(0xE9) + ' r' + cp(0xE9) + 'sum' + cp(0xE9) + '\nHello world\nbalance: 100\ngood';
 const STRICT_B = 'cafe' + cp(0x301) + ' r' + cp(0xE9) + 'sum' + cp(0xE9) + '\nHello' + cp(0xA0) + 'world\nbalance: 100' + cp(0x200B) + '\ng' + cp(0x43E) + cp(0x43E) + 'd';
-
 const ART_A = ['前言:這份報告討論城市交通。', '背景:近年車流量上升。', '現況一:尖峰時段壅塞。', '現況二:大眾運輸使用率偏低。', '現況三:停車空間不足。', '分析:主因是私人運具偏好。', '方法:建立動態號誌系統。', '數據:平均通勤時間 38 分鐘。', '結果:導入後縮短到 31 分鐘。', '結論:智慧號誌有效。'].join('\n');
 const ART_B = ['前言:這份報告討論城市交通。', '背景:近年車流量與事故同步上升。', '現況一:尖峰時段壅塞。', '現況二:大眾運輸使用率偏低。', '現況三:停車空間不足。', '分析:主因是私人運具偏好。', '方法:建立動態號誌系統。', '數據:平均通勤時間 38 分鐘。', '結果:導入後縮短到 29 分鐘,降幅更明顯。', '結論:智慧號誌有效。'].join('\n');
-
 const CODE_A = ['function add(a, b) {', '  return a + b;', '}', '', 'const x = add(1, 2);', 'console.log(x);'].join('\n');
 const CODE_B = ['function add(a, b) {', '  if (typeof a !== "number") throw new Error("bad");', '  return a + b;', '}', '', 'const x = add(1, 2);', 'console.log("result", x);'].join('\n');
-
 const JSON_A = '{\n  "name": "Alice",\n  "age": 30,\n  "tags": ["a", "b"],\n  "city": "Taipei"\n}';
 const JSON_B = '{\n  "age": 31,\n  "name": "Alice",\n  "tags": ["a", "c", "d"],\n  "country": "TW"\n}';
 
+// 模式:options = 該模式支援的選項 id(JSON 結構化沒有可用選項)
 const MODES = [
-  { id: 'strict', label: '逐字嚴格', collapse: false, a: STRICT_A, b: STRICT_B },
-  { id: 'article', label: '文章(只看差異)', collapse: true, a: ART_A, b: ART_B },
-  { id: 'code', label: '程式碼', collapse: true, a: CODE_A, b: CODE_B },
-  { id: 'json', label: 'JSON 結構化', json: true, a: JSON_A, b: JSON_B },
+  { id: 'strict', label: '逐字嚴格', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
+  { id: 'article', label: '文章(只看差異)', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
+  { id: 'code', label: '程式碼', collapse: true, options: TEXT_OPTS, a: CODE_A, b: CODE_B },
+  { id: 'json', label: 'JSON 結構化', json: true, options: [], a: JSON_A, b: JSON_B },
 ];
+
+// 每個模式各自記住自己的選項狀態:optState[modeId][optId] = bool
+const optState = {};
+MODES.forEach((m) => { optState[m.id] = {}; m.options.forEach((o) => { optState[m.id][o] = false; }); });
+
 let mode = MODES[0];
-let showSpaces = false;
 let timer;
 
 buildModes();
 setMode(MODES[0]);
 
 [inA, inB].forEach((el) => el.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 200); }));
-wsToggle.addEventListener('change', () => { showSpaces = wsToggle.checked; run(); });
-[icToggle, isToggle].forEach((t) => t.addEventListener('change', run));
 $('#swap').addEventListener('click', () => { const t = inA.value; inA.value = inB.value; inB.value = t; run(); });
 $('#clear').addEventListener('click', () => { inA.value = ''; inB.value = ''; run(); });
 
@@ -58,18 +63,34 @@ function buildModes() {
 function setMode(m) {
   mode = m;
   [...modesEl.children].forEach((b) => b.classList.toggle('active', b.dataset.id === m.id));
-  // 忽略大小寫/空白只對文字模式有意義,JSON 模式停用
-  icToggle.disabled = isToggle.disabled = !!m.json;
+  renderOptions(m);            // 只顯示此模式支援的選項,並還原此模式之前的選擇
   inA.value = m.a; inB.value = m.b;
   run();
 }
+
+// 依模式產生選項開關(不支援的選項不會出現),狀態取自該模式自己的記憶
+function renderOptions(m) {
+  optsEl.innerHTML = '';
+  m.options.forEach((o) => {
+    const lab = document.createElement('label');
+    lab.className = 'toggle';
+    lab.innerHTML = `<input type="checkbox"><span class="slider"></span><span>${OPTIONS[o]}</span>`;
+    const cb = lab.querySelector('input');
+    cb.checked = optState[m.id][o];
+    cb.addEventListener('change', () => { optState[m.id][o] = cb.checked; run(); });
+    optsEl.appendChild(lab);
+  });
+}
+
+// 目前模式的選項狀態(讀取用;沒宣告的選項一律 false)
+function opt(id) { return !!optState[mode.id][id]; }
 
 function run() {
   const rawA = inA.value, rawB = inB.value;
   if (mode.json) { jsonRun(rawA, rawB); return; }
 
   renderReport(strictReport(rawA, rawB));
-  const opts = { ignoreCase: icToggle.checked, ignoreSpace: isToggle.checked };
+  const showSpaces = opt('showSpaces');
 
   let aLines = rawA.replace(/\r\n?/g, '\n').split('\n');
   let bLines = rawB.replace(/\r\n?/g, '\n').split('\n');
@@ -80,7 +101,8 @@ function run() {
   bannerEl.hidden = !capped;
   if (capped) bannerEl.textContent = `⚠ 內容過大，只比較前 ${MAX_LINES} 行`;
 
-  renderDiff(diffRows(aLines.join('\n'), bLines.join('\n'), opts), mode.collapse);
+  const rows = diffRows(aLines.join('\n'), bLines.join('\n'), { ignoreCase: opt('ignoreCase'), ignoreSpace: opt('ignoreSpace') });
+  renderDiff(rows, mode.collapse, showSpaces);
 }
 
 // ── JSON 結構化比對 ──
@@ -116,7 +138,7 @@ function renderReport({ verdict, findings }) {
   reportBox.innerHTML = html;
 }
 
-function renderDiff(rows, collapse) {
+function renderDiff(rows, collapse, showSpaces) {
   const CTX = 2;
   const keep = rows.map(() => !collapse);
   if (collapse) rows.forEach((r, i) => { if (r.type !== 'eq') for (let j = Math.max(0, i - CTX); j <= Math.min(rows.length - 1, i + CTX); j++) keep[j] = true; });
@@ -133,7 +155,7 @@ function renderDiff(rows, collapse) {
     if (!keep[i]) { skipped++; return; }
     flushSkip();
     if (row.type === 'eq') html += line(la, revealHtml(row.left, { showSpaces }), 'eq', lb, revealHtml(row.right, { showSpaces }), 'eq');
-    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right); html += line(la, side(ops, 'left'), 'chg', lb, side(ops, 'right'), 'chg'); }
+    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right); html += line(la, side(ops, 'left', showSpaces), 'chg', lb, side(ops, 'right', showSpaces), 'chg'); }
     else if (row.type === 'del') html += line(la, revealHtml(row.left, { showSpaces }), 'del', '', '', 'blank');
     else html += line('', '', 'blank', lb, revealHtml(row.right, { showSpaces }), 'add');
   });
@@ -144,7 +166,7 @@ function renderDiff(rows, collapse) {
   summaryEl.textContent = same ? '兩邊逐行相同' : `修改 ${nChg} 行・新增 ${nAdd} 行・刪除 ${nDel} 行`;
 }
 
-function side(ops, which) {
+function side(ops, which, showSpaces) {
   let out = '';
   for (const op of ops) {
     if (op.t === 'eq') out += revealChar(op.v, { showSpaces });

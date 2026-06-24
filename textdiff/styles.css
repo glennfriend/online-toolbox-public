@@ -45,6 +45,7 @@ body {
 .btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); padding: .3em .8em; }
 .btn:hover { background: var(--bg-code); }
 .summary { font-size: .85rem; color: var(--muted); margin-left: auto; }
+.opts { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
 .toggle { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; font-size: .82rem; color: var(--muted); }
 .toggle input { display: none; }
 .toggle .slider { width: 34px; height: 20px; border-radius: 999px; background: var(--border); position: relative; transition: background .15s; }

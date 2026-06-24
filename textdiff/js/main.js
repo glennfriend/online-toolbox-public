@@ -26,6 +26,8 @@ const OPTIONS = {
   ignoreSpace: { label: '忽略空白', group: '比對規則' },
 };
 const TEXT_OPTS = ['showSpaces', 'movedBlock', 'ignoreCase', 'ignoreSpace'];
+// 程式碼大小寫有意義,不提供「忽略大小寫」
+const CODE_OPTS = ['showSpaces', 'movedBlock', 'ignoreSpace'];
 // inline 為了讓上色層與 textarea 逐字對齊,不做會改變字寬的標記(空白點、不可見字元符號),
 // 所以沒有「顯示空白字元」;不可見字元仍由下方嚴格報告負責。
 const INLINE_OPTS = ['movedBlock', 'ignoreCase', 'ignoreSpace'];
@@ -45,7 +47,7 @@ const MODES = [
   { id: 'strict', label: '逐字嚴格', view: 'lines', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'inline', label: '逐字嚴格 (直接編輯)', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
-  { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: TEXT_OPTS, a: CODE_A, b: CODE_B },
+  { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: CODE_OPTS, a: CODE_A, b: CODE_B },
   { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
 ];
 

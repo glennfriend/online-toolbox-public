@@ -11,7 +11,7 @@
 <body>
   <header class="head">
     <h1>TextDiff
-      <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">ⓘ</span>
+      <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
         <span class="info-tip">
           <span>連「看不見的字元」(空白 / Tab / 零寬 / NBSP / 全形空格)都抓出來</span>
           <span>Unicode 同形字(肉眼相同、其實不同的字)</span>
@@ -32,6 +32,8 @@
 
   <div class="toolbar">
     <label class="toggle"><input type="checkbox" id="ws-toggle"><span class="slider"></span><span>顯示空白字元</span></label>
+    <label class="toggle"><input type="checkbox" id="ignore-case"><span class="slider"></span><span>忽略大小寫</span></label>
+    <label class="toggle"><input type="checkbox" id="ignore-space"><span class="slider"></span><span>忽略空白</span></label>
     <button id="swap" class="btn" type="button">⇄ 對調</button>
     <button id="clear" class="btn" type="button">清空</button>
     <span id="summary" class="summary"></span>

@@ -185,13 +185,14 @@ function renderDiff(rows, collapse, showSpaces, cmp) {
     if (!keep[i]) { skipped++; return; }
     flushSkip();
     if (row.type === 'eq') html += line(la, revealHtml(row.left, { showSpaces }), 'eq', lb, revealHtml(row.right, { showSpaces }), 'eq');
-    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); html += line(la, side(ops, 'left', showSpaces), 'chg', lb, side(ops, 'right', showSpaces), 'chg'); }
+    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); html += line(la, side(ops, 'left', showSpaces), 'del', lb, side(ops, 'right', showSpaces), 'add'); }   // 左移除(紅)/右新增(綠)
     else if (row.type === 'del') html += line(la, movedTag(row.moved, '移出') + revealHtml(row.left, { showSpaces }), row.moved ? 'moved' : 'del', '', '', 'blank');
     else html += line('', '', 'blank', lb, movedTag(row.moved, '移入') + revealHtml(row.right, { showSpaces }), row.moved ? 'moved' : 'add');
   });
   flushSkip();
 
-  diffBox.innerHTML = html || '<div class="empty">(兩邊都是空的)</div>';
+  const header = '<div class="row dhead"><div class="num"></div><div class="cell hl">Origin</div><div class="num numr"></div><div class="cell hr">Changed</div></div>';
+  diffBox.innerHTML = html ? header + html : '<div class="empty">(兩邊都是空的)</div>';
   const same = !nChg && !nAdd && !nDel && !nMoved;
   let s = `修改 ${nChg} 行・新增 ${nAdd} 行・刪除 ${nDel} 行`;
   if (nMoved) s += `・移動 ${nMoved} 行`;
@@ -211,6 +212,6 @@ function side(ops, which, showSpaces) {
 function line(nl, lh, lc, nr, rh, rc) {
   return '<div class="row">' +
     `<div class="num">${nl}</div><div class="cell ${lc}">${lh}</div>` +
-    `<div class="num">${nr}</div><div class="cell ${rc}">${rh}</div>` +
+    `<div class="num numr">${nr}</div><div class="cell ${rc}">${rh}</div>` +
     '</div>';
 }

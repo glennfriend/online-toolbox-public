@@ -26,7 +26,9 @@ body {
 .info-tip > span { display: block; margin: .2rem 0; color: var(--muted); }
 
 /* 比較模式按鈕 */
-.modes { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .9rem; }
+.modebar { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.bar-label { font-size: .8rem; color: var(--muted); }
+.modes { display: flex; flex-wrap: wrap; gap: .4rem; }
 .mode-btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 999px; background: #fff; color: var(--fg); padding: .25em .9em; }
 .mode-btn:hover { background: var(--bg-code); }
 .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -47,7 +49,9 @@ body {
 .btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); padding: .3em .8em; }
 .btn:hover { background: var(--bg-code); }
 .summary { font-size: .85rem; color: var(--muted); margin-left: auto; }
-.opts { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
+.opts { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+.opt-group { display: flex; align-items: center; gap: .7rem; }
+.opt-label { font-size: .75rem; color: var(--muted); background: var(--bg-code); border: 1px solid var(--border-soft); border-radius: 999px; padding: .05em .6em; }
 .toggle { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; font-size: .82rem; color: var(--muted); }
 .toggle input { display: none; }
 .toggle .slider { width: 34px; height: 20px; border-radius: 999px; background: var(--border); position: relative; transition: background .15s; }
@@ -80,6 +84,8 @@ body {
 .cell.del { background: var(--del-bg); }
 .cell.chg { background: #fffbe6; }
 .cell.blank { background: #fafbfc; }
+.cell.moved { background: #f3e8ff; }   /* 搬移:紫色,跟刪/增區別 */
+.moved-tag { font-size: .72em; color: #8250df; border: 1px solid #d8c0f0; border-radius: 4px; padding: 0 .3em; margin-right: .35em; }
 .empty { grid-column: 1 / -1; padding: 1rem; color: var(--muted); }
 /* 折疊模式:被略過的相同行收成一條分隔 */
 .gap { grid-column: 1 / -1; padding: .15rem .6rem; text-align: center; color: var(--muted); background: var(--bg-code); border-bottom: 1px solid var(--border-soft); font-size: .78rem; }

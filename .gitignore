@@ -1,0 +1,5 @@
+# Claude Code 本機專案設定(不上 GitHub)
+.claude/
+
+# dictionary 建置過程的暫存 SQLite(可重新產生,不需版控)
+dictionary/data/_q.db

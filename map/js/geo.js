@@ -1,4 +1,5 @@
-// geo.js — 地理相關純函式:解析座標、地名搜尋、產生免 key 的地圖嵌入網址。
+// geo.js — 地理相關純函式:解析座標、抓店名、地名搜尋、距離、路線規劃。
+// (地圖怎麼「畫」是 mapview.js 的事;這裡只算「資料」。)
 
 // 從文字解析出經緯度。支援:
 //   "lat,lng" 或 "lat,lng,zoom"(直接貼座標,含縮放也可)
@@ -43,11 +44,6 @@ export async function search(query) {
   return data.map((d) => ({ label: d.display_name, lat: +d.lat, lng: +d.lon }));
 }
 
-// 免 key 的 Google 地圖嵌入網址(老牌、長年穩定的 output=embed 形式;可被 iframe 嵌入)。
-export function embedUrl(lat, lng, z = 16) {
-  return `https://maps.google.com/maps?q=${lat},${lng}&z=${z}&output=embed`;
-}
-
 // 球面直線距離(公里)。
 export function haversineKm(a, b) {
   const R = 6371, rad = (d) => d * Math.PI / 180;
@@ -80,8 +76,19 @@ export function orderByRoute(points, start) {
   return seq.slice(1);
 }
 
-// 免 key 的「路線」嵌入網址(saddr/daddr + to: 多停點;mode 'w' 步行 / 'd' 開車)。
-export function directionsEmbedUrl(stops, mode = 'w') {
-  const f = (s) => `${s.lat},${s.lng}`;
-  return `https://maps.google.com/maps?saddr=${f(stops[0])}&daddr=${stops.slice(1).map(f).join('+to:')}&dirflg=${mode}&output=embed`;
+// 規劃一組的路線:起點用 center(沒有就第一個點),依距離排序(orderByRoute),上限 maxStops 站。
+// 回傳 { stops:[{lat,lng}],included:[點],dropped:[點],mode:'b'|'d' }。畫圖交給 mapview.showRoute。
+export function planRoute(group, maxStops = 10) {
+  let startCoord, visit, lead;
+  if (group.center) { startCoord = { lat: group.center.lat, lng: group.center.lng }; visit = group.points; lead = []; }
+  else { startCoord = group.points[0]; visit = group.points.slice(1); lead = [group.points[0]]; }
+  const allOrdered = [...lead, ...orderByRoute(visit, startCoord)];     // 資料點的路線順序(不含 center)
+  const cap = group.center ? maxStops - 1 : maxStops;
+  const included = allOrdered.slice(0, cap);
+  const dropped = allOrdered.slice(cap);
+  const stops = group.center ? [startCoord] : [];
+  included.forEach((p) => stops.push({ lat: p.lat, lng: p.lng }));
+  const span = stops.length > 1 ? Math.max(...stops.slice(1).map((s) => haversineKm(stops[0], s))) : 0;
+  const mode = span > 1.5 ? 'd' : 'b';   // 點分散(>1.5km)用開車,否則單車——皆畫「線」,避免步行的大點點
+  return { stops, included, dropped, mode };
 }

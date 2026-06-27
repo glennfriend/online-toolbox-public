@@ -70,21 +70,25 @@
 map/
 ├── index.html
 ├── styles.css
-└── js/
-    ├── main.js     殼層:內建+使用者組、搜尋選點、詳情、地圖跳位、匯出入、事件
-    ├── store.js    使用者組的 localStorage 存取
-    ├── geo.js      解析座標 / Nominatim 搜尋 / 免 key 地圖嵌入網址(純函式)
-    └── io.js       匯出/匯入 + 點正規化(JSON)(純函式)
+├── js/
+│   ├── main.js     殼層:狀態、DOM 渲染、事件(只串接,不放邏輯)
+│   ├── store.js    使用者組的 localStorage 存取
+│   ├── geo.js      座標解析 / 地名搜尋 / 距離 / 路線規劃(純計算)
+│   ├── mapview.js  地圖呈現層:免 key Google 崁入 iframe + LRU 快取
+│   ├── io.js       匯入匯出 + 點正規化(JSON)
+│   └── util.js     共用小工具(esc / 營業中判斷 / 下載)
 └── data/
     └── builtin.json  內建(版控)組;唯讀,由 agent 產生填入
 ```
+
+各模組是純函式 / 單一職責,殼層只負責「串」。**要換地圖引擎(例如 Leaflet+OSM)只需改寫 `mapview.js`**,維持 `initMapView / showPoint / showRoute / clearMapView` 介面,其餘程式一律不動。
 
 > ⚠️ 內建組裡若 `approx: true`,表示座標是靠網路概略推估、非精確,僅供參考;要精確請改用 Google Maps 連結重新定位。
 
 ## 計畫(之後可加)
 
 - **Leaflet + OpenStreetMap 地圖層(可切換)**:目前用免 key 的 Google 崁入 iframe,先天限制是「一次一個點、不能同時多針、縮放與路線樣式都不可控、路線會重載」。改用 Leaflet+OSM(仍免 key)可一次解決:**整組所有點同時上針、自動框定縮放、乾淨可控的路線折線、切點不重載**。
-  - 重點:資料/清單/詳情/匯入匯出/路線排序(`orderByRoute`)全部沿用,只需把「畫到地圖」那層抽成小介面 + 寫一個 Leaflet 轉接器(見當時討論)。Google 崁入可退役,或留作「在 Google Maps 開啟」跳板。
+  - 地圖層已抽成獨立的 `mapview.js`(介面 `initMapView / showPoint / showRoute / clearMapView`),所以只要**新寫一支 Leaflet 版的 mapview**、換掉 import 即可;資料/清單/詳情/匯入匯出/路線規劃(`geo.planRoute`)完全沿用。Google 崁入可退役,或留作「在 Google Maps 開啟」跳板。
 - 路線交通方式手動切換、起點改「我的位置」、結構化營業時間(精準開/關)等,視需要再加。
 
 ## 部署

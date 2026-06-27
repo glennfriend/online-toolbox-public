@@ -26,6 +26,16 @@ body {
 }
 .info-pop .version { display: block; font-size: .78rem; color: var(--muted); margin: 0 0 .5rem; }
 
+/* 💡 說明氣泡(用 tipinfo 前綴,避開上面 ⓘ 用的 .info) */
+.tipinfo { position: relative; display: inline-block; font-size: 1rem; font-weight: 400; vertical-align: middle; }
+.tipinfo-btn { color: var(--muted); cursor: help; }
+.tipinfo-btn:hover { color: var(--accent); }
+.tipinfo-tip { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 30; width: max-content; max-width: 90vw; background: #fff; color: var(--fg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; font-size: .82rem; line-height: 1.6; text-align: left; }
+.tipinfo:hover .tipinfo-tip, .tipinfo-btn:focus + .tipinfo-tip { display: block; }
+.tipinfo-tip > span { display: block; margin: .15rem 0 .15rem .8rem; color: var(--muted); }
+.tipinfo-tip > .tip-h { margin: .55rem 0 .15rem; color: var(--fg); font-weight: 700; }
+.tipinfo-tip > .tip-h:first-child { margin-top: 0; }
+
 /* 兩欄:左=字典卡內容,右=搜尋框/下拉;兩欄上緣對齊(下拉留在右欄,不蓋內容) */
 .layout { display: flex; align-items: flex-start; gap: 1.5rem; }
 .left { flex: 1 1 auto; min-width: 0; }

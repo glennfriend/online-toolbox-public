@@ -15,7 +15,22 @@
     </div>
     <div class="right">
       <div class="title-row">
-        <h1 class="title">Dictionary</h1>
+        <h1 class="title">Dictionary
+          <span class="tipinfo"><span class="tipinfo-btn" tabindex="0" aria-label="說明">💡</span>
+            <span class="tipinfo-tip">
+              <span class="tip-h">[Feature]</span>
+              <span>即時前綴自動完成(依詞頻)、鍵盤導航</span>
+              <span>詞性分組:定義/例句/IPA/繁中註解/常用度</span>
+              <span>發音(真人錄音優先,否則語音合成)</span>
+              <span class="tip-h">[不支援]</span>
+              <span>定義/同義字搜尋、拼字糾正(僅前綴補完)</span>
+              <span>雙向查詢(中文僅為釋義)</span>
+              <span class="tip-h">[技術支援]</span>
+              <span>OPFS + SQLite WASM(10 萬+ 單字存本機)</span>
+              <span>Web Worker、DecompressionStream</span>
+              <span>發音 API(dictionaryapi.dev)、Web Speech API</span>
+            </span>
+          </span></h1>
         <div class="info">
           <button id="info-btn" class="info-btn" type="button" aria-label="資料版本與重建" title="資料版本 / 重建本機資料">ⓘ</button>
           <div id="info-pop" class="info-pop" hidden>

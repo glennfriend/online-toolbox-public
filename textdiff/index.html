@@ -13,11 +13,16 @@
     <h1>TextDiff
       <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
         <span class="info-tip">
-          <span>連「看不見的字元」(空白 / Tab / 零寬 / NBSP / 全形空格)都抓出來</span>
-          <span>Unicode 同形字(肉眼相同、其實不同的字)</span>
-          <span>NFC / NFD 正規化差異</span>
-          <span>行尾(CRLF / LF / CR)與 BOM</span>
-          <span>純前端、不上傳</span>
+          <span class="tip-h">[Feature]</span>
+          <span>抓看不見的字元(空白/Tab/零寬/NBSP/全形)</span>
+          <span>Unicode 同形字、NFC/NFD、行尾(CRLF/LF/CR)/BOM</span>
+          <span>模式:逐字嚴格 / 文章 / 程式碼 / JSON 結構化、搬移偵測</span>
+          <span class="tip-h">[不支援]</span>
+          <span>在輸入框內直接編輯上色(刻意不做)</span>
+          <span>超過 5000 行只比前段;JSON 需合法</span>
+          <span class="tip-h">[技術支援]</span>
+          <span>純 JavaScript、零依賴、不上傳</span>
+          <span>LCS 比對、String.normalize、\p{Script} 同形字偵測</span>
         </span>
       </span>
     </h1>

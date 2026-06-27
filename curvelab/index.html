@@ -115,12 +115,36 @@
     .tabs{ position:static; max-height:none; overflow:visible; width:100%; flex-wrap:wrap; padding:0 0 18px; }
     .tab-col{ flex:1 1 200px; width:auto; }
   }
+
+  /* 💡 說明氣泡 */
+  .info { position: relative; display: inline-block; font-size: 1rem; font-weight: 400; vertical-align: middle; }
+  .info-btn { color: var(--muted, #57606a); cursor: help; }
+  .info-btn:hover { color: var(--accent, #2563eb); }
+  .info-tip { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 30; width: max-content; max-width: 90vw; background: #fff; color: var(--fg, #24292f); border: 1px solid var(--border, #d0d7de); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; font-size: .82rem; line-height: 1.6; text-align: left; }
+  .info:hover .info-tip, .info-btn:focus + .info-tip { display: block; }
+  .info-tip > span { display: block; margin: .15rem 0 .15rem .8rem; color: var(--muted, #57606a); }
+  .info-tip > .tip-h { margin: .55rem 0 .15rem; color: var(--fg, #24292f); font-weight: 700; }
+  .info-tip > .tip-h:first-child { margin-top: 0; }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="app__head">
-    <h1>Curvelab</h1>
+    <h1>Curvelab<span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
+        <span class="info-tip">
+          <span class="tip-h">[Feature]</span>
+          <span>19 種互動數學曲線 / 函數視覺化</span>
+          <span>滑桿即時調參、動畫播放、拖曳點</span>
+          <span>自由輸入公式找根、聯立解步驟</span>
+          <span class="tip-h">[不支援]</span>
+          <span>儲存 / 匯出 / 分享(皆無)</span>
+          <span>3D / WebGL;公式僅單變數 x</span>
+          <span class="tip-h">[技術支援]</span>
+          <span>SVG + requestAnimationFrame</span>
+          <span>Pointer Events、自寫運算式解析</span>
+          <span>純前端零依賴</span>
+        </span>
+      </span></h1>
   </header>
   <main class="stage" id="stage"></main>
   <nav class="tabs" id="tabs" aria-label="選擇公式"></nav>

@@ -120,3 +120,13 @@ body {
   transition: opacity .2s, transform .2s;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 💡 說明氣泡 */
+.info { position: relative; display: inline-block; font-size: 1rem; font-weight: 400; vertical-align: middle; }
+.info-btn { color: var(--muted, #57606a); cursor: help; }
+.info-btn:hover { color: var(--accent, #2563eb); }
+.info-tip { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 30; width: max-content; max-width: 90vw; background: #fff; color: var(--fg, #24292f); border: 1px solid var(--border, #d0d7de); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; font-size: .82rem; line-height: 1.6; text-align: left; }
+.info:hover .info-tip, .info-btn:focus + .info-tip { display: block; }
+.info-tip > span { display: block; margin: .15rem 0 .15rem .8rem; color: var(--muted, #57606a); }
+.info-tip > .tip-h { margin: .55rem 0 .15rem; color: var(--fg, #24292f); font-weight: 700; }
+.info-tip > .tip-h:first-child { margin-top: 0; }

@@ -22,6 +22,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 let builtinGroups = [];
 let user = loadUser();        // { userGroups, currentId, line2 }
 if (!user.line2) user.line2 = 'address';   // 第二行顯示哪個欄位(全域偏好,會記住)
+if (user.line2 === 'rating') user.line2 = 'address';   // 評分已顯示在列上,不再當第二行
 if (!user.sort) user.sort = 'none';         // 清單排序(none/rating/title,會記住)
 let pick = null;              // 待加入的地點 { lat, lng, label }
 let results = [];             // 最近一次搜尋結果
@@ -127,7 +128,7 @@ function renderDetail() {
     el.detail.innerHTML = `
       <button class="detail-close" id="detailClose" type="button" title="關閉">✕</button>
       <div class="d-title">🧭 ${esc(r.groupName)} 路線</div>
-      <div class="d-coord">${r.mode === 'd' ? '開車' : '步行'} · 依距離自動排序(最近鄰 + 2-opt)· 座標概略</div>
+      <div class="d-coord">${r.mode === 'd' ? '開車' : '單車'} · 依距離自動排序(最近鄰 + 2-opt)· 座標概略</div>
       <div class="r-steps">${steps}</div>${dropped}`;
     $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
     return;
@@ -183,7 +184,7 @@ function buildRoute(g) {
   if (g.center) stops.push(startCoord);
   included.forEach((p) => stops.push({ lat: p.lat, lng: p.lng }));
   const span = stops.length > 1 ? Math.max(...stops.slice(1).map((s) => haversineKm(stops[0], s))) : 0;
-  const mode = span > 1.5 ? 'd' : 'w';   // 點分散(離起點 >1.5km)用開車,否則步行
+  const mode = span > 1.5 ? 'd' : 'b';   // 點分散(>1.5km)用開車,否則單車——兩者都畫「線」,避免步行的大點點
   return { stops, included, dropped, mode, hasCenter: !!g.center };
 }
 function showRoute() {

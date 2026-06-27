@@ -67,7 +67,7 @@ body {
 .fld { width: 100%; font: inherit; font-size: .85rem; padding: .4em .6em; border: 1px solid var(--border); border-radius: 8px; }
 .fld:focus, .rating-in:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .rating-in { width: 5em; font: inherit; font-size: .85rem; padding: .4em .6em; border: 1px solid var(--border); border-radius: 8px; }
-.row-rating { font-size: .8rem; flex: 0 0 auto; }
+.row-rating { position: absolute; right: .7rem; top: .5rem; z-index: 0; pointer-events: none; font-size: .95rem; font-weight: 700; color: #c4ccd8; }
 .row.on { background: #eef4ff; }
 .route-row { background: #f3f0ff; border-bottom: 2px solid var(--border); }
 .route-row:hover { background: #e9e3ff; }
@@ -94,14 +94,14 @@ body {
 /* 地點清單(填滿剩餘、可捲動) */
 .list { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow-y: auto; flex: 1; min-height: 0; }
 .empty { padding: 1rem; color: var(--muted); font-size: .85rem; }
-.row { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-soft); cursor: pointer; }
+.row { position: relative; display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border-soft); cursor: pointer; }
 .row:last-child { border-bottom: 0; }
 .row:hover { background: var(--bg-code); }
 .row-emoji { font-size: 1.2rem; line-height: 1; flex: 0 0 auto; }
-.row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.row-main { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .row-title { font-size: .9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row-note { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.row-del { flex: 0 0 auto; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: .9rem; padding: .2em .4em; border-radius: 6px; }
+.row-del { position: relative; z-index: 2; flex: 0 0 auto; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: .9rem; padding: .2em .4em; border-radius: 6px; }
 .row-del:hover { background: #ffebe9; color: var(--danger); }
 
 /* 窄螢幕:改成上下堆疊、可捲動 */

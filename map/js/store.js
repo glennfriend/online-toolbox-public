@@ -12,7 +12,7 @@ export function loadUser() {
 }
 
 export function saveUser(state) {
-  localStorage.setItem(KEY, JSON.stringify({ userGroups: state.userGroups, currentId: state.currentId, line2: state.line2 }));
+  localStorage.setItem(KEY, JSON.stringify({ userGroups: state.userGroups, currentId: state.currentId, line2: state.line2, sort: state.sort }));
 }
 
 export function uid(prefix = 'id') {

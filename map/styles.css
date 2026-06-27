@@ -58,6 +58,8 @@ body {
 .d-tags { margin: .4rem 0 .2rem; display: flex; flex-wrap: wrap; gap: .3rem; }
 .chip { font-size: .75rem; background: var(--bg-code); border: 1px solid var(--border-soft); border-radius: 999px; padding: .1em .6em; color: var(--muted); }
 .d-note { font-size: .82rem; color: var(--fg); margin-top: .4rem; white-space: pre-wrap; }
+.d-gmap { display: inline-block; margin-top: .5rem; font-size: .78rem; color: var(--muted); text-decoration: none; }
+.d-gmap:hover { color: var(--accent); text-decoration: underline; }
 
 /* 新增地點區 */
 .add { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .7rem; flex: 0 0 auto; }

@@ -14,7 +14,7 @@ const el = {
   picked: $('#picked'), pickedLoc: $('#pickedLoc'),
   emoji: $('#emoji'), title: $('#title'), address: $('#address'), hours: $('#hours'), tags: $('#tags'), rating: $('#rating'), note: $('#note'),
   addPoint: $('#addPoint'), adder: $('#adder'), detail: $('#detail'),
-  delGroup: $('#delGroup'), renameGroup: $('#renameGroup'), line2: $('#line2'),
+  delGroup: $('#delGroup'), renameGroup: $('#renameGroup'), line2: $('#line2'), sort: $('#sort'),
 };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -22,6 +22,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 let builtinGroups = [];
 let user = loadUser();        // { userGroups, currentId, line2 }
 if (!user.line2) user.line2 = 'address';   // 第二行顯示哪個欄位(全域偏好,會記住)
+if (!user.sort) user.sort = 'none';         // 清單排序(none/rating/title,會記住)
 let pick = null;              // 待加入的地點 { lat, lng, label }
 let results = [];             // 最近一次搜尋結果
 let selected = null;          // 目前點選顯示詳情的點
@@ -65,16 +66,23 @@ function renderList() {
       : '<div class="empty">這組還沒有地點。用上面貼 Google Maps 連結 / 經緯度來新增。</div>';
     return;
   }
-  el.list.innerHTML = g.points.map((p, i) => {
+  el.list.innerHTML = sortedPoints(g).map((p) => {
     const l2 = esc(line2Text(p));
     return `
-    <div class="row${selected && selected.id === p.id ? ' on' : ''}" data-i="${i}" title="點一下:看詳情並跳到地圖">
+    <div class="row${selected && selected.id === p.id ? ' on' : ''}" data-id="${p.id}" title="點一下:看詳情並跳到地圖">
       <span class="row-emoji">${esc(p.emoji)}</span>
       <span class="row-main"><span class="row-title">${esc(p.title || '(未命名)')}</span>${l2 ? `<span class="row-note" title="${l2}">${l2}</span>` : ''}</span>
       ${p.rating ? `<span class="row-rating">★${esc(p.rating)}</span>` : ''}
-      ${ro ? '' : `<button class="row-del" data-del="${i}" type="button" title="刪除此點">✕</button>`}
+      ${ro ? '' : `<button class="row-del" data-del="${p.id}" type="button" title="刪除此點">✕</button>`}
     </div>`;
   }).join('');
+}
+// 依使用者選的排序回傳「顯示用」的點(複製,不動原始順序/資料)
+function sortedPoints(g) {
+  const pts = g.points.slice();
+  if (user.sort === 'rating') return pts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  if (user.sort === 'title') return pts.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'zh-Hant'));
+  return pts;   // none:維持原順序
 }
 // 第二行要顯示的內容(依使用者選的偏好)
 function line2Text(p) {
@@ -115,7 +123,8 @@ function renderDetail() {
     ${p.address ? `<div class="d-line"><span class="d-k">地址</span>${esc(p.address)}</div>` : ''}
     ${p.hours ? `<div class="d-line"><span class="d-k">營業</span>${openMark(p.hours)}${esc(p.hours)}</div>` : ''}
     ${tags ? `<div class="d-tags">${tags}</div>` : ''}
-    ${p.note ? `<div class="d-note">${esc(p.note)}</div>` : ''}`;
+    ${p.note ? `<div class="d-note">${esc(p.note)}</div>` : ''}
+    <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">在 Google Maps 開啟 ↗</a>`;
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
 }
 // 地圖 LRU 快取:切點時不重載——已看過的 iframe 只是隱藏,切回就顯示(極快)。
@@ -147,7 +156,7 @@ function showGroupDefault() {
   else if (g.center) showOnMap(g.center.lat, g.center.lng, g.center.z);
   // 空組且無 center:不顯示(切組時已清快取)
 }
-function renderAll() { el.line2.value = user.line2; renderGroups(); renderControls(); selected = null; renderDetail(); renderList(); clearMapCache(); showGroupDefault(); }
+function renderAll() { el.line2.value = user.line2; el.sort.value = user.sort; renderGroups(); renderControls(); selected = null; renderDetail(); renderList(); clearMapCache(); showGroupDefault(); }
 
 // ── 搜尋 / 選點(加入用)──
 async function doSearch() {
@@ -229,15 +238,16 @@ function importFile(file) {
 // ── 事件 ──
 el.groups.addEventListener('change', () => { user.currentId = el.groups.value; persist(); renderControls(); selected = null; renderDetail(); renderList(); clearMapCache(); showGroupDefault(); });
 el.line2.addEventListener('change', () => { user.line2 = el.line2.value; persist(); renderList(); });
+el.sort.addEventListener('change', () => { user.sort = el.sort.value; persist(); renderList(); });
 el.search.addEventListener('click', doSearch);
 el.q.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
 el.results.addEventListener('click', (e) => { const t = e.target.closest('.r-item'); if (t) setPick(results[+t.dataset.r]); });
 el.addPoint.addEventListener('click', addPoint);
 el.list.addEventListener('click', (e) => {
   const del = e.target.closest('[data-del]');
-  if (del) { current().points.splice(+del.dataset.del, 1); persist(); renderGroups(); renderList(); if (selected) { selected = null; renderDetail(); } return; }
+  if (del) { const g = current(); g.points = g.points.filter((x) => x.id !== del.dataset.del); persist(); renderGroups(); renderList(); selected = null; renderDetail(); return; }
   const row = e.target.closest('.row');
-  if (row) { const p = current().points[+row.dataset.i]; selected = p; renderDetail(); renderList(); showOnMap(p.lat, p.lng, p.z); }
+  if (row) { const p = current().points.find((x) => x.id === row.dataset.id); if (p) { selected = p; renderDetail(); renderList(); showOnMap(p.lat, p.lng, p.z); } }
 });
 $('#newGroup').addEventListener('click', newGroup);
 el.renameGroup.addEventListener('click', renameGroup);

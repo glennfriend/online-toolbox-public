@@ -50,8 +50,9 @@ const MODES = [
   { id: 'inline', label: '逐字嚴格 (直接編輯)', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
   { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: CODE_OPTS, a: CODE_A, b: CODE_B },
-  // 程式碼一定不長 → 恆即時、無選項(instant:true 讓它不走防抖)
-  { id: 'code-inline', label: '程式碼 (直接編輯)', view: 'inline', instant: true, options: [], a: CODE_A, b: CODE_B },
+  // 程式碼一定不長 → 恆即時(instant:true 不走防抖,故不需要「即時更新」選項);
+  // 搬移偵測/忽略空白沿用 code 的;「顯示空白字元」無法用(會改字寬、破壞 backdrop 對齊)
+  { id: 'code-inline', label: '程式碼 (直接編輯)', view: 'inline', instant: true, options: ['movedBlock', 'ignoreSpace'], a: CODE_A, b: CODE_B },
   { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
 ];
 
@@ -74,6 +75,7 @@ function setMode(m) {
   mode = m;
   [...modesEl.children].forEach((b) => b.classList.toggle('active', b.dataset.id === m.id));
   document.body.classList.toggle('mode-inline', m.view === 'inline');   // 切換:輸入框內上色 vs 下方面板
+  document.body.dataset.mode = m.id;   // 供 CSS 針對特定模式微調(例:程式碼直接編輯把編輯區拉高)
   renderOptions(m);
   inA.value = m.a; inB.value = m.b;
   run();

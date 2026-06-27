@@ -59,6 +59,8 @@ body {
 body.mode-inline .ta-ov { display: block; }
 body.mode-inline .ta { position: relative; z-index: 2; color: transparent; background: transparent; caret-color: var(--fg); }
 body.mode-inline .diff { display: none; }   /* 此模式上色在輸入框內,不用下方面板 */
+/* 程式碼 (直接編輯):編輯區拉高,程式碼好讀好改(overlay 為 inset:0 會跟著長高) */
+body[data-mode="code-inline"] .ta { min-height: 360px; }
 
 /* 工具列 */
 .toolbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: .8rem 0; }

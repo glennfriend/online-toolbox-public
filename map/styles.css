@@ -57,8 +57,9 @@ body {
 .d-k { display: inline-block; min-width: 3em; color: var(--accent); font-weight: 600; margin-right: .4rem; }
 .d-tags { margin: .4rem 0 .2rem; display: flex; flex-wrap: wrap; gap: .3rem; }
 .chip { font-size: .75rem; background: var(--bg-code); border: 1px solid var(--border-soft); border-radius: 999px; padding: .1em .6em; color: var(--muted); }
-.d-note { font-size: .82rem; color: var(--fg); margin-top: .4rem; white-space: pre-wrap; }
-.d-gmap { display: inline-block; margin-top: .5rem; font-size: .78rem; color: var(--muted); text-decoration: none; }
+.d-foot { display: flex; gap: .8rem; align-items: flex-start; margin-top: .5rem; }
+.d-note { font-size: .82rem; color: var(--fg); white-space: pre-wrap; flex: 1; min-width: 0; }
+.d-gmap { flex: 0 0 auto; white-space: nowrap; font-size: .78rem; color: var(--muted); text-decoration: none; }
 .d-gmap:hover { color: var(--accent); text-decoration: underline; }
 
 /* 新增地點區 */

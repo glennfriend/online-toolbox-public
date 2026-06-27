@@ -122,7 +122,8 @@ function renderDetail() {
   if (selected.route) {
     const r = selected;
     const steps = r.included.map((p, i) => `<div class="r-step"><span class="r-num">${i + 1}</span>${esc(p.emoji)} ${esc(p.title || '(未命名)')}</div>`).join('');
-    const dropped = r.dropped.length ? `<div class="d-approx r-dropped">⚠ ${r.dropped.length} 個點未納入(Google 路線約上限 ${ROUTE_MAX_STOPS} 站):${esc(r.dropped.map((p) => p.title).join('、'))}</div>` : '';
+    const total = r.included.length + r.dropped.length;
+    const dropped = r.dropped.length ? `<div class="d-approx r-dropped" title="${esc(r.dropped.map((p) => p.title).join('、'))}">⚠ ${r.dropped.length}/${total} 未納入(Google 路線上限 ${ROUTE_MAX_STOPS} 站,滑過看名單)</div>` : '';
     el.detail.innerHTML = `
       <button class="detail-close" id="detailClose" type="button" title="關閉">✕</button>
       <div class="d-title">🧭 ${esc(r.groupName)} 路線</div>
@@ -140,8 +141,10 @@ function renderDetail() {
     ${p.address ? `<div class="d-line"><span class="d-k">地址</span>${esc(p.address)}</div>` : ''}
     ${p.hours ? `<div class="d-line"><span class="d-k">營業</span>${openMark(p.hours)}${esc(p.hours)}</div>` : ''}
     ${tags ? `<div class="d-tags">${tags}</div>` : ''}
-    ${p.note ? `<div class="d-note">${esc(p.note)}</div>` : ''}
-    <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">在 Google Maps 開啟 ↗</a>`;
+    <div class="d-foot">
+      <div class="d-note">${p.note ? esc(p.note) : ''}</div>
+      <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Google Map ↗</a>
+    </div>`;
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
 }
 // 地圖 LRU 快取:切點時不重載——已看過的 iframe 只是隱藏,切回就顯示(極快)。

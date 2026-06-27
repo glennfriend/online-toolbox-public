@@ -10,6 +10,7 @@
 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/ "https://glennfriend.github.io/online-toolbox-public/pipeflow/") | 簡易資料轉換 |
 | [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/ "https://glennfriend.github.io/online-toolbox-public/dictionary/") | 英文單字字典(發音 / 常用度 / 定義 / 例句,自動完成) |
 | [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/ "https://glennfriend.github.io/online-toolbox-public/textdiff/") | 文字比對(嚴格:含不可見字元 / Unicode 同形字 / NFC·NFD / 行尾) |
+| [**Map**](https://glennfriend.github.io/online-toolbox-public/map/ "https://glennfriend.github.io/online-toolbox-public/map/") | 地點清單地圖(分組記錄、免 API key、點擊跳位、匯出入 JSON) |
 
 ---
 

@@ -28,8 +28,6 @@ const OPTIONS = {
 };
 // instantRender 預設 false = 維持現在的 200ms 防抖;打開才即時(暫時的實驗開關,試完手感再決定去留)
 const TEXT_OPTS = ['showSpaces', 'movedBlock', 'instantRender', 'ignoreCase', 'ignoreSpace'];
-// 程式碼大小寫有意義,不提供「忽略大小寫」
-const CODE_OPTS = ['showSpaces', 'movedBlock', 'instantRender', 'ignoreSpace'];
 // inline 為了讓上色層與 textarea 逐字對齊,不做會改變字寬的標記(空白點、不可見字元符號),
 // 所以沒有「顯示空白字元」;不可見字元仍由下方嚴格報告負責。
 const INLINE_OPTS = ['movedBlock', 'instantRender', 'ignoreCase', 'ignoreSpace'];
@@ -49,9 +47,8 @@ const MODES = [
   { id: 'strict', label: '逐字嚴格', view: 'lines', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'inline', label: '逐字嚴格 (直接編輯)', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
-  { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: CODE_OPTS, a: CODE_A, b: CODE_B },
-  // 程式碼一定不長 → 恆即時(instant:true 不走防抖,故不需要「即時更新」選項);
-  // 搬移偵測/忽略空白沿用 code 的;「顯示空白字元」無法用(會改字寬、破壞 backdrop 對齊)
+  // 程式碼一定不長 → 恆即時(instant:true 不走防抖,故不需要「即時更新」選項);只用 搬移偵測/忽略空白。
+  // 「顯示空白字元」無法用(會改字寬、破壞 backdrop 對齊);要看空白符號可用「逐字嚴格」。
   { id: 'code-inline', label: '程式碼 (直接編輯)', view: 'inline', instant: true, options: ['movedBlock', 'ignoreSpace'], a: CODE_A, b: CODE_B },
   { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
 ];

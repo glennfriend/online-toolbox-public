@@ -50,6 +50,8 @@ const MODES = [
   { id: 'inline', label: '逐字嚴格 (直接編輯)', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
   { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: CODE_OPTS, a: CODE_A, b: CODE_B },
+  // 程式碼一定不長 → 恆即時、無選項(instant:true 讓它不走防抖)
+  { id: 'code-inline', label: '程式碼 (直接編輯)', view: 'inline', instant: true, options: [], a: CODE_A, b: CODE_B },
   { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
 ];
 
@@ -254,8 +256,8 @@ buildModes();
 setMode(MODES[0]);
 [inA, inB].forEach((el) => el.addEventListener('input', () => {
   clearTimeout(timer);
-  if (opt('instantRender')) run();              // 即時:打字當下就更新
-  else timer = setTimeout(run, 200);            // 預設:200ms 防抖
+  if (mode.instant || opt('instantRender')) run();   // 即時:此模式恆即時,或開了即時選項
+  else timer = setTimeout(run, 200);                 // 預設:200ms 防抖
 }));
 $('#swap').addEventListener('click', () => { const t = inA.value; inA.value = inB.value; inB.value = t; run(); });
 $('#clear').addEventListener('click', () => { inA.value = ''; inB.value = ''; run(); });

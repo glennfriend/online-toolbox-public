@@ -23,6 +23,8 @@ body {
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.primary:hover { filter: brightness(1.05); }
 .btn.wide { width: 100%; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled:hover { background: #fff; }
 
 /* 說明氣泡 */
 .info { position: relative; display: inline-block; font-size: 1rem; font-weight: 400; vertical-align: middle; }
@@ -42,8 +44,29 @@ body {
 .mapwrap { flex: 1; min-width: 0; min-height: 0; }
 .map { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-code); }
 
+/* 內建唯讀提示 */
+.ro-note { flex: 0 0 auto; background: #fff8c5; border: 1px solid #f0e0a0; border-radius: 8px; padding: .45rem .6rem; font-size: .8rem; color: #6a5300; }
+
+/* 詳情面板(點選地點後顯示) */
+.detail { flex: 0 0 auto; position: relative; background: #fff; border: 1px solid var(--accent); border-radius: 10px; padding: .7rem .8rem; }
+.detail-close { position: absolute; top: .4rem; right: .4rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: .9rem; }
+.d-title { font-size: 1rem; font-weight: 700; padding-right: 1.2rem; }
+.d-rating, .row-rating { color: #9a6700; font-weight: 600; }
+.d-coord { font-size: .76rem; color: var(--muted); margin: .15rem 0 .4rem; }
+.d-approx { color: var(--danger); }
+.d-line { font-size: .85rem; margin: .15rem 0; }
+.d-k { display: inline-block; min-width: 3em; color: var(--accent); font-weight: 600; margin-right: .4rem; }
+.d-tags { margin: .4rem 0 .2rem; display: flex; flex-wrap: wrap; gap: .3rem; }
+.chip { font-size: .75rem; background: var(--bg-code); border: 1px solid var(--border-soft); border-radius: 999px; padding: .1em .6em; color: var(--muted); }
+.d-note { font-size: .82rem; color: var(--fg); margin-top: .4rem; white-space: pre-wrap; }
+
 /* 新增地點區 */
 .add { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .7rem; flex: 0 0 auto; }
+.fld { width: 100%; font: inherit; font-size: .85rem; padding: .4em .6em; border: 1px solid var(--border); border-radius: 8px; }
+.fld:focus, .rating-in:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.rating-in { width: 5em; font: inherit; font-size: .85rem; padding: .4em .6em; border: 1px solid var(--border); border-radius: 8px; }
+.row-rating { font-size: .8rem; flex: 0 0 auto; }
+.row.on { background: #eef4ff; }
 .add-row { display: flex; gap: .5rem; }
 .q { flex: 1; min-width: 0; font: inherit; font-size: .9rem; padding: .45em .6em; border: 1px solid var(--border); border-radius: 8px; }
 .q:focus, .title:focus, .note:focus, .emoji:focus { outline: 2px solid var(--accent); outline-offset: -1px; }

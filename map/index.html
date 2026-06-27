@@ -13,10 +13,10 @@
     <span class="brand">Map
       <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
         <span class="info-tip">
-          <span>把地點分「組」記錄;每個點有 emoji、標題、內容</span>
-          <span>點清單裡的地點 → 地圖跳過去(免 API key)</span>
+          <span>🔒 內建組來自版控資料、唯讀;你自己的組可新增/匯入/刪除</span>
+          <span>點清單裡的地點 → 看詳情 + 地圖跳過去(免 API key)</span>
           <span>找店家:在 Google Maps 找到 → 複製「網址列」連結貼上(短網址 maps.app.goo.gl 無座標、不適用)</span>
-          <span>也可搜尋地址/地標、或貼經緯度;每組可匯出/匯入 JSON,純前端存本機</span>
+          <span>每組可匯出 / 匯入 JSON,純前端、你的組存在本機</span>
         </span>
       </span>
     </span>
@@ -33,7 +33,9 @@
 
   <section class="layout">
     <aside class="panel">
-      <div class="add">
+      <div id="roNote" class="ro-note" hidden>🔒 內建組(版控資料),唯讀:不能新增 / 刪改點。可檢視、跳位、匯出。</div>
+
+      <div id="adder" class="add">
         <div class="add-row">
           <input id="q" class="q" type="text" placeholder="貼 Google Maps 連結(找店家最準)/ 搜地址地標 / lat,lng">
           <button id="search" class="btn primary" type="button">搜尋</button>
@@ -45,10 +47,18 @@
             <input id="emoji" class="emoji" maxlength="4" value="📍" title="圖示(emoji)">
             <input id="title" class="title" type="text" placeholder="標題">
           </div>
+          <input id="address" class="fld" type="text" placeholder="地址(可留空)">
+          <div class="fields">
+            <input id="hours" class="fld" type="text" placeholder="營業時間(可留空)">
+            <input id="rating" class="rating-in" type="number" step="0.1" min="0" max="5" placeholder="評分">
+          </div>
+          <input id="tags" class="fld" type="text" placeholder="tags:逗號分隔,如 拉麵, 日式">
           <textarea id="note" class="note" placeholder="內容 / 備註(可留空)"></textarea>
           <button id="addPoint" class="btn primary wide" type="button">＋ 加入此組</button>
         </div>
       </div>
+
+      <div id="detail" class="detail" hidden></div>
       <div id="list" class="list"></div>
     </aside>
 

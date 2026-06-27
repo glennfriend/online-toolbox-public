@@ -1,18 +1,18 @@
-// store.js — 多組地點存在 localStorage(純資料層,不碰 DOM)。
-// 狀態形狀:{ groups: [{ id, name, points: [{ id, emoji, title, note, lat, lng, z }] }], currentId }
+// store.js — user 自己的組存在 localStorage(內建組不在這裡、由版控 JSON 載入)。
+// 形狀:{ userGroups: [{ id, name, points:[...] }], currentId }
 
 const KEY = 'map.v1';
 
-export function loadState() {
+export function loadUser() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && Array.isArray(s.groups) && s.groups.length) return s;
-  } catch { /* 壞掉就當沒有 */ }
-  return null;
+    if (s && Array.isArray(s.userGroups)) return s;
+  } catch { /* 壞掉或舊格式就當沒有 */ }
+  return { userGroups: [], currentId: null };
 }
 
-export function saveState(state) {
-  localStorage.setItem(KEY, JSON.stringify(state));
+export function saveUser(state) {
+  localStorage.setItem(KEY, JSON.stringify({ userGroups: state.userGroups, currentId: state.currentId }));
 }
 
 export function uid(prefix = 'id') {

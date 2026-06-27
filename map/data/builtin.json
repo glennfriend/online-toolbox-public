@@ -1,0 +1,13 @@
+{
+  "_note": "內建組(版控資料):由工具載入、唯讀,使用者不能刪改。可由 AI agent 依 README 的 schema 填入並 commit。points 為空者待填。center 僅為地圖預設視角(概略)。",
+  "groups": [
+    { "id": "b-zhongshanjh", "name": "中山國中 捷運站 美食", "builtin": true, "center": { "lat": 25.0685, "lng": 121.5440, "z": 16 }, "points": [] },
+    { "id": "b-nanjingfuxing", "name": "南京復興 捷運站 美食", "builtin": true, "center": { "lat": 25.0524, "lng": 121.5443, "z": 16 }, "points": [] },
+    { "id": "b-zhongxiaofuxing", "name": "忠孝復興 捷運站 餐點", "builtin": true, "center": { "lat": 25.0417, "lng": 121.5440, "z": 16 }, "points": [] },
+    { "id": "b-daan", "name": "大安 捷運站 美食", "builtin": true, "center": { "lat": 25.0334, "lng": 121.5435, "z": 16 }, "points": [] },
+    { "id": "b-xinyianhe", "name": "信義安和 捷運站 美食", "builtin": true, "center": { "lat": 25.0330, "lng": 121.5527, "z": 16 }, "points": [] },
+    { "id": "b-jiaoxi", "name": "宜蘭礁溪 - 景點餐點", "builtin": true, "center": { "lat": 24.8225, "lng": 121.7700, "z": 15 }, "points": [] },
+    { "id": "b-luodong", "name": "宜蘭羅東 - 景點餐點", "builtin": true, "center": { "lat": 24.6770, "lng": 121.7670, "z": 15 }, "points": [] },
+    { "id": "b-wujie", "name": "宜蘭五結 - 景點餐點", "builtin": true, "center": { "lat": 24.6840, "lng": 121.7980, "z": 15 }, "points": [] }
+  ]
+}

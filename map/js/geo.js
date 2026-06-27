@@ -26,6 +26,13 @@ export function validLatLng(lat, lng) {
   return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
 
+// 從 Google Maps 網址路徑 /maps/place/<名稱>/ 取出店名(URL 解碼)。取不到回空字串。
+export function placeNameFromUrl(text) {
+  const m = (text || '').match(/\/maps\/place\/([^/@]+)/);
+  if (!m) return '';
+  try { return decodeURIComponent(m[1]).replace(/\+/g, ' ').trim(); } catch { return ''; }
+}
+
 // 地名搜尋:用 OpenStreetMap 的 Nominatim(免 API key)。回傳 [{ label, lat, lng }]。
 // 注意:Nominatim 使用政策限制每秒 ~1 次、需附識別資訊(瀏覽器會自動帶 Referer);僅供輕量人工搜尋。
 export async function search(query) {

@@ -4,7 +4,7 @@
 // 地圖只是「跳到某座標」的觀景窗(免 API key)。點一下任一地點 → 下方顯示完整資訊。
 
 import { loadUser, saveUser, uid } from './store.js';
-import { parseLatLng, search, embedUrl, orderByRoute, directionsEmbedUrl, haversineKm } from './geo.js';
+import { parseLatLng, search, embedUrl, orderByRoute, directionsEmbedUrl, haversineKm, placeNameFromUrl } from './geo.js';
 import { groupToJSON, parseImport, normPoint } from './io.js';
 
 const $ = (s) => document.querySelector(s);
@@ -207,7 +207,7 @@ async function doSearch() {
   const text = el.q.value.trim();
   if (!text) return;
   const coords = parseLatLng(text);
-  if (coords) { setPick({ ...coords, label: `${coords.lat}, ${coords.lng}` }); return; }
+  if (coords) { setPick({ lat: coords.lat, lng: coords.lng, name: placeNameFromUrl(text) }); return; }
   el.results.hidden = false;
   el.results.innerHTML = '<div class="r-msg">搜尋中…</div>';
   try {
@@ -222,8 +222,8 @@ function setPick(loc) {
   pick = loc;
   el.results.hidden = true;
   el.picked.hidden = false;
-  el.pickedLoc.textContent = `${loc.label}　(${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)})`;
-  if (!el.title.value.trim()) el.title.value = String(loc.label).split(',')[0].trim();
+  el.pickedLoc.textContent = (loc.name ? loc.name + '　' : '') + `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`;
+  if (!el.title.value.trim() && loc.name) el.title.value = loc.name;   // 網址/搜尋有名稱就自動帶入標題
   showOnMap(loc.lat, loc.lng, 16);
 }
 function addPoint() {
@@ -285,7 +285,7 @@ el.line2.addEventListener('change', () => { user.line2 = el.line2.value; persist
 el.sort.addEventListener('change', () => { user.sort = el.sort.value; persist(); renderList(); });
 el.search.addEventListener('click', doSearch);
 el.q.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
-el.results.addEventListener('click', (e) => { const t = e.target.closest('.r-item'); if (t) setPick(results[+t.dataset.r]); });
+el.results.addEventListener('click', (e) => { const t = e.target.closest('.r-item'); if (t) { const rr = results[+t.dataset.r]; setPick({ lat: rr.lat, lng: rr.lng, name: rr.label.split(',')[0].trim() }); } });
 el.addPoint.addEventListener('click', addPoint);
 el.list.addEventListener('click', (e) => {
   const del = e.target.closest('[data-del]');

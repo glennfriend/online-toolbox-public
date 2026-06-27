@@ -3,7 +3,7 @@
 
 import { loadState, saveState, uid } from './store.js';
 import { parseLatLng, search, embedUrl, validLatLng } from './geo.js';
-import { groupToJSON, groupToCSV, parseImport } from './io.js';
+import { groupToJSON, parseImport } from './io.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -62,10 +62,10 @@ async function doSearch() {
   el.results.innerHTML = '<div class="r-msg">搜尋中…</div>';
   try {
     results = await search(text);
-    if (!results.length) { el.results.innerHTML = '<div class="r-msg">找不到結果(可改貼座標或 Google Maps 連結)</div>'; return; }
+    if (!results.length) { el.results.innerHTML = '<div class="r-msg">找不到(OSM 沒有店家資料很正常)。找店家請在 Google Maps 找到後,複製「網址列」連結貼上;短網址 maps.app.goo.gl 無座標、不適用。</div>'; return; }
     el.results.innerHTML = results.map((r, i) => `<div class="r-item" data-r="${i}">${esc(r.label)}</div>`).join('');
   } catch (e) {
-    el.results.innerHTML = `<div class="r-msg">搜尋失敗:${esc(e.message)}(可改貼座標或 Google Maps 連結)</div>`;
+    el.results.innerHTML = `<div class="r-msg">搜尋失敗:${esc(e.message)}。可改貼 Google Maps 網址列連結或經緯度。</div>`;
   }
 }
 function setPick(loc) {
@@ -140,7 +140,6 @@ $('#newGroup').addEventListener('click', newGroup);
 $('#renameGroup').addEventListener('click', renameGroup);
 $('#delGroup').addEventListener('click', delGroup);
 $('#exportJson').addEventListener('click', () => download(safeName(current().name) + '.json', groupToJSON(current()), 'application/json'));
-$('#exportCsv').addEventListener('click', () => download(safeName(current().name) + '.csv', groupToCSV(current()), 'text/csv;charset=utf-8'));
 $('#importBtn').addEventListener('click', () => $('#importFile').click());
 $('#importFile').addEventListener('change', (e) => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; });
 

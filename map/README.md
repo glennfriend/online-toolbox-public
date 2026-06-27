@@ -12,9 +12,9 @@
 
 - **多組(group)**:每組是一批地點;可新增 / 改名 / 刪除 / 切換組。
 - **每個點**:`emoji 圖示 + 標題 + 內容 + 經緯度`。
-- **加點**:搜尋地名(OpenStreetMap Nominatim,免 key)、或直接貼 **Google Maps 連結** / `lat,lng`。
+- **加點**:找店家最準的方式是**貼 Google Maps「網址列」連結**(含 `@lat,lng`);也可搜尋地址/地標(OpenStreetMap Nominatim,免 key)、或直接貼 `lat,lng`。
 - **點清單 → 地圖跳位**:點任一列,右邊地圖就切到該座標。
-- **匯出 / 匯入**:每組可存成 **JSON(主)** 或 **CSV(輔)**,也可匯入成新的一組。
+- **匯出 / 匯入**:每組可存成 **JSON**,也可匯入 JSON 成新的一組。
 - 全部存在瀏覽器 `localStorage`,不上傳、不需要帳號。
 
 ## 為什麼免 key(關鍵設計)
@@ -28,7 +28,7 @@
 
 ## 資料格式(= 給 AI agent 產生資料的契約)
 
-一個檔 = 一組。匯入會自動判別 JSON / CSV。**JSON schema**:
+一個檔 = 一組。匯出/匯入皆為 JSON。**JSON schema**:
 
 ```json
 {
@@ -40,7 +40,6 @@
 ```
 
 - `lat` / `lng` 是**資料本體**(必填、範圍內才會被接受);`emoji` 預設 `📍`;`note`、`z`(縮放,預設 16)可省略。
-- CSV 欄位:`emoji,title,note,lat,lng`(第一列為標頭)。
 
 ### 給 AI agent 用
 
@@ -63,7 +62,7 @@ map/
     ├── main.js     殼層:組/點清單、搜尋選點、地圖跳位、匯出入、事件
     ├── store.js    localStorage 多組存取
     ├── geo.js      解析座標 / Nominatim 搜尋 / 免 key 地圖嵌入網址(純函式)
-    └── io.js       匯出/匯入(JSON、CSV)(純函式)
+    └── io.js       匯出/匯入(JSON)(純函式)
 ```
 
 ## 部署

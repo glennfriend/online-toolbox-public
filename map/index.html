@@ -9,20 +9,17 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="head">
-    <h1>Map
+  <div class="bar">
+    <span class="brand">Map
       <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
         <span class="info-tip">
           <span>把地點分「組」記錄;每個點有 emoji、標題、內容</span>
-          <span>點清單裡的地點 → 右邊地圖跳過去(免 API key)</span>
-          <span>搜尋地名、或貼 Google Maps 連結 / 經緯度都可以</span>
-          <span>每組可匯出 / 匯入(JSON 或 CSV),純前端、存在本機</span>
+          <span>點清單裡的地點 → 地圖跳過去(免 API key)</span>
+          <span>找店家:在 Google Maps 找到 → 複製「網址列」連結貼上(短網址 maps.app.goo.gl 無座標、不適用)</span>
+          <span>也可搜尋地址/地標、或貼經緯度;每組可匯出/匯入 JSON,純前端存本機</span>
         </span>
       </span>
-    </h1>
-  </header>
-
-  <div class="bar">
+    </span>
     <span class="bar-label">組</span>
     <select id="groups" class="select"></select>
     <button id="newGroup" class="btn" type="button">＋ 新組</button>
@@ -30,16 +27,15 @@
     <button id="delGroup" class="btn" type="button">刪除組</button>
     <span class="spacer"></span>
     <button id="exportJson" class="btn" type="button">匯出 JSON</button>
-    <button id="exportCsv" class="btn" type="button">匯出 CSV</button>
-    <button id="importBtn" class="btn" type="button">匯入</button>
-    <input id="importFile" type="file" accept=".json,.csv" hidden>
+    <button id="importBtn" class="btn" type="button">匯入 JSON</button>
+    <input id="importFile" type="file" accept=".json,application/json" hidden>
   </div>
 
   <section class="layout">
     <aside class="panel">
       <div class="add">
         <div class="add-row">
-          <input id="q" class="q" type="text" placeholder="搜尋地點 / 貼 Google Maps 連結 / 或 lat,lng">
+          <input id="q" class="q" type="text" placeholder="貼 Google Maps 連結(找店家最準)/ 搜地址地標 / lat,lng">
           <button id="search" class="btn primary" type="button">搜尋</button>
         </div>
         <div id="results" class="results" hidden></div>

@@ -13,15 +13,22 @@
     <span class="brand">Map
       <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
         <span class="info-tip">
-          <span>🔒 內建組來自版控資料、唯讀;你自己的組可新增/匯入/刪除</span>
-          <span>點清單裡的地點 → 看詳情 + 地圖跳過去(免 API key)</span>
-          <span>找店家:在 Google Maps 找到 → 複製「網址列」連結貼上(短網址 maps.app.goo.gl 無座標、不適用)</span>
-          <span>每組可匯出 / 匯入 JSON,純前端、你的組存在本機</span>
+          <span class="tip-h">[Feature]</span>
+          <span>🔒 內建資料組 來自版控資料、唯讀預設值</span>
+          <span>User 可以 新增 / 匯入 / 刪除</span>
+          <span>評分排序</span>
+          <span>可解析輸入 Google Map url</span>
+          <span class="tip-h">[不支援]</span>
+          <span>地點搜尋、商家搜尋</span>
+          <span>短網址(maps.app.goo.gl)</span>
+          <span class="tip-h">[技術支援]</span>
+          <span>localStorage</span>
+          <span>Google Maps iframe</span>
+          <span>OpenStreetMap Nominatim API</span>
         </span>
       </span>
     </span>
-    <span class="bar-label">組</span>
-    <select id="groups" class="select"></select>
+    <select id="groups" class="select" title="資料組"></select>
     <select id="line2" class="select select-sm" title="清單第二行顯示的內容">
       <option value="address">地址</option>
       <option value="hours">營業時間</option>

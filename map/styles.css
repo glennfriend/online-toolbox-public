@@ -38,7 +38,9 @@ body {
   box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; font-size: .82rem;
 }
 .info:hover .info-tip, .info-btn:focus + .info-tip { display: block; }
-.info-tip > span { display: block; margin: .2rem 0; color: var(--muted); }
+.info-tip > span { display: block; margin: .15rem 0 .15rem .8rem; color: var(--muted); }
+.info-tip > .tip-h { margin: .55rem 0 .15rem; padding: 0; color: var(--fg); font-weight: 700; }
+.info-tip > .tip-h:first-child { margin-top: 0; }
 
 /* 主版面:左清單 / 右地圖,填滿剩餘高度 */
 .layout { flex: 1; min-height: 0; display: flex; gap: 1rem; }

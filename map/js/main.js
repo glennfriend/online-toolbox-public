@@ -58,7 +58,8 @@ function renderAll() {
   clearMapView(); showGroupDefault();
 }
 function renderGroups() {
-  el.groups.innerHTML = allGroups().map((g) => `<option value="${g.id}">${g.builtin ? '🔒 ' : ''}${esc(g.name)}(${g.points.length})</option>`).join('');
+  el.groups.innerHTML = '<option disabled>──── 資料組 ────</option>'
+    + allGroups().map((g) => `<option value="${g.id}">${g.builtin ? '🔒 ' : ''}${esc(g.name)}(${g.points.length})</option>`).join('');
   const g = current(); if (g) el.groups.value = g.id;
 }
 function renderControls() {

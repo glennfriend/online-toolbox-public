@@ -19,9 +19,9 @@
           <span>純前端、圖片不上傳;模型快取於瀏覽器</span>
           <span class="tip-h">[不支援]</span>
           <span>手寫、嚴重模糊 / 藝術字、複雜版面不保證</span>
-          <span>首次需下載模型(約 20MB,之後快取)</span>
+          <span>首次需下載模型(數十 MB,之後快取)</span>
           <span class="tip-h">[技術支援]</span>
-          <span>PaddleOCR PP-OCRv5 + onnxruntime-web(WASM/WebGPU)</span>
+          <span>PaddleOCR PP-OCRv6(ppu-paddle-ocr)+ onnxruntime-web(WebGPU/WASM)</span>
           <span>純前端、無後端、無 API key</span>
         </span>
       </span>
@@ -55,6 +55,16 @@
     </div>
   </section>
 
+  <!-- import map:把 onnxruntime-web 指到「瀏覽器專用 bundle」(關鍵:避開 node 相容墊片 process.binding 的錯) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0/dist/ort.all.bundle.min.mjs",
+      "ppu-ocv/web": "https://cdn.jsdelivr.net/npm/ppu-ocv@3.3.0/index.web.js",
+      "ppu-ocv/canvas-web": "https://cdn.jsdelivr.net/npm/ppu-ocv@3.3.0/index.canvas-web.js"
+    }
+  }
+  </script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

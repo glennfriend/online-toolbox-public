@@ -9,14 +9,14 @@
 ## 功能
 
 - **取圖三種方式**:拖放、直接貼上(Ctrl/⌘+V)、點擊上傳。
-- **一個模型吃繁+簡+英**:用 PaddleOCR 的 **PP-OCRv5**(`lang:'ch'`),官方技術報告說明它以單一模型統一辨識簡體/繁體/拼音/英文/日文。
+- **一個模型吃繁+簡+英**:用 PaddleOCR **PP-OCRv6 small**(透過 `ppu-paddle-ocr`),單一模型統一辨識簡體 / 繁體 / 英文與 50+ 語言。
 - **結果可編輯可複製**:辨識出的逐行文字放進文字框,改完一鍵複製。
-- **純前端**:辨識在瀏覽器內用 `onnxruntime-web` 跑,**不上傳、無後端、無金鑰**;模型首次下載(約 20MB)後由瀏覽器快取,之後秒載入。
+- **純前端**:辨識在瀏覽器內用 `onnxruntime-web` 跑,**不上傳、無後端、無金鑰**;模型首次下載(數十 MB)後由瀏覽器快取,之後秒載入。
 
 ## 限制(老實說)
 
 - **清晰印刷體**(截圖、文件照)效果最好;**手寫、嚴重模糊、藝術字、複雜版面(多欄/表格)、直排** 不保證。
-- **繁體**靠 PP-OCRv5 才好(舊版 v4 偏簡體)。
+- **繁體**:PP-OCRv6 單模型已同時涵蓋繁 / 簡,清晰印刷體最佳。
 - **首次需網路**下載模型;之後離線可用(已快取)。
 - 速度:WebGPU(若可用)較快,否則單執行緒 WASM 保底,每張圖數秒。
 
@@ -35,9 +35,10 @@ ocr/
 
 ## 技術 / 維護註記
 
-- 引擎:官方 **`@paddleocr/paddleocr-js`**(PP-OCRv5)+ **onnxruntime-web**;`ortOptions.backend:'auto'`(WebGPU 優先、否則 WASM)。
-- 目前用 **esm.sh** 載入函式庫(`ocr.js` 的 `LIB_URL`),模型走函式庫預設來源、瀏覽器快取。日後若要**自架/釘版本**:改 `LIB_URL`,並用 `textDetectionModelAsset.url` / `textRecognitionModelAsset.url` 指向自架的 `.tar`(ustar、未壓縮,內含 `inference.onnx` + `inference.yml`)。
-- ⚠️ **GitHub Pages 不能設 COOP/COEP 標頭** → 不能用多執行緒 WASM(SharedArrayBuffer);故不開 worker 多執行緒,靠 WebGPU 或單執行緒 WASM。
+- 引擎:**`ppu-paddle-ocr`** 的瀏覽器入口 `/web`(PP-OCRv6 small)+ **onnxruntime-web**(WebGPU 優先、否則 WASM)。設定照官方 demo 的「無打包器 CDN」用法。
+- **關鍵**:`index.html` 的 **import map** 把 `onnxruntime-web` 指到瀏覽器專用 bundle(`ort.all.bundle.min.mjs`),**避開 CDN 把 Node 版打包進來造成的 `process.binding` 錯**;`ppu-ocv/web`、`ppu-ocv/canvas-web` 也由 import map 提供。函式庫本體由 `ocr.js` 的 `WEB_ENTRY`(jsdelivr)動態載入。
+- 模型走函式庫預設來源 fetch、靠瀏覽器 HTTP 快取。日後要**自架 / 釘版本 / IndexedDB 持久快取**:改 import map 與 `WEB_ENTRY` 指向自架檔,或用 `model.detection/recognition/charactersDictionary` 指定自架 `.onnx`/`.ort` + 字典。
+- ⚠️ **GitHub Pages 不能設 COOP/COEP** → WASM 為單執行緒(較慢);WebGPU 不受影響。函式庫附 `coi-serviceworker.js` 可開多執行緒,本工具**暫未啟用**(避免它會重載頁面+改寫所有 fetch 的副作用)。
 
 ## 部署
 

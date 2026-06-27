@@ -1,50 +1,61 @@
 // ocr.js — OCR 引擎整合層(唯一碰 PaddleOCR / onnxruntime-web 的地方)。
 //
-// 用官方 @paddleocr/paddleocr-js,PP-OCRv5(lang:'ch' 單一模型同時辨識 繁體+簡體+英文)。
-// 全程在瀏覽器跑(onnxruntime-web),無後端、無 API key;模型首次下載後由瀏覽器快取。
+// 用 ppu-paddle-ocr 的「瀏覽器專用」入口(/web),引擎 PP-OCRv6 small:
+// 單一模型涵蓋 簡體 + 繁體 + 英文 + 50+ 語言。全程瀏覽器內跑、無後端、無 API key。
 //
-// 註:GitHub Pages 無法設定 COOP/COEP 標頭 → 不能用多執行緒 WASM(SharedArrayBuffer)。
-//     故 backend:'auto'(WebGPU 優先,否則單執行緒 WASM 保底),不開 worker 多執行緒。
+// 關鍵:onnxruntime-web 走 index.html 的 import map → 瀏覽器專用 bundle(ort.all.bundle.min.mjs),
+//       避開 CDN 把 Node 版打包進來造成的 `process.binding` 錯誤。
+// 設定照官方 demo(snowfluke)的無打包器 CDN 用法。
 //
-// 整合點集中於此:若日後要換引擎(Tesseract/其它)或自架模型,只改這支。
+// 模型首次由函式庫預設來源 fetch、靠瀏覽器 HTTP 快取;WebGPU 可用就用、否則 WASM。
+// GitHub Pages 無法設 COOP/COEP → WASM 為單執行緒(較慢但可動);未啟用 coi-serviceworker。
+//
+// 要換引擎或自架模型,只改這支 + index.html 的 import map。
 
-const LIB_URL = 'https://esm.sh/@paddleocr/paddleocr-js';   // 之後可改自架/釘版本
+const WEB_ENTRY = 'https://cdn.jsdelivr.net/npm/ppu-paddle-ocr@6.0.0/web/index.js';
 
-let _ocr = null;     // 已初始化的引擎(模型載入過就重用)
-let _loading = null; // 初始化中的 promise(避免重複載入)
+let _svc = null;       // 已初始化的服務(模型載入過就重用)
+let _loading = null;   // 初始化中的 promise(避免重複載入)
 
-// 確保引擎就緒(首次會下載模型,之後重用)。onStatus 回報進度文字。
-async function ensureEngine(onStatus) {
-  if (_ocr) return _ocr;
+async function ensureService(onStatus) {
+  if (_svc) return _svc;
   if (_loading) return _loading;
   _loading = (async () => {
-    onStatus?.('載入模型中(首次約 20MB,之後瀏覽器快取、秒載入)…');
-    const mod = await import(LIB_URL);
-    const PaddleOCR = mod.PaddleOCR || mod.default?.PaddleOCR || mod.default;
-    _ocr = await PaddleOCR.create({
-      lang: 'ch',                 // 單一模型:簡體 + 繁體 + 拼音 + 英文
-      ocrVersion: 'PP-OCRv5',
-      ortOptions: { backend: 'auto' },   // WebGPU 優先,否則單執行緒 WASM
-    });
-    return _ocr;
+    onStatus?.('載入引擎與模型中(首次數十 MB,之後瀏覽器快取、秒載入)…');
+    const { PaddleOcrService } = await import(WEB_ENTRY);
+    const svc = new PaddleOcrService();   // 預設 PP-OCRv6 small:繁 + 簡 + 英 單一模型
+    await svc.initialize();               // 偵測模型在此載入(一次性)
+    _svc = svc;
+    return svc;
   })();
   try { return await _loading; } finally { _loading = null; }
 }
 
-// 辨識一張圖(File / Blob)→ 回傳純文字(逐行)。onStatus 回報進度。
+// 辨識一張圖(File / Blob)→ 回傳純文字。onStatus 回報進度。
 export async function recognize(blobOrFile, onStatus) {
-  const ocr = await ensureEngine(onStatus);
+  const svc = await ensureService(onStatus);
   onStatus?.('辨識中…');
-  const out = await ocr.predict(blobOrFile);
-  const result = Array.isArray(out) ? out[0] : out;
-  return linesOf(result);
+  const canvas = await blobToCanvas(blobOrFile);
+  const result = await svc.recognize(canvas);
+  return typeof result?.text === 'string' ? result.text : extractText(result);
 }
 
-// 從各種可能的回傳形狀抽出逐行文字(防禦式:欄位名跨版本可能不同)。
-function linesOf(result) {
-  const items = result?.items || result?.texts || result?.data || [];
-  return items
-    .map((it) => (typeof it === 'string' ? it : (it.text ?? it.transcription ?? it.rec_text ?? it.label ?? '')))
-    .filter((s) => s && s.trim())
-    .join('\n');
+// 圖片 → canvas(ppu-paddle-ocr/web 的 recognize 吃 HTMLCanvasElement)。
+async function blobToCanvas(blob) {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    return c;
+  } finally { URL.revokeObjectURL(url); }
+}
+
+// 後備:萬一回傳沒有 .text,從常見形狀抽逐行文字。
+function extractText(result) {
+  const lines = result?.lines || result?.boxes || result?.results || [];
+  return lines.map((x) => (typeof x === 'string' ? x : (x.text ?? x.transcription ?? ''))).filter(Boolean).join('\n');
 }

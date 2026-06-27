@@ -44,9 +44,6 @@ body {
 .mapwrap { flex: 1; min-width: 0; min-height: 0; }
 .map { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-code); }
 
-/* 內建唯讀提示 */
-.ro-note { flex: 0 0 auto; background: #fff8c5; border: 1px solid #f0e0a0; border-radius: 8px; padding: .45rem .6rem; font-size: .8rem; color: #6a5300; }
-
 /* 詳情面板(點選地點後顯示) */
 .detail { flex: 0 0 auto; position: relative; background: #fff; border: 1px solid var(--accent); border-radius: 10px; padding: .7rem .8rem; }
 .detail-close { position: absolute; top: .4rem; right: .4rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: .9rem; }

@@ -13,7 +13,7 @@ const el = {
   q: $('#q'), search: $('#search'), results: $('#results'),
   picked: $('#picked'), pickedLoc: $('#pickedLoc'),
   emoji: $('#emoji'), title: $('#title'), address: $('#address'), hours: $('#hours'), tags: $('#tags'), rating: $('#rating'), note: $('#note'),
-  addPoint: $('#addPoint'), adder: $('#adder'), roNote: $('#roNote'), detail: $('#detail'),
+  addPoint: $('#addPoint'), adder: $('#adder'), detail: $('#detail'),
   delGroup: $('#delGroup'), renameGroup: $('#renameGroup'),
 };
 
@@ -52,7 +52,6 @@ function renderGroups() {
 function renderControls() {
   const ro = isBuiltin(current());
   el.adder.hidden = ro;
-  el.roNote.hidden = !ro;
   el.delGroup.disabled = ro;
   el.renameGroup.disabled = ro;
 }

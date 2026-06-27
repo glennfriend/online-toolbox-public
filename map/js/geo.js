@@ -40,3 +40,41 @@ export async function search(query) {
 export function embedUrl(lat, lng, z = 16) {
   return `https://maps.google.com/maps?q=${lat},${lng}&z=${z}&output=embed`;
 }
+
+// 球面直線距離(公里)。
+export function haversineKm(a, b) {
+  const R = 6371, rad = (d) => d * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+// 路線排序:最近鄰(從 start 出發)+ 2-opt 解交叉。回傳 points 的排序(不含 start)。
+export function orderByRoute(points, start) {
+  const pts = points.slice();
+  if (pts.length <= 1) return pts;
+  const out = []; const rem = pts.slice(); let cur = start;
+  while (rem.length) {                       // 最近鄰
+    let bi = 0, bd = Infinity;
+    for (let i = 0; i < rem.length; i++) { const d = haversineKm(cur, rem[i]); if (d < bd) { bd = d; bi = i; } }
+    cur = rem[bi]; out.push(rem.splice(bi, 1)[0]);
+  }
+  const seq = [start, ...out];               // 2-opt(起點固定;開放路徑、不繞回起點)
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 1; i < seq.length - 1; i++) for (let k = i + 1; k < seq.length; k++) {
+      const a = seq[i - 1], b = seq[i], c = seq[k], d = seq[k + 1];
+      const before = haversineKm(a, b) + (d ? haversineKm(c, d) : 0);
+      const after = haversineKm(a, c) + (d ? haversineKm(b, d) : 0);
+      if (after + 1e-9 < before) { const rev = seq.slice(i, k + 1).reverse(); seq.splice(i, rev.length, ...rev); improved = true; }
+    }
+  }
+  return seq.slice(1);
+}
+
+// 免 key 的「路線」嵌入網址(saddr/daddr + to: 多停點;mode 'w' 步行 / 'd' 開車)。
+export function directionsEmbedUrl(stops, mode = 'w') {
+  const f = (s) => `${s.lat},${s.lng}`;
+  return `https://maps.google.com/maps?saddr=${f(stops[0])}&daddr=${stops.slice(1).map(f).join('+to:')}&dirflg=${mode}&output=embed`;
+}

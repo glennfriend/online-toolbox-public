@@ -68,6 +68,13 @@ body {
 .rating-in { width: 5em; font: inherit; font-size: .85rem; padding: .4em .6em; border: 1px solid var(--border); border-radius: 8px; }
 .row-rating { font-size: .8rem; flex: 0 0 auto; }
 .row.on { background: #eef4ff; }
+.route-row { background: #f3f0ff; border-bottom: 2px solid var(--border); }
+.route-row:hover { background: #e9e3ff; }
+.route-row.on { background: #e3dbff; }
+.r-steps { margin-top: .4rem; display: flex; flex-direction: column; gap: .2rem; }
+.r-step { font-size: .85rem; display: flex; align-items: baseline; gap: .4rem; }
+.r-num { flex: 0 0 auto; min-width: 1.4em; text-align: center; font-size: .72rem; background: var(--accent); color: #fff; border-radius: 999px; padding: .05em .35em; }
+.r-dropped { margin-top: .45rem; font-size: .78rem; }
 .add-row { display: flex; gap: .5rem; }
 .q { flex: 1; min-width: 0; font: inherit; font-size: .9rem; padding: .45em .6em; border: 1px solid var(--border); border-radius: 8px; }
 .q:focus, .title:focus, .note:focus, .emoji:focus { outline: 2px solid var(--accent); outline-offset: -1px; }

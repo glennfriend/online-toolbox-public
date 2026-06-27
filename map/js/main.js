@@ -4,7 +4,7 @@
 // 地圖只是「跳到某座標」的觀景窗(免 API key)。點一下任一地點 → 下方顯示完整資訊。
 
 import { loadUser, saveUser, uid } from './store.js';
-import { parseLatLng, search, embedUrl } from './geo.js';
+import { parseLatLng, search, embedUrl, orderByRoute, directionsEmbedUrl, haversineKm } from './geo.js';
 import { groupToJSON, parseImport, normPoint } from './io.js';
 
 const $ = (s) => document.querySelector(s);
@@ -66,7 +66,12 @@ function renderList() {
       : '<div class="empty">這組還沒有地點。用上面貼 Google Maps 連結 / 經緯度來新增。</div>';
     return;
   }
-  el.list.innerHTML = sortedPoints(g).map((p) => {
+  const routeRow = g.points.length >= 2 ? `
+    <div class="row route-row${selected && selected.route ? ' on' : ''}" data-route="1" title="顯示本組路線(依距離自動串連)">
+      <span class="row-emoji">🧭</span>
+      <span class="row-main"><span class="row-title">路線(本組 ${g.points.length} 點)</span><span class="row-note">依距離自動串連</span></span>
+    </div>` : '';
+  el.list.innerHTML = routeRow + sortedPoints(g).map((p) => {
     const l2 = esc(line2Text(p));
     return `
     <div class="row${selected && selected.id === p.id ? ' on' : ''}" data-id="${p.id}" title="點一下:看詳情並跳到地圖">
@@ -113,9 +118,21 @@ function isOpenNow(hours) {
 function openMark(hours) { const o = isOpenNow(hours); return o === true ? '🟢 ' : o === false ? '🔴 ' : ''; }
 function renderDetail() {
   if (!selected) { el.detail.hidden = true; return; }
+  el.detail.hidden = false;
+  if (selected.route) {
+    const r = selected;
+    const steps = r.included.map((p, i) => `<div class="r-step"><span class="r-num">${i + 1}</span>${esc(p.emoji)} ${esc(p.title || '(未命名)')}</div>`).join('');
+    const dropped = r.dropped.length ? `<div class="d-approx r-dropped">⚠ ${r.dropped.length} 個點未納入(Google 路線約上限 ${ROUTE_MAX_STOPS} 站):${esc(r.dropped.map((p) => p.title).join('、'))}</div>` : '';
+    el.detail.innerHTML = `
+      <button class="detail-close" id="detailClose" type="button" title="關閉">✕</button>
+      <div class="d-title">🧭 ${esc(r.groupName)} 路線</div>
+      <div class="d-coord">${r.mode === 'd' ? '開車' : '步行'} · 依距離自動排序(最近鄰 + 2-opt)· 座標概略</div>
+      <div class="r-steps">${steps}</div>${dropped}`;
+    $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
+    return;
+  }
   const p = selected;
   const tags = (p.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join('');
-  el.detail.hidden = false;
   el.detail.innerHTML = `
     <button class="detail-close" id="detailClose" type="button" title="關閉">✕</button>
     <div class="d-title">${esc(p.emoji)} ${esc(p.title || '(未命名)')}${p.rating ? ` <span class="d-rating">★${esc(p.rating)}</span>` : ''}</div>
@@ -131,23 +148,46 @@ function renderDetail() {
 // lazy 建立;超過上限就移除「最久沒看」的那張(切換組時整批清掉)。
 const MAP_CACHE_MAX = 6;   // 同組內最多保留幾張已載入的地圖(可調)
 let mapCache = [];         // [{ key, el }],陣列尾端 = 最近使用
-function showOnMap(lat, lng, z) {
-  const zoom = z || 16;
-  const key = `${lat},${lng},${zoom}`;
+function showMapUrl(key, url) {
   let entry = mapCache.find((e) => e.key === key);
   if (entry) {
-    mapCache = mapCache.filter((e) => e !== entry);          // 命中:拉到最近使用
+    mapCache = mapCache.filter((e) => e !== entry);          // 命中:拉到最近使用(不重載)
   } else {
     const f = document.createElement('iframe');
     f.className = 'map'; f.title = '地圖'; f.loading = 'lazy';
     f.referrerPolicy = 'strict-origin-when-cross-origin';
-    f.src = embedUrl(lat, lng, zoom);                        // 只有新點才真的載入
+    f.src = url;                                             // 只有新的才真的載入
     el.mapwrap.appendChild(f);
     entry = { key, el: f };
   }
   mapCache.push(entry);
   while (mapCache.length > MAP_CACHE_MAX) mapCache.shift().el.remove();   // 淘汰最久沒看的
   for (const e of mapCache) e.el.style.display = (e === entry) ? 'block' : 'none';
+}
+function showOnMap(lat, lng, z) { const zoom = z || 16; showMapUrl(`${lat},${lng},${zoom}`, embedUrl(lat, lng, zoom)); }
+
+// 路線:起點用 center(沒有就用第一個點),最近鄰+2-opt 排序,上限 ROUTE_MAX_STOPS 站。
+const ROUTE_MAX_STOPS = 10;
+function buildRoute(g) {
+  let startCoord, visit, lead;
+  if (g.center) { startCoord = { lat: g.center.lat, lng: g.center.lng }; visit = g.points; lead = []; }
+  else { startCoord = g.points[0]; visit = g.points.slice(1); lead = [g.points[0]]; }
+  const allOrdered = [...lead, ...orderByRoute(visit, startCoord)];   // 資料點的路線順序(不含 center)
+  const cap = g.center ? ROUTE_MAX_STOPS - 1 : ROUTE_MAX_STOPS;
+  const included = allOrdered.slice(0, cap);
+  const dropped = allOrdered.slice(cap);
+  const stops = [];
+  if (g.center) stops.push(startCoord);
+  included.forEach((p) => stops.push({ lat: p.lat, lng: p.lng }));
+  const span = stops.length > 1 ? Math.max(...stops.slice(1).map((s) => haversineKm(stops[0], s))) : 0;
+  const mode = span > 1.5 ? 'd' : 'w';   // 點分散(離起點 >1.5km)用開車,否則步行
+  return { stops, included, dropped, mode, hasCenter: !!g.center };
+}
+function showRoute() {
+  const g = current();
+  const r = buildRoute(g);
+  selected = { route: true, groupName: g.name, ...r };
+  showMapUrl(`route:${g.id}:${g.points.length}:${r.mode}`, directionsEmbedUrl(r.stops, r.mode));
 }
 function clearMapCache() { for (const e of mapCache) e.el.remove(); mapCache = []; }
 function showGroupDefault() {
@@ -246,6 +286,7 @@ el.addPoint.addEventListener('click', addPoint);
 el.list.addEventListener('click', (e) => {
   const del = e.target.closest('[data-del]');
   if (del) { const g = current(); g.points = g.points.filter((x) => x.id !== del.dataset.del); persist(); renderGroups(); renderList(); selected = null; renderDetail(); return; }
+  if (e.target.closest('[data-route]')) { showRoute(); renderDetail(); renderList(); return; }
   const row = e.target.closest('.row');
   if (row) { const p = current().points.find((x) => x.id === row.dataset.id); if (p) { selected = p; renderDetail(); renderList(); showOnMap(p.lat, p.lng, p.z); } }
 });

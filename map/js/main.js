@@ -9,7 +9,7 @@ import { groupToJSON, parseImport, normPoint } from './io.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
-  groups: $('#groups'), list: $('#list'), map: $('#map'),
+  groups: $('#groups'), list: $('#list'), mapwrap: $('#mapwrap'),
   q: $('#q'), search: $('#search'), results: $('#results'),
   picked: $('#picked'), pickedLoc: $('#pickedLoc'),
   emoji: $('#emoji'), title: $('#title'), address: $('#address'), hours: $('#hours'), tags: $('#tags'), rating: $('#rating'), note: $('#note'),
@@ -101,14 +101,36 @@ function renderDetail() {
     ${p.note ? `<div class="d-note">${esc(p.note)}</div>` : ''}`;
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
 }
-function showOnMap(lat, lng, z) { el.map.src = embedUrl(lat, lng, z || 16); }
+// 地圖 LRU 快取:切點時不重載——已看過的 iframe 只是隱藏,切回就顯示(極快)。
+// lazy 建立;超過上限就移除「最久沒看」的那張(切換組時整批清掉)。
+const MAP_CACHE_MAX = 6;   // 同組內最多保留幾張已載入的地圖(可調)
+let mapCache = [];         // [{ key, el }],陣列尾端 = 最近使用
+function showOnMap(lat, lng, z) {
+  const zoom = z || 16;
+  const key = `${lat},${lng},${zoom}`;
+  let entry = mapCache.find((e) => e.key === key);
+  if (entry) {
+    mapCache = mapCache.filter((e) => e !== entry);          // 命中:拉到最近使用
+  } else {
+    const f = document.createElement('iframe');
+    f.className = 'map'; f.title = '地圖'; f.loading = 'lazy';
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.src = embedUrl(lat, lng, zoom);                        // 只有新點才真的載入
+    el.mapwrap.appendChild(f);
+    entry = { key, el: f };
+  }
+  mapCache.push(entry);
+  while (mapCache.length > MAP_CACHE_MAX) mapCache.shift().el.remove();   // 淘汰最久沒看的
+  for (const e of mapCache) e.el.style.display = (e === entry) ? 'block' : 'none';
+}
+function clearMapCache() { for (const e of mapCache) e.el.remove(); mapCache = []; }
 function showGroupDefault() {
   const g = current();
   if (g.points.length) showOnMap(g.points[0].lat, g.points[0].lng, g.points[0].z);
   else if (g.center) showOnMap(g.center.lat, g.center.lng, g.center.z);
-  else el.map.removeAttribute('src');
+  // 空組且無 center:不顯示(切組時已清快取)
 }
-function renderAll() { el.line2.value = user.line2; renderGroups(); renderControls(); selected = null; renderDetail(); renderList(); showGroupDefault(); }
+function renderAll() { el.line2.value = user.line2; renderGroups(); renderControls(); selected = null; renderDetail(); renderList(); clearMapCache(); showGroupDefault(); }
 
 // ── 搜尋 / 選點(加入用)──
 async function doSearch() {
@@ -188,7 +210,7 @@ function importFile(file) {
 }
 
 // ── 事件 ──
-el.groups.addEventListener('change', () => { user.currentId = el.groups.value; persist(); renderControls(); selected = null; renderDetail(); renderList(); showGroupDefault(); });
+el.groups.addEventListener('change', () => { user.currentId = el.groups.value; persist(); renderControls(); selected = null; renderDetail(); renderList(); clearMapCache(); showGroupDefault(); });
 el.line2.addEventListener('change', () => { user.line2 = el.line2.value; persist(); renderList(); });
 el.search.addEventListener('click', doSearch);
 el.q.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });

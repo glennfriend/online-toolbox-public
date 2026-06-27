@@ -5,7 +5,7 @@ import { recognize } from './ocr.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
-  drop: $('#drop'), file: $('#file'), preview: $('#preview'),
+  drop: $('#drop'), file: $('#file'), preview: $('#preview'), pick: $('#pick'),
   run: $('#run'), clear: $('#clear'), copy: $('#copy'),
   status: $('#status'), result: $('#result'),
 };
@@ -54,9 +54,9 @@ async function run() {
   }
 }
 
-// ── 取圖:上傳 / 拖放 / 貼上 ──
-el.drop.addEventListener('click', () => el.file.click());
-el.drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.file.click(); } });
+// ── 取圖:選擇檔案 / 拖放 / 貼上 ──
+// 大區塊只負責「拖曳 + 貼上」(點它不彈對話框,以免擋住貼上);選檔案走專屬按鈕。
+el.pick.addEventListener('click', () => el.file.click());
 el.file.addEventListener('change', (e) => { if (e.target.files[0]) setImage(e.target.files[0]); e.target.value = ''; });
 
 el.drop.addEventListener('dragover', (e) => { e.preventDefault(); el.drop.classList.add('over'); });

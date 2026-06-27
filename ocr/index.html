@@ -32,15 +32,16 @@
 
   <section class="layout">
     <div class="left">
-      <div id="drop" class="drop" tabindex="0">
+      <div id="drop" class="drop">
         <div class="drop-hint">
-          <div class="drop-big">拖曳圖片到這裡</div>
-          <div class="drop-sub">或 點此上傳 · 直接貼上(Ctrl/⌘+V)</div>
+          <div class="drop-big">拖曳圖片到這裡,或直接貼上(Ctrl / ⌘ + V)</div>
+          <div class="drop-sub">要從檔案選,請按下方「選擇檔案」</div>
         </div>
         <img id="preview" class="preview" alt="預覽" hidden>
       </div>
       <input id="file" type="file" accept="image/*" hidden>
       <div class="actions">
+        <button id="pick" class="btn" type="button">選擇檔案</button>
         <button id="run" class="btn primary" type="button" disabled>辨識文字</button>
         <button id="clear" class="btn" type="button">清空</button>
       </div>

@@ -124,7 +124,7 @@ function renderDetail() {
     const r = selected;
     const steps = r.included.map((p, i) => `<div class="r-step"><span class="r-num">${i + 1}</span>${esc(p.emoji)} ${esc(p.title || '(未命名)')}</div>`).join('');
     const total = r.included.length + r.dropped.length;
-    const dropped = r.dropped.length ? `<div class="d-approx r-dropped" title="${esc(r.dropped.map((p) => p.title).join('、'))}">⚠ ${r.dropped.length}/${total} 未納入(Google 路線上限 ${ROUTE_MAX_STOPS} 站,滑過看名單)</div>` : '';
+    const dropped = r.dropped.length ? `<div class="d-approx r-dropped" title="${esc(r.dropped.map((p) => p.title).join('、'))}">⚠ ${r.dropped.length}/${total} 未納入路線圖</div>` : '';
     el.detail.innerHTML = `
       <button class="detail-close" id="detailClose" type="button" title="關閉">✕</button>
       <div class="d-title">🧭 ${esc(r.groupName)} 路線</div>

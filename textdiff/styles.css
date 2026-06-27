@@ -42,25 +42,8 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.6;
   padding: .7rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg);
 }
+.ta { tab-size: 4; }
 .ta:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-
-/* inline 模式(原地比對)backdrop:textarea 文字透明、只留游標,後面疊一個逐字對齊的上色層。
-   兩者字型/字級/行高/內距/換行/tab 都必須一致才會對齊。 */
-.ta, .ta-ov { tab-size: 4; }
-.ta-ov {
-  display: none; position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none;
-  background: #fff; color: var(--fg);
-  border: 1px solid transparent; border-radius: 8px; padding: .7rem;   /* 與 .ta 同樣的 border+padding,文字起點才對齊 */
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.6;
-  white-space: pre-wrap; overflow-wrap: anywhere;
-}
-.iline { display: block; }   /* 一個原始行一個 div,只用背景色、不加內距(不可改字寬,否則跟 textarea 錯位) */
-.iline.del { background: var(--del-bg); } .iline.add { background: var(--add-bg); } .iline.moved { background: #f3e8ff; }
-body.mode-inline .ta-ov { display: block; }
-body.mode-inline .ta { position: relative; z-index: 2; color: transparent; background: transparent; caret-color: var(--fg); }
-body.mode-inline .diff { display: none; }   /* 此模式上色在輸入框內,不用下方面板 */
-/* 程式碼 (直接編輯):編輯區拉高,程式碼好讀好改(overlay 為 inset:0 會跟著長高) */
-body[data-mode="code-inline"] .ta { min-height: 360px; }
 
 /* 工具列 */
 .toolbar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: .8rem 0; }

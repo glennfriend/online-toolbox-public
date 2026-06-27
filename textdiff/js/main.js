@@ -3,8 +3,8 @@
 // 結構:每個「模式」宣告自己的 view 種類,run() 依 view 分派到對應渲染函式。模式之間互不影響:
 //   lines  = 下方並排逐行 diff(逐字嚴格 / 文章 / 程式碼)
 //   json   = 下方並排上色(把兩段 JSON 正規化成相同 key 順序後做文字 diff,不受順序/排版影響)
-//   inline = 直接在輸入框內、邊打字邊上色(背景上色層疊在透明文字的 textarea 後面;可即時編輯)
 // 每個模式自己宣告支援哪些選項,並各自記住選項狀態。
+// 註:刻意「不做」直接在輸入框內編輯上色的模式,原因見 README「為什麼不做『直接編輯』」。
 
 import { diffRows, charDiff } from './diff.js';
 import { revealHtml, revealChar } from './reveal.js';
@@ -12,7 +12,7 @@ import { strictReport } from './inspect.js';
 import { esc } from './unicode.js';
 
 const $ = (s) => document.querySelector(s);
-const inA = $('#a'), inB = $('#b'), ovA = $('#ov-a'), ovB = $('#ov-b');
+const inA = $('#a'), inB = $('#b');
 const diffBox = $('#diff'), reportBox = $('#report'), summaryEl = $('#summary'), bannerEl = $('#banner');
 const modesEl = $('#modes'), optsEl = $('#options');
 
@@ -26,13 +26,10 @@ const OPTIONS = {
   ignoreCase: { label: '忽略大小寫', group: '比對規則' },
   ignoreSpace: { label: '忽略空白', group: '比對規則' },
 };
-// instantRender 預設 false = 維持現在的 200ms 防抖;打開才即時(暫時的實驗開關,試完手感再決定去留)
+// instantRender 預設 false = 200ms 防抖;打開才即時(大輸入時防抖避免每次按鍵都重算)
 const TEXT_OPTS = ['showSpaces', 'movedBlock', 'instantRender', 'ignoreCase', 'ignoreSpace'];
 // 程式碼大小寫有意義,不提供「忽略大小寫」
 const CODE_OPTS = ['showSpaces', 'movedBlock', 'instantRender', 'ignoreSpace'];
-// inline 為了讓上色層與 textarea 逐字對齊,不做會改變字寬的標記(空白點、不可見字元符號),
-// 所以沒有「顯示空白字元」;不可見字元仍由下方嚴格報告負責。
-const INLINE_OPTS = ['movedBlock', 'instantRender', 'ignoreCase', 'ignoreSpace'];
 
 const STRICT_A = 'caf' + cp(0xE9) + ' r' + cp(0xE9) + 'sum' + cp(0xE9) + '\nHello world\nbalance: 100\ngood';
 const STRICT_B = 'cafe' + cp(0x301) + ' r' + cp(0xE9) + 'sum' + cp(0xE9) + '\nHello' + cp(0xA0) + 'world\nbalance: 100' + cp(0x200B) + '\ng' + cp(0x43E) + cp(0x43E) + 'd';
@@ -45,9 +42,7 @@ const JSON_A = '{\n  "name": "Alice",\n  "age": 30,\n  "tags": ["a", "b"],\n  "c
 const JSON_B = '{\n  "age": 31,\n  "name": "Alice",\n  "tags": ["a", "c", "d"],\n  "country": "TW"\n}';
 
 const MODES = [
-  // 逐字嚴格 與 逐字嚴格(直接編輯)是同一種比對、不同顯示方式,所以並排放一起
   { id: 'strict', label: '逐字嚴格', view: 'lines', collapse: false, options: TEXT_OPTS, a: STRICT_A, b: STRICT_B },
-  { id: 'inline', label: '逐字嚴格 (直接編輯)', view: 'inline', options: INLINE_OPTS, a: STRICT_A, b: STRICT_B },
   { id: 'article', label: '文章(只看差異)', view: 'lines', collapse: true, options: TEXT_OPTS, a: ART_A, b: ART_B },
   { id: 'code', label: '程式碼', view: 'lines', collapse: true, options: CODE_OPTS, a: CODE_A, b: CODE_B },
   { id: 'json', label: 'JSON 結構化', view: 'json', options: [], a: JSON_A, b: JSON_B },
@@ -71,8 +66,6 @@ function buildModes() {
 function setMode(m) {
   mode = m;
   [...modesEl.children].forEach((b) => b.classList.toggle('active', b.dataset.id === m.id));
-  document.body.classList.toggle('mode-inline', m.view === 'inline');   // 切換:輸入框內上色 vs 下方面板
-  document.body.dataset.mode = m.id;   // 供 CSS 針對特定模式微調(例:程式碼直接編輯把編輯區拉高)
   renderOptions(m);
   inA.value = m.a; inB.value = m.b;
   run();
@@ -101,7 +94,7 @@ function opt(id) { return !!optState[mode.id][id]; }
 function cmpOpts() { return { ignoreCase: opt('ignoreCase'), ignoreSpace: opt('ignoreSpace') }; }
 
 // ── 依模式 view 分派 ──
-const VIEWS = { lines: linesView, json: jsonView, inline: inlineView };
+const VIEWS = { lines: linesView, json: jsonView };
 function run() { VIEWS[mode.view](inA.value, inB.value); }
 
 // view: lines — 下方並排逐行 diff
@@ -139,45 +132,6 @@ function sortKeys(v) {
   return v;
 }
 function jsonErr(side, msg) { reportBox.innerHTML = `<div class="verdict warn">⚠ ${side} 不是合法 JSON:${esc(msg)}</div>`; diffBox.innerHTML = ''; summaryEl.textContent = ''; }
-
-// view: inline — 直接在輸入框內、邊打字邊上色。
-// 作法(backdrop):textarea 文字設透明、只留游標,後面疊一個對齊的上色層(ovA/ovB)顯示同樣文字+紅綠底色。
-// 為了逐字對齊,這裡只用「背景色」不改字寬:不插入空白點/不可見字元符號/移出移入標籤(那些交給下方嚴格報告)。
-function inlineView(rawA, rawB) {
-  renderReport(strictReport(rawA, rawB));
-  bannerEl.hidden = true;
-  const cmp = cmpOpts();
-  const rows = diffRows(rawA.replace(/\r\n?/g, '\n'), rawB.replace(/\r\n?/g, '\n'), cmp);
-  if (opt('movedBlock')) markMoved(rows);
-
-  let left = '', right = '', nChg = 0, nAdd = 0, nDel = 0, nMoved = 0;
-  const il = (html, cls) => `<div class="iline ${cls}">${html || '​'}</div>`;   // 空行用零寬字維持行高、又不佔寬
-  for (const row of rows) {
-    if (row.type === 'eq') { left += il(esc(row.left), 'eq'); right += il(esc(row.right), 'eq'); }
-    else if (row.type === 'chg') { const ops = charDiff(row.left, row.right, cmp); left += il(inlineSide(ops, 'left'), 'del'); right += il(inlineSide(ops, 'right'), 'add'); nChg++; }
-    else if (row.type === 'del') { left += il(esc(row.left), row.moved ? 'moved' : 'del'); row.moved ? nMoved++ : nDel++; }
-    else { right += il(esc(row.right), row.moved ? 'moved' : 'add'); if (!row.moved) nAdd++; }
-  }
-  ovA.innerHTML = left; ovB.innerHTML = right;
-  ovA.scrollTop = inA.scrollTop; ovA.scrollLeft = inA.scrollLeft;
-  ovB.scrollTop = inB.scrollTop; ovB.scrollLeft = inB.scrollLeft;
-
-  const same = !nChg && !nAdd && !nDel && !nMoved;
-  let s = `修改 ${nChg} 行・新增 ${nAdd} 行・刪除 ${nDel} 行`;
-  if (nMoved) s += `・移動 ${nMoved} 行`;
-  summaryEl.textContent = same ? '兩邊逐行相同' : s;
-}
-
-// inline 專用:字元級上色,但只用背景色、不改字寬(純 esc + c-del/c-add 背景)。
-function inlineSide(ops, which) {
-  let out = '';
-  for (const op of ops) {
-    if (op.t === 'eq') out += esc(which === 'right' ? (op.v2 ?? op.v) : op.v);
-    else if (op.t === 'del' && which === 'left') out += `<span class="c-del">${esc(op.v)}</span>`;
-    else if (op.t === 'add' && which === 'right') out += `<span class="c-add">${esc(op.v)}</span>`;
-  }
-  return out;
-}
 
 // ── 共用 ──
 function renderReport({ verdict, findings }) {
@@ -255,11 +209,8 @@ buildModes();
 setMode(MODES[0]);
 [inA, inB].forEach((el) => el.addEventListener('input', () => {
   clearTimeout(timer);
-  if (mode.instant || opt('instantRender')) run();   // 即時:此模式恆即時,或開了即時選項
-  else timer = setTimeout(run, 200);                 // 預設:200ms 防抖
+  if (opt('instantRender')) run();        // 即時更新
+  else timer = setTimeout(run, 200);      // 預設:200ms 防抖
 }));
 $('#swap').addEventListener('click', () => { const t = inA.value; inA.value = inB.value; inB.value = t; run(); });
 $('#clear').addEventListener('click', () => { inA.value = ''; inB.value = ''; run(); });
-// inline 模式:textarea 捲動時,後面的上色層跟著捲(保持對齊)
-inA.addEventListener('scroll', () => { ovA.scrollTop = inA.scrollTop; ovA.scrollLeft = inA.scrollLeft; });
-inB.addEventListener('scroll', () => { ovB.scrollTop = inB.scrollTop; ovB.scrollLeft = inB.scrollLeft; });

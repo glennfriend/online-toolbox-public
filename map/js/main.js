@@ -70,7 +70,7 @@ function renderList() {
     return `
     <div class="row${selected && selected.id === p.id ? ' on' : ''}" data-i="${i}" title="點一下:看詳情並跳到地圖">
       <span class="row-emoji">${esc(p.emoji)}</span>
-      <span class="row-main"><span class="row-title">${esc(p.title || '(未命名)')}</span>${l2 ? `<span class="row-note">${l2}</span>` : ''}</span>
+      <span class="row-main"><span class="row-title">${esc(p.title || '(未命名)')}</span>${l2 ? `<span class="row-note" title="${l2}">${l2}</span>` : ''}</span>
       ${p.rating ? `<span class="row-rating">★${esc(p.rating)}</span>` : ''}
       ${ro ? '' : `<button class="row-del" data-del="${i}" type="button" title="刪除此點">✕</button>`}
     </div>`;
@@ -79,13 +79,30 @@ function renderList() {
 // 第二行要顯示的內容(依使用者選的偏好)
 function line2Text(p) {
   switch (user.line2) {
-    case 'hours': return p.hours || '';
-    case 'tags': return (p.tags || []).join(' · ');
+    case 'hours': return p.hours ? openMark(p.hours) + p.hours : '';
+    case 'tags': return (p.tags || []).join(', ');
     case 'rating': return p.rating ? '★' + p.rating : '';
     case 'note': return p.note || '';
     default: return p.address || '';
   }
 }
+// 依營業時間字串粗判現在開/關:🟢 開、🔴 關、''(無法判斷就不標)。
+// 最佳努力:抓 HH:MM–HH:MM 時段(含跨夜)、「24小時/全天」視為開;不處理「週X公休」等日期條件。
+function isOpenNow(hours) {
+  if (!hours) return null;
+  if (/24\s*小時|全天/.test(hours)) return true;
+  const re = /(\d{1,2}):(\d{2})\s*[–\-~〜]\s*(\d{1,2}):(\d{2})/g;
+  const d = new Date(); const cur = d.getHours() * 60 + d.getMinutes();
+  let m, found = false;
+  while ((m = re.exec(hours))) {
+    found = true;
+    let s = (+m[1]) * 60 + (+m[2]); let e = (+m[3]) * 60 + (+m[4]);
+    if (e <= s) e += 1440;   // 跨夜(如 17:00–01:00)
+    if ((cur >= s && cur <= e) || (cur + 1440 >= s && cur + 1440 <= e)) return true;
+  }
+  return found ? false : null;
+}
+function openMark(hours) { const o = isOpenNow(hours); return o === true ? '🟢 ' : o === false ? '🔴 ' : ''; }
 function renderDetail() {
   if (!selected) { el.detail.hidden = true; return; }
   const p = selected;
@@ -96,7 +113,7 @@ function renderDetail() {
     <div class="d-title">${esc(p.emoji)} ${esc(p.title || '(未命名)')}${p.rating ? ` <span class="d-rating">★${esc(p.rating)}</span>` : ''}</div>
     <div class="d-coord">${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}${p.approx ? ' <span class="d-approx">(座標概略)</span>' : ''}</div>
     ${p.address ? `<div class="d-line"><span class="d-k">地址</span>${esc(p.address)}</div>` : ''}
-    ${p.hours ? `<div class="d-line"><span class="d-k">營業</span>${esc(p.hours)}</div>` : ''}
+    ${p.hours ? `<div class="d-line"><span class="d-k">營業</span>${openMark(p.hours)}${esc(p.hours)}</div>` : ''}
     ${tags ? `<div class="d-tags">${tags}</div>` : ''}
     ${p.note ? `<div class="d-note">${esc(p.note)}</div>` : ''}`;
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });

@@ -22,15 +22,17 @@ const cp = (...a) => String.fromCodePoint(...a);
 const OPTIONS = {
   showSpaces: { label: '顯示空白字元', group: '顯示' },
   movedBlock: { label: '搬移偵測', group: '顯示' },
+  instantRender: { label: '即時更新(不延遲)', group: '顯示' },
   ignoreCase: { label: '忽略大小寫', group: '比對規則' },
   ignoreSpace: { label: '忽略空白', group: '比對規則' },
 };
-const TEXT_OPTS = ['showSpaces', 'movedBlock', 'ignoreCase', 'ignoreSpace'];
+// instantRender 預設 false = 維持現在的 200ms 防抖;打開才即時(暫時的實驗開關,試完手感再決定去留)
+const TEXT_OPTS = ['showSpaces', 'movedBlock', 'instantRender', 'ignoreCase', 'ignoreSpace'];
 // 程式碼大小寫有意義,不提供「忽略大小寫」
-const CODE_OPTS = ['showSpaces', 'movedBlock', 'ignoreSpace'];
+const CODE_OPTS = ['showSpaces', 'movedBlock', 'instantRender', 'ignoreSpace'];
 // inline 為了讓上色層與 textarea 逐字對齊,不做會改變字寬的標記(空白點、不可見字元符號),
 // 所以沒有「顯示空白字元」;不可見字元仍由下方嚴格報告負責。
-const INLINE_OPTS = ['movedBlock', 'ignoreCase', 'ignoreSpace'];
+const INLINE_OPTS = ['movedBlock', 'instantRender', 'ignoreCase', 'ignoreSpace'];
 
 const STRICT_A = 'caf' + cp(0xE9) + ' r' + cp(0xE9) + 'sum' + cp(0xE9) + '\nHello world\nbalance: 100\ngood';
 const STRICT_B = 'cafe' + cp(0x301) + ' r' + cp(0xE9) + 'sum' + cp(0xE9) + '\nHello' + cp(0xA0) + 'world\nbalance: 100' + cp(0x200B) + '\ng' + cp(0x43E) + cp(0x43E) + 'd';
@@ -250,7 +252,11 @@ function line(nl, lh, lc, nr, rh, rc) {
 // ── 啟動(放在最後:確保上面的 const VIEWS 等都已初始化才呼叫 run)──
 buildModes();
 setMode(MODES[0]);
-[inA, inB].forEach((el) => el.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 200); }));
+[inA, inB].forEach((el) => el.addEventListener('input', () => {
+  clearTimeout(timer);
+  if (opt('instantRender')) run();              // 即時:打字當下就更新
+  else timer = setTimeout(run, 200);            // 預設:200ms 防抖
+}));
 $('#swap').addEventListener('click', () => { const t = inA.value; inA.value = inB.value; inB.value = t; run(); });
 $('#clear').addEventListener('click', () => { inA.value = ''; inB.value = ''; run(); });
 // inline 模式:textarea 捲動時,後面的上色層跟著捲(保持對齊)

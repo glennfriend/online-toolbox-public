@@ -18,6 +18,8 @@ body {
 .bar-label { font-size: .8rem; color: var(--muted); }
 .spacer { flex: 1; }
 .select { font: inherit; font-size: .9rem; padding: .3em .6em; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); max-width: 280px; }
+.select-sm { max-width: 7.5em; }
+.export-gap { margin-left: 1.6rem; }   /* 與匯入/匯出之間留一些空間 */
 .btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg); padding: .35em .8em; white-space: nowrap; }
 .btn:hover { background: var(--bg-code); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }

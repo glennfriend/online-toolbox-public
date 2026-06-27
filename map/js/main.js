@@ -14,13 +14,14 @@ const el = {
   picked: $('#picked'), pickedLoc: $('#pickedLoc'),
   emoji: $('#emoji'), title: $('#title'), address: $('#address'), hours: $('#hours'), tags: $('#tags'), rating: $('#rating'), note: $('#note'),
   addPoint: $('#addPoint'), adder: $('#adder'), detail: $('#detail'),
-  delGroup: $('#delGroup'), renameGroup: $('#renameGroup'),
+  delGroup: $('#delGroup'), renameGroup: $('#renameGroup'), line2: $('#line2'),
 };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 let builtinGroups = [];
-let user = loadUser();        // { userGroups, currentId }
+let user = loadUser();        // { userGroups, currentId, line2 }
+if (!user.line2) user.line2 = 'address';   // 第二行顯示哪個欄位(全域偏好,會記住)
 let pick = null;              // 待加入的地點 { lat, lng, label }
 let results = [];             // 最近一次搜尋結果
 let selected = null;          // 目前點選顯示詳情的點
@@ -64,13 +65,26 @@ function renderList() {
       : '<div class="empty">這組還沒有地點。用上面貼 Google Maps 連結 / 經緯度來新增。</div>';
     return;
   }
-  el.list.innerHTML = g.points.map((p, i) => `
+  el.list.innerHTML = g.points.map((p, i) => {
+    const l2 = esc(line2Text(p));
+    return `
     <div class="row${selected && selected.id === p.id ? ' on' : ''}" data-i="${i}" title="點一下:看詳情並跳到地圖">
       <span class="row-emoji">${esc(p.emoji)}</span>
-      <span class="row-main"><span class="row-title">${esc(p.title || '(未命名)')}</span>${p.address ? `<span class="row-note">${esc(p.address)}</span>` : ''}</span>
+      <span class="row-main"><span class="row-title">${esc(p.title || '(未命名)')}</span>${l2 ? `<span class="row-note">${l2}</span>` : ''}</span>
       ${p.rating ? `<span class="row-rating">★${esc(p.rating)}</span>` : ''}
       ${ro ? '' : `<button class="row-del" data-del="${i}" type="button" title="刪除此點">✕</button>`}
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+// 第二行要顯示的內容(依使用者選的偏好)
+function line2Text(p) {
+  switch (user.line2) {
+    case 'hours': return p.hours || '';
+    case 'tags': return (p.tags || []).join(' · ');
+    case 'rating': return p.rating ? '★' + p.rating : '';
+    case 'note': return p.note || '';
+    default: return p.address || '';
+  }
 }
 function renderDetail() {
   if (!selected) { el.detail.hidden = true; return; }
@@ -94,7 +108,7 @@ function showGroupDefault() {
   else if (g.center) showOnMap(g.center.lat, g.center.lng, g.center.z);
   else el.map.removeAttribute('src');
 }
-function renderAll() { renderGroups(); renderControls(); selected = null; renderDetail(); renderList(); showGroupDefault(); }
+function renderAll() { el.line2.value = user.line2; renderGroups(); renderControls(); selected = null; renderDetail(); renderList(); showGroupDefault(); }
 
 // ── 搜尋 / 選點(加入用)──
 async function doSearch() {
@@ -175,6 +189,7 @@ function importFile(file) {
 
 // ── 事件 ──
 el.groups.addEventListener('change', () => { user.currentId = el.groups.value; persist(); renderControls(); selected = null; renderDetail(); renderList(); showGroupDefault(); });
+el.line2.addEventListener('change', () => { user.line2 = el.line2.value; persist(); renderList(); });
 el.search.addEventListener('click', doSearch);
 el.q.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
 el.results.addEventListener('click', (e) => { const t = e.target.closest('.r-item'); if (t) setPick(results[+t.dataset.r]); });

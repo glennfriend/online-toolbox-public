@@ -34,22 +34,38 @@
     <div class="left">
       <div id="drop" class="drop">
         <div class="drop-hint">
-          <div class="drop-big">拖曳圖片到這裡,或直接貼上(Ctrl / ⌘ + V)</div>
+          <div class="drop-big">拖曳圖片或 PDF 到這裡,或直接貼上(Ctrl / ⌘ + V)</div>
           <div class="drop-sub">要從檔案選,請按下方「選擇檔案」</div>
         </div>
         <img id="preview" class="preview" alt="預覽" hidden>
       </div>
-      <input id="file" type="file" accept="image/*" hidden>
+      <input id="file" type="file" accept="image/*,application/pdf" hidden>
       <div class="actions">
         <button id="pick" class="btn" type="button">選擇檔案</button>
+        <select id="pages" class="sel" title="PDF 解析頁數範圍" hidden>
+          <option value="1-3">解析第 1–3 頁</option>
+          <option value="1-10">解析第 1–10 頁</option>
+          <option value="11-20">解析第 11–20 頁</option>
+          <option value="all">解析整個 PDF</option>
+        </select>
         <button id="run" class="btn primary" type="button" disabled>辨識文字</button>
         <button id="clear" class="btn" type="button">清空</button>
+        <label class="opt">
+          <input id="prep" type="checkbox"> 影像前處理
+          <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
+            <span class="info-tip">
+              <span class="tip-h">[影像前處理]</span>
+              <span>轉灰階、自動拉對比、放大小圖</span>
+              <span>對小字 / 低對比 / 偏暗的截圖較有幫助</span>
+              <span>清晰文件可能不需要,故預設關閉</span>
+            </span>
+          </span>
+        </label>
       </div>
     </div>
 
     <div class="right">
       <div class="result-head">
-        <span class="result-title">辨識結果(可編輯)</span>
         <button id="copy" class="btn" type="button" disabled>📋 複製</button>
       </div>
       <textarea id="result" class="result" spellcheck="false" placeholder="辨識出的文字會出現在這裡,可直接編輯與複製…"></textarea>
@@ -62,7 +78,8 @@
     "imports": {
       "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0/dist/ort.all.bundle.min.mjs",
       "ppu-ocv/web": "https://cdn.jsdelivr.net/npm/ppu-ocv@3.3.0/index.web.js",
-      "ppu-ocv/canvas-web": "https://cdn.jsdelivr.net/npm/ppu-ocv@3.3.0/index.canvas-web.js"
+      "ppu-ocv/canvas-web": "https://cdn.jsdelivr.net/npm/ppu-ocv@3.3.0/index.canvas-web.js",
+      "pdfjs-dist": "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.1.200/build/pdf.min.mjs"
     }
   }
   </script>

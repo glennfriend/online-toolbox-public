@@ -8,8 +8,10 @@
 
 ## 功能
 
-- **取圖三種方式**:拖放、直接貼上(Ctrl/⌘+V)、點擊上傳。
+- **取圖多種方式**:拖放、直接貼上(Ctrl/⌘+V)、點擊上傳;貼上後按 **Enter** 直接辨識。
+- **支援圖片與 PDF**:圖片直接辨識;PDF 用 `pdf.js` 逐頁 render 成圖再 OCR,可選頁數範圍(1–3 / 1–10 / 11–20 / 整份)。
 - **一個模型吃繁+簡+英**:用 PaddleOCR **PP-OCRv6 small**(透過 `ppu-paddle-ocr`),單一模型統一辨識簡體 / 繁體 / 英文與 50+ 語言。
+- **影像前處理(可選,預設關)**:轉灰階、自動拉對比、放大小圖,對小字 / 低對比 / 偏暗的截圖較有幫助;清晰文件通常不需要。
 - **結果可編輯可複製**:辨識出的逐行文字放進文字框,改完一鍵複製。
 - **純前端**:辨識在瀏覽器內用 `onnxruntime-web` 跑,**不上傳、無後端、無金鑰**;模型首次下載(數十 MB)後由瀏覽器快取,之後秒載入。
 
@@ -27,16 +29,21 @@ ocr/
 ├── index.html
 ├── styles.css
 └── js/
-    ├── main.js   殼層:取圖(拖/貼/上傳)、預覽、按鈕、顯示結果
-    └── ocr.js    OCR 整合層(唯一碰 PaddleOCR / onnxruntime-web 的地方)
+    ├── main.js        殼層:取圖(拖/貼/上傳)、預覽、按鈕、流程編排、顯示結果
+    ├── ocr.js         OCR 引擎層(唯一碰 PaddleOCR / onnxruntime-web 的地方)
+    ├── preprocess.js  影像前處理(純 canvas;灰階/對比/放大)— 獨立模組
+    └── pdfdoc.js      PDF → canvas(延遲載入 pdf.js)— 獨立模組
 ```
 
-> **要換引擎或自架模型,只改 `ocr.js`。** 殼層只認 `recognize(blob, onStatus)`。
+> **模組互不影響**:`preprocess.js`(影像)與 `pdfdoc.js`(PDF)彼此分離,一邊壞了不影響另一邊;
+> 共用的只有引擎層的 `recognizeCanvas(canvas, onStatus)`(canvas 進、文字出)。
+> **要換引擎或自架模型,只改 `ocr.js`。**
 
 ## 技術 / 維護註記
 
 - 引擎:**`ppu-paddle-ocr`** 的瀏覽器入口 `/web`(PP-OCRv6 small)+ **onnxruntime-web**(WebGPU 優先、否則 WASM)。設定照官方 demo 的「無打包器 CDN」用法。
 - **關鍵**:`index.html` 的 **import map** 把 `onnxruntime-web` 指到瀏覽器專用 bundle(`ort.all.bundle.min.mjs`),**避開 CDN 把 Node 版打包進來造成的 `process.binding` 錯**;`ppu-ocv/web`、`ppu-ocv/canvas-web` 也由 import map 提供。函式庫本體由 `ocr.js` 的 `WEB_ENTRY`(jsdelivr)動態載入。
+- **PDF**:用 `pdfjs-dist` v6 的 ESM build(import map 提供 `pdfjs-dist` → `build/pdf.min.mjs`),`pdfdoc.js` 延遲載入(丟 PDF 才抓),worker 用 `GlobalWorkerOptions.workerSrc` 指向同版的 `build/pdf.worker.min.mjs` — **改版本時兩個 URL 要一起改**。
 - 模型走函式庫預設來源 fetch、靠瀏覽器 HTTP 快取。日後要**自架 / 釘版本 / IndexedDB 持久快取**:改 import map 與 `WEB_ENTRY` 指向自架檔,或用 `model.detection/recognition/charactersDictionary` 指定自架 `.onnx`/`.ort` + 字典。
 - ⚠️ **GitHub Pages 不能設 COOP/COEP** → WASM 為單執行緒(較慢);WebGPU 不受影響。函式庫附 `coi-serviceworker.js` 可開多執行緒,本工具**暫未啟用**(避免它會重載頁面+改寫所有 fetch 的副作用)。
 

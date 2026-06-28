@@ -2,16 +2,16 @@
 
 | 工具 | 說明 |
 |---|---|
-| [**Scrapbook**](https://glennfriend.github.io/online-toolbox-public/scrapbook/ "https://glennfriend.github.io/online-toolbox-public/scrapbook/") | 暫存性質的 資料、圖片 |
+| [**Scrapbook**](https://glennfriend.github.io/online-toolbox-public/scrapbook/ "https://glennfriend.github.io/online-toolbox-public/scrapbook/") | 資料, 圖片 暫存 |
 | [**Calcpad**](https://glennfriend.github.io/online-toolbox-public/calcpad/ "https://glennfriend.github.io/online-toolbox-public/calcpad/") | 計算工具 數學 時區 |
 | [**Curvelab**](https://glennfriend.github.io/online-toolbox-public/curvelab/ "https://glennfriend.github.io/online-toolbox-public/curvelab/") | 學生用的 數學公式圖形 |
 | [**Scrollshot**](https://glennfriend.github.io/online-toolbox-public/scrollshot/ "https://glennfriend.github.io/online-toolbox-public/scrollshot/") | 網頁截圖 |
 | [**Chart**](https://glennfriend.github.io/online-toolbox-public/chart/ "https://glennfriend.github.io/online-toolbox-public/chart/") | 統計圖表 |
 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/ "https://glennfriend.github.io/online-toolbox-public/pipeflow/") | 簡易資料轉換 |
-| [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/ "https://glennfriend.github.io/online-toolbox-public/dictionary/") | 英文單字字典(發音 / 常用度 / 定義 / 例句,自動完成) |
-| [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/ "https://glennfriend.github.io/online-toolbox-public/textdiff/") | 文字比對(嚴格:含不可見字元 / Unicode 同形字 / NFC·NFD / 行尾) |
-| [**Map**](https://glennfriend.github.io/online-toolbox-public/map/ "https://glennfriend.github.io/online-toolbox-public/map/") | 地點清單地圖(分組記錄、免 API key、點擊跳位、匯出入 JSON) |
-| [**OCR**](https://glennfriend.github.io/online-toolbox-public/ocr/ "https://glennfriend.github.io/online-toolbox-public/ocr/") | 圖片 / PDF 轉文字(繁中 / 簡中 / 英,純前端、免 API key;可選影像前處理、框疊原圖標低信心、模型持久快取) |
+| [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/ "https://glennfriend.github.io/online-toolbox-public/dictionary/") | 英文字典 |
+| [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/ "https://glennfriend.github.io/online-toolbox-public/textdiff/") | 文字比對 |
+| [**Map**](https://glennfriend.github.io/online-toolbox-public/map/ "https://glennfriend.github.io/online-toolbox-public/map/") | 地圖 |
+| [**OCR**](https://glennfriend.github.io/online-toolbox-public/ocr/ "https://glennfriend.github.io/online-toolbox-public/ocr/") | 圖片轉文字 |
 
 ---
 

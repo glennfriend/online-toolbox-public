@@ -16,7 +16,7 @@ body {
 .bar { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 .brand { font-size: 1.25rem; font-weight: 700; }
 .spacer { flex: 1; }
-.status { font-size: .85rem; color: var(--muted); }
+.status { font-size: .85rem; color: var(--muted); min-width: 0; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .status.work { color: var(--accent); }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--danger); }
@@ -73,8 +73,6 @@ body {
 .btn.primary:hover { filter: brightness(1.05); }
 .btn.primary:disabled { filter: none; }
 
-.result-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex: 0 0 auto; }
-.result-head .status { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .result {
   flex: 1; min-height: 0; resize: none; width: 100%;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans CJK TC", monospace; font-size: .95rem; line-height: 1.7;

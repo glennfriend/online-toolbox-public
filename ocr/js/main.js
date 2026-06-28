@@ -295,10 +295,30 @@ el.copy.addEventListener('click', async () => {
 // 在結果框「選取一段文字」就自動複製到剪貼簿,並去掉頭尾空白(不必再按「複製」)。
 function copySelection() {
   const ta = el.result;
-  if (ta.selectionStart === ta.selectionEnd) return;     // 沒有選取(只是點一下)→ 不動作
-  const text = ta.value.slice(ta.selectionStart, ta.selectionEnd).trim();
-  if (!text) return;                                     // 只選到空白 → 不複製
-  navigator.clipboard.writeText(text).then(() => setStatus('已複製選取的文字', 'ok'), () => {});
+  let s = ta.selectionStart, e = ta.selectionEnd;
+  if (s === e) return;                                   // 沒選取(只是點一下)→ 不動作
+  const val = ta.value;
+  while (s < e && /\s/.test(val[s])) s++;                // 縮掉頭尾空白
+  while (e > s && /\s/.test(val[e - 1])) e--;
+  if (s === e) return;                                   // 只選到空白 → 不複製
+  const text = val.slice(s, e);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(() => setStatus('已複製選取的文字', 'ok'), () => copyViaExec(s, e));
+  } else {
+    copyViaExec(s, e);
+  }
 }
-el.result.addEventListener('mouseup', copySelection);    // 滑鼠拖選
-el.result.addEventListener('keyup', copySelection);      // 鍵盤選取(Shift+方向鍵 / Ctrl+A);無選取時自動略過
+
+// 後備:把選取縮到去空白後的範圍,用 execCommand 複製(同步、不需剪貼簿權限)。
+function copyViaExec(s, e) {
+  try {
+    el.result.focus();
+    el.result.setSelectionRange(s, e);
+    const ok = document.execCommand && document.execCommand('copy');
+    setStatus(ok ? '已複製選取的文字' : '自動複製失敗(請按 Ctrl/⌘ + C)', ok ? 'ok' : 'err');
+  } catch { setStatus('自動複製失敗(請按 Ctrl/⌘ + C)', 'err'); }
+}
+
+// 放手時複製。拖選常落在文字框外才放開,故掛在 document、用焦點判斷是不是在結果框選取。
+document.addEventListener('mouseup', () => { if (document.activeElement === el.result) copySelection(); });
+el.result.addEventListener('keyup', copySelection);      // 鍵盤選取(Shift+方向鍵 / Ctrl+A);無選取自動略過

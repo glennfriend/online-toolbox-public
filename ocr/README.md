@@ -47,6 +47,10 @@ ocr/
 - 模型走函式庫預設來源 fetch、靠瀏覽器 HTTP 快取。日後要**自架 / 釘版本 / IndexedDB 持久快取**:改 import map 與 `WEB_ENTRY` 指向自架檔,或用 `model.detection/recognition/charactersDictionary` 指定自架 `.onnx`/`.ort` + 字典。
 - ⚠️ **GitHub Pages 不能設 COOP/COEP** → WASM 為單執行緒(較慢);WebGPU 不受影響。函式庫附 `coi-serviceworker.js` 可開多執行緒,本工具**暫未啟用**(避免它會重載頁面+改寫所有 fetch 的副作用)。
 
+## 計畫(TODO)
+
+- **模型持久快取(OPFS / Cache API)**:目前靠瀏覽器 HTTP 快取——會在空間不足時被**無聲清掉**、也**沒有下載進度**。改用 OPFS 或 Cache API 做可控的持久快取:**顯示下載進度%、用 hash 比對版本更新、不被自動清除**。(現況已堪用,故列為日後再做。)
+
 ## 部署
 
 GitHub Pages,全相對路徑、無建置步驟,放在子路徑(`/ocr/`)即可。

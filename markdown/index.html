@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Markdown</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📝%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <!-- 主題:換這個 href 就換樣式(每個主題 = 一個 themes/<name>.css) -->
+  <link id="theme-link" rel="stylesheet" href="themes/default.css">
+  <!-- 核心與第三方走 CDN(延遲載入);自己的 module 走本機檔 -->
+  <script type="importmap">
+  {
+    "imports": {
+      "markdown-it": "https://esm.sh/markdown-it@14",
+      "highlight.js": "https://esm.sh/highlight.js@11"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Markdown
+      <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
+        <span class="info-tip">
+          <span class="tip-h">[Feature]</span>
+          <span>Markdown → HTML 即時預覽</span>
+          <span>本機文件庫:多份筆記、邊打邊自動存(像 HackMD)</span>
+          <span>三種檢視:左右 / 只編輯 / 只預覽</span>
+          <span>可切主題;程式碼上色(js / php / json…)</span>
+          <span class="tip-h">[不支援]</span>
+          <span>原始 HTML 一律 escape(防 XSS,不 render)</span>
+          <span>雲端同步(內容只存在本機瀏覽器)</span>
+          <span class="tip-h">[技術支援]</span>
+          <span>markdown-it(核心)+ highlight.js(上色),CDN 載入</span>
+          <span>localStorage 存檔;純前端、無後端、無 API key</span>
+        </span>
+      </span>
+    </span>
+    <span id="doc-title" class="doc-title"></span>
+    <span class="spacer"></span>
+    <span class="seg">
+      <button id="mode-split" class="seg-btn" type="button">左右</button>
+      <button id="mode-edit" class="seg-btn" type="button">編輯</button>
+      <button id="mode-view" class="seg-btn" type="button">預覽</button>
+    </span>
+    <select id="theme" class="sel" title="主題"></select>
+  </header>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span>文件</span>
+        <button id="new-doc" class="btn" type="button">＋ 新增</button>
+      </div>
+      <ul id="doc-list" class="doc-list"></ul>
+    </aside>
+    <main class="main">
+      <div id="panes" class="panes mode-split">
+        <textarea id="editor" class="editor" wrap="soft" spellcheck="false" placeholder="在這裡寫 Markdown…"></textarea>
+        <div id="preview" class="preview md-preview" aria-live="polite"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

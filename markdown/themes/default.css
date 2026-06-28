@@ -1,0 +1,33 @@
+/* 預設主題:GitHub 風,套用於預覽容器 .md-preview。
+   換主題 = 複製這個檔成 themes/<name>.css 改色,並在 main.js 的 THEMES 加上名字。
+   全部選擇器都鎖在 .md-preview 之下,不影響 app 外框。 */
+
+.md-preview { color: #24292f; font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif; line-height: 1.7; font-size: 1rem; word-wrap: break-word; }
+
+.md-preview > :first-child { margin-top: 0; }
+.md-preview h1, .md-preview h2, .md-preview h3, .md-preview h4, .md-preview h5, .md-preview h6 { margin: 1.4em 0 .6em; font-weight: 600; line-height: 1.3; }
+.md-preview h1 { font-size: 1.8em; border-bottom: 1px solid #d8dee4; padding-bottom: .3em; }
+.md-preview h2 { font-size: 1.45em; border-bottom: 1px solid #d8dee4; padding-bottom: .3em; }
+.md-preview h3 { font-size: 1.2em; }
+.md-preview h4 { font-size: 1em; }
+
+.md-preview p { margin: .7em 0; }
+.md-preview a { color: #2563eb; text-decoration: none; }
+.md-preview a:hover { text-decoration: underline; }
+
+.md-preview ul, .md-preview ol { margin: .7em 0; padding-left: 1.6em; }
+.md-preview li { margin: .25em 0; }
+.md-preview li > ul, .md-preview li > ol { margin: .25em 0; }
+
+.md-preview blockquote { margin: .8em 0; padding: .2em 1em; color: #57606a; border-left: 4px solid #d0d7de; }
+
+.md-preview code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; background: #eff1f3; padding: .15em .4em; border-radius: 4px; }
+.md-preview pre { background: #f6f8fa; padding: 1em; border-radius: 8px; overflow: auto; }
+.md-preview pre code { background: transparent; padding: 0; font-size: .88em; }
+
+.md-preview table { border-collapse: collapse; margin: .8em 0; display: block; overflow: auto; }
+.md-preview th, .md-preview td { border: 1px solid #d0d7de; padding: .4em .8em; }
+.md-preview th { background: #f6f8fa; }
+
+.md-preview hr { border: 0; border-top: 1px solid #d8dee4; margin: 1.4em 0; }
+.md-preview img { max-width: 100%; }

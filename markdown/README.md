@@ -1,25 +1,70 @@
 # Markdown
 
-用 Markdown 語法即時 render 成 HTML 顯示。純前端、模組化、可插拔。**(規劃中,尚未實作)**
+用 Markdown 語法即時 render 成 HTML 顯示。**本機文件庫(像 HackMD,邊打邊自動存)**、三種檢視、可切主題、程式碼上色。純前端、無後端、無 API key。
+
+線上版:<https://glennfriend.github.io/online-toolbox-public/markdown/>
 
 ---
 
+## 功能
+
+- **即時預覽**:左邊寫 Markdown,右邊即時出 HTML。
+- **本機文件庫**:多份筆記存在瀏覽器(localStorage)。開啟某份 = 正在編輯它,**改了就自動存回那份**(概念同 HackMD;無暫存區、不走網址分享)。標題自動取內容第一行。
+- **三種檢視**:左右並排 / 只編輯 / 只預覽。
+- **主題可切**:每個主題是一個 `themes/<name>.css`,只套在預覽容器 `.md-preview` 上。
+- **程式碼上色**:第一個功能 module,支援 js / php / json 等(highlight.js)。
+
 ## 安全(目前的決定)
 
-**目前策略:全部 escape。**
+**目前策略:全部 escape。** markdown-it 以 `html:false` 啟動 → 使用者寫的原始 HTML **一律當純文字**,從根本避免 XSS(render = 把 HTML 塞進 DOM,瀏覽器會執行其中的 `onerror` / `javascript:` 連結等)。
 
-不讓使用者寫的「原始 HTML」passthrough —— 原始 HTML 一律當純文字顯示,從根本避免 XSS。
+> 之後若要像 GitHub / HackMD 允許部分原始 HTML,**不能只 escape,要改成「允許 + 消毒(allowlist sanitizer)」**:HackMD/CodiMD 用 markdown-it + DOMPurify;GitHub 用 cmark-gfm + 白名單過濾。屆時參考其做法,並把消毒器列為誠實的外部相依。
 
-> 為什麼需要管:render = 把 HTML 字串塞進 DOM(`innerHTML`),瀏覽器會「啟用」其中的東西(如 `<img onerror=…>`、`javascript:` 連結),那是執行,不是單純畫面。威脅在「**算別人的 markdown、給別人看**」這個情境(本 repo 走網址分享,屬於此情境)。
+## 架構
 
-- 預計用 **markdown-it**,其**預設 `html: false` 就是 escape**,且內建擋掉危險連結(`javascript:` 等)。
-- 這條路最安全,代價是**不能寫原始 HTML**。對「個人用、純文字 markdown → HTML」足夠。
+純前端 ES modules,**核心(解析)與功能(module)分離,功能可插拔**(沿用本 repo 的登記表模式)。
 
-## 之後要擴充時(若要允許原始 HTML)
+```
+markdown/
+├── index.html            外框 + import map(CDN 核心)+ 載入 js/main.js
+├── styles.css            app 外框與三種檢視版面
+├── themes/
+│   └── default.css       預覽內文樣式(GitHub 風);換主題 = 換這個檔
+└── js/
+    ├── main.js           殼層:文件庫 / 編輯器 / 預覽 / 檢視模式 / 主題 串接
+    ├── renderer.js       markdown-it 薄 adapter(核心可抽換;html:false 安全基線)
+    ├── registry.js       module 登記表 + 隔離(try/catch,壞了只錯單一 module)
+    ├── store.js          文件庫(localStorage:list / 開啟 / 自動存 / 刪)
+    └── modules/
+        └── highlight.js  功能 module #1:程式碼上色(post 型,隔離最佳)
+```
 
-若日後要像 GitHub / HackMD 那樣允許一部分原始 HTML,**不能只 escape,要改成「允許 + 消毒(allowlist sanitizer)」**:放行安全標籤、剝掉 `<script>` / `on*` 事件屬性 / `javascript:` 連結。屆時參考它們的做法或原始碼:
+### module 介面(可插拔的關鍵)
 
-- **HackMD / CodiMD**:client 端 `markdown-it` + **DOMPurify** 消毒。
-- **GitHub**:`cmark-gfm` 解析 + 一層 sanitization 白名單過濾(見 `github/markup`)。
+```js
+registerModule({
+  name: 'highlight',
+  type: 'post',           // 'parse' | 'render' | 'post'
+  apply,                  // parse/render: apply(md);  post: apply(rootEl)(可 async)
+  css,                    // (選填)模組自帶的 CSS 字串
+});
+```
 
-> 提醒:「允許 + 消毒」是**持續的攻防**(邊角案例會被繞過,GitHub/HackMD 都修過真實 XSS),要釘好消毒器版本、關注其安全更新。這是必須誠實列出的外部相依。
+- **post**(對 render 後的 DOM 再加工)隔離最佳:單一元素失敗只影響它自己。**建議新功能優先用 post / render 規則覆寫**。
+- **parse**(改 tokenizer)隔離較粗:套用失敗則該 module 失效,但其餘與整個程式照常。
+- registry 對每個 module 包 try/catch:**任一 module 壞掉只記 console、略過,不讓整個程式掛掉。**
+
+### 外部相依(誠實列出)
+
+- **markdown-it**(核心解析)、**highlight.js**(上色):皆走 CDN(`index.html` 的 import map),**延遲載入**——抓不到時誠實退回(整份退純文字 / 程式碼維持原樣),外殼仍可用。
+- 自己寫的 module 是本機檔,不需 CDN、不需建置。
+
+## 計畫(TODO)
+
+- 更多功能 module:任務清單、callout 容器(`::: note`)、數學(KaTeX)、圖表(mermaid)…(各自獨立、逐一加)。
+- 更多主題(含深色)。
+- 編輯/預覽捲動同步。
+
+## 部署
+
+GitHub Pages,全相對路徑、無建置步驟,放在子路徑(`/markdown/`)即可。

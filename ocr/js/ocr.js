@@ -10,27 +10,41 @@
 // 關鍵:onnxruntime-web 走 index.html 的 import map → 瀏覽器專用 bundle(ort.all.bundle.min.mjs),
 //       避開 CDN 把 Node 版打包進來造成的 `process.binding` 錯誤。設定照官方 demo 的無打包器 CDN 用法。
 //
-// 模型首次由函式庫預設來源 fetch、靠瀏覽器 HTTP 快取;WebGPU 可用就用、否則 WASM。
+// 模型不靠瀏覽器 HTTP 快取,改由 modelcache.js 做「可控持久快取」(Cache API + 進度 + 版本/hash);
+// 我們自己抓 buffer、餵進 PaddleOcrService(model 接受 ArrayBuffer),WebGPU 自動偵測不受影響。
 // 要換引擎或自架模型,只改這支 + index.html 的 import map。
+
+import { loadModels } from './modelcache.js';
 
 const WEB_ENTRY = 'https://cdn.jsdelivr.net/npm/ppu-paddle-ocr@6.0.0/web/index.js';
 
 let _svc = null;       // 已初始化的服務(模型載入過就重用)
 let _loading = null;   // 初始化中的 promise(避免重複載入)
 
-// 確保引擎與模型就緒(第一次會下載模型,之後重用)。
+// 確保引擎與模型就緒(第一次會下載模型,之後從持久快取秒載入)。
 export async function ensureEngine(onStatus) {
   if (_svc) return _svc;
   if (_loading) return _loading;
   _loading = (async () => {
-    onStatus?.('載入引擎與模型中(首次數十 MB,之後瀏覽器快取、秒載入)…');
-    const { PaddleOcrService } = await import(WEB_ENTRY);
-    const svc = new PaddleOcrService();   // 預設 PP-OCRv6 small:繁 + 簡 + 英 單一模型
-    await svc.initialize();               // 偵測模型在此載入(一次性)
+    onStatus?.('準備引擎中…');
+    // DEFAULT_MODEL = PP-OCRv6 small 的三個檔(偵測 / 辨識 / 字典)網址。
+    const { PaddleOcrService, DEFAULT_MODEL } = await import(WEB_ENTRY);
+    const model = await loadModels(DEFAULT_MODEL, (p) => onStatus?.(progressMsg(p)));
+    onStatus?.('初始化引擎中…');
+    const svc = new PaddleOcrService({ model });   // 餵入自己快取好的 buffer
+    await svc.initialize();
     _svc = svc;
     return svc;
   })();
   try { return await _loading; } finally { _loading = null; }
+}
+
+// 把下載進度轉成狀態文字。
+function progressMsg(p) {
+  if (!p || p.phase === 'cache') return '從快取載入模型(秒載入)…';
+  const mb = (b) => (b / 1048576).toFixed(1);
+  if (p.total) return `下載模型 ${mb(p.loaded)} / ${mb(p.total)} MB(${Math.round((p.loaded / p.total) * 100)}%)…`;
+  return `下載模型 ${mb(p.loaded)} MB…`;
 }
 
 // 辨識一張 canvas → 回傳純文字。onStatus 回報進度。

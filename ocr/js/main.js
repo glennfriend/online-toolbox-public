@@ -103,8 +103,14 @@ async function run() {
     const res = current.kind === 'pdf' ? await runPdf() : await runImage();
     el.result.value = res.text;
     el.copy.disabled = !res.text;
-    if (current?.kind === 'image' && res.text) showImageAnnotations(res);
-    setStatus(res.text ? '完成' : '沒有辨識到文字(換清晰一點的來源試試)', res.text ? 'ok' : 'err');
+    if (!res.text) {
+      setStatus('沒有辨識到文字(換清晰一點的來源試試)', 'err');
+    } else if (current?.kind === 'image') {
+      const n = showImageAnnotations(res);
+      setStatus(n > 0 ? `完成 · 低信心 ${n} 行(下方點一下校對)` : '完成 · 無低信心行', 'ok');
+    } else {
+      setStatus('完成', 'ok');
+    }
   } catch (e) {
     console.error(e);
     setStatus('辨識失敗:' + (e?.message || e) + '(需要網路下載模型;若持續失敗請看 console)', 'err');
@@ -138,10 +144,12 @@ async function runPdf() {
 }
 
 // ── 框疊原圖 + 低信心校對清單(僅圖片模式) ──
+// 回傳低信心行數(供狀態列顯示摘要)。
 function showImageAnnotations(res) {
   lastImageResult = { lines: res.lines || [], width: res.width, height: res.height };
-  buildProof(res);
+  const n = buildProof(res);
   drawOverlay();
+  return n;
 }
 
 function clearOverlayAndProof() {
@@ -155,12 +163,10 @@ function lineConfidence(words) {
   return words.length ? Math.min(...words.map((w) => (typeof w.confidence === 'number' ? w.confidence : 1))) : 1;
 }
 
+// 渲染低信心行的可點清單;回傳低信心行數。摘要文字交由狀態列顯示,這裡只放可點的行。
 function buildProof(res) {
   el.proof.innerHTML = '';
   const lines = res.lines || [];
-  if (!lines.length) { el.proof.hidden = true; return; }   // 無結構資料 → 不顯示
-  el.proof.hidden = false;
-
   const textLines = (res.text || '').split('\n');
   const flagged = [];
   lines.forEach((words, i) => {
@@ -169,18 +175,8 @@ function buildProof(res) {
     if (conf < LOW_CONF) flagged.push({ i, conf, text: textLines[i] ?? words.map((w) => w.text).join('') });
   });
 
-  if (!flagged.length) {
-    const d = document.createElement('div');
-    d.className = 'proof-empty';
-    d.textContent = '✓ 沒有偵測到低信心的行';
-    el.proof.appendChild(d);
-    return;
-  }
-
-  const title = document.createElement('div');
-  title.className = 'proof-title';
-  title.textContent = `低信心 ${flagged.length} 行(點一下定位、優先校對):`;
-  el.proof.appendChild(title);
+  if (!flagged.length) { el.proof.hidden = true; return 0; }
+  el.proof.hidden = false;
 
   flagged.forEach((f) => {
     const row = document.createElement('button');
@@ -196,6 +192,7 @@ function buildProof(res) {
     row.addEventListener('click', () => focusLine(f.i));
     el.proof.appendChild(row);
   });
+  return flagged.length;
 }
 
 // 計算圖片在預覽框內「實際顯示」的矩形(object-fit: contain 會留白),座標相對 #drop。

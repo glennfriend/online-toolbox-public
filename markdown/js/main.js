@@ -9,12 +9,13 @@ import * as store from './store.js';
 
 // ── 掛載功能 module(可插拔)──
 import './modules/highlight.js';
+import './modules/codeblock.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
   list: $('#doc-list'), newBtn: $('#new-doc'),
   editor: $('#editor'), preview: $('#preview'),
-  panes: $('#panes'), title: $('#doc-title'),
+  panes: $('#panes'),
   modeSplit: $('#mode-split'), modeEdit: $('#mode-edit'), modeView: $('#mode-view'),
   theme: $('#theme'), themeLink: $('#theme-link'),
 };
@@ -69,7 +70,6 @@ function openDoc(id) {
   currentId = doc.id;
   store.open(doc.id);
   el.editor.value = doc.content;
-  el.title.textContent = doc.title;
   renderList();
   renderPreview(doc.content);
 }
@@ -110,8 +110,6 @@ el.editor.addEventListener('input', () => {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     store.update(currentId, text);
-    const doc = store.getCurrent();
-    if (doc) el.title.textContent = doc.title;
     renderList();   // 標題可能變(取自第一行)
   }, SAVE_DELAY);
 });

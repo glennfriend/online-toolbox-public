@@ -15,7 +15,6 @@ body {
 /* 頂列 */
 .topbar { display: flex; align-items: center; gap: .6rem; padding: .5rem .8rem; background: #fff; border-bottom: 1px solid var(--border); flex: 0 0 auto; }
 .brand { font-weight: 700; font-size: 1.1rem; }
-.doc-title { color: var(--muted); font-size: .9rem; max-width: 28vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .spacer { flex: 1; }
 
 .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }

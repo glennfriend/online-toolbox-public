@@ -11,8 +11,12 @@
 - **即時預覽**:左邊寫 Markdown,右邊即時出 HTML。
 - **本機文件庫**:多份筆記存在瀏覽器(localStorage)。開啟某份 = 正在編輯它,**改了就自動存回那份**(概念同 HackMD;無暫存區、不走網址分享)。標題自動取內容第一行。
 - **三種檢視**:左右並排 / 只編輯 / 只預覽。
-- **主題可切**:每個主題是一個 `themes/<name>.css`,只套在預覽容器 `.md-preview` 上。
-- **程式碼上色**:第一個功能 module,支援 js / php / json 等(highlight.js)。
+- **主題可切**:`default`(GitHub 風,本機檔)、`github`(官方 github-markdown-css)。每個主題 = 一個 `themes/<name>.css`。
+- **內建示範文件(不可刪、置頂)**:一份總覽 + 每個 plugin 各一份(`docs/*.md`),打開即看效果與用法。
+- **功能 module(可插拔,各自獨立)**:
+  - 程式碼上色(highlight.js)、程式碼工具列(語言名 + 複製)
+  - 標題錨點(markdown-it-anchor)、螢光標記 `==…==`(markdown-it-mark)
+  - 數學公式(@vscode/markdown-it-katex)、連結開新分頁(markdown-it-link-attributes)
 
 ## 安全(目前的決定)
 
@@ -26,17 +30,24 @@
 
 ```
 markdown/
-├── index.html            外框 + import map(CDN 核心)+ 載入 js/main.js
+├── index.html            外框 + import map(CDN 核心/plugin)+ 載入 js/main.js
 ├── styles.css            app 外框與三種檢視版面
 ├── themes/
-│   └── default.css       預覽內文樣式(GitHub 風);換主題 = 換這個檔
+│   ├── default.css       預覽內文樣式(GitHub 風,本機檔)
+│   └── github.css        官方 github-markdown-css(CDN @import)
+├── docs/                 內建文件(.md):demo + 各 plugin 示範(同源 fetch 載入)
 └── js/
-    ├── main.js           殼層:文件庫 / 編輯器 / 預覽 / 檢視模式 / 主題 串接
+    ├── main.js           殼層:文件庫 / 編輯器 / 預覽 / 檢視模式 / 主題 / 內建文件 串接
     ├── renderer.js       markdown-it 薄 adapter(核心可抽換;html:false 安全基線)
     ├── registry.js       module 登記表 + 隔離(try/catch,壞了只錯單一 module)
-    ├── store.js          文件庫(localStorage:list / 開啟 / 自動存 / 刪)
-    └── modules/
-        └── highlight.js  功能 module #1:程式碼上色(post 型,隔離最佳)
+    ├── store.js          文件庫(localStorage;內建文件 id 以 __ 開頭、不可刪、置頂)
+    └── modules/          功能 module(可插拔)
+        ├── highlight.js        程式碼上色(post)
+        ├── codeblock.js        程式碼工具列:語言名 + 複製(post)
+        ├── anchor.js           標題錨點(parse)
+        ├── mark.js             ==螢光標記==(parse)
+        ├── katex.js            數學公式(parse)
+        └── link-attributes.js  連結開新分頁(parse)
 ```
 
 ### module 介面(可插拔的關鍵)
@@ -56,12 +67,15 @@ registerModule({
 
 ### 外部相依(誠實列出)
 
-- **markdown-it**(核心解析)、**highlight.js**(上色):皆走 CDN(`index.html` 的 import map),**延遲載入**——抓不到時誠實退回(整份退純文字 / 程式碼維持原樣),外殼仍可用。
+- 走 CDN(`index.html` 的 import map)、**延遲載入**,抓不到時誠實退回、外殼仍可用:
+  - `markdown-it`(核心)、`highlight.js`(上色)
+  - plugin:`markdown-it-anchor`、`markdown-it-mark`、`@vscode/markdown-it-katex`(+ `katex` CSS)、`markdown-it-link-attributes`
+- CSS:`github` 主題 `@import` 自 `github-markdown-css`(CDN);`katex` 主題 CSS 由 katex module 注入。
 - 自己寫的 module 是本機檔,不需 CDN、不需建置。
 
 ## 計畫(TODO)
 
-- 更多功能 module:任務清單、callout 容器(`::: note`)、數學(KaTeX)、圖表(mermaid)…(各自獨立、逐一加)。
+- 更多功能 module:任務清單、callout 容器(`::: note`)、emoji、圖表(mermaid)…(各自獨立、逐一加)。
 - 更多主題(含深色)。
 - 編輯/預覽捲動同步。
 

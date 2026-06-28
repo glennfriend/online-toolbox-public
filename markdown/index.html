@@ -14,7 +14,11 @@
   {
     "imports": {
       "markdown-it": "https://esm.sh/markdown-it@14",
-      "highlight.js": "https://esm.sh/highlight.js@11"
+      "highlight.js": "https://esm.sh/highlight.js@11",
+      "markdown-it-anchor": "https://esm.sh/markdown-it-anchor@9",
+      "markdown-it-mark": "https://esm.sh/markdown-it-mark@4",
+      "@vscode/markdown-it-katex": "https://esm.sh/@vscode/markdown-it-katex@1",
+      "markdown-it-link-attributes": "https://esm.sh/markdown-it-link-attributes@4"
     }
   }
   </script>
@@ -58,7 +62,7 @@
     <main class="main">
       <div id="panes" class="panes mode-split">
         <textarea id="editor" class="editor" wrap="soft" spellcheck="false" placeholder="在這裡寫 Markdown…"></textarea>
-        <div id="preview" class="preview md-preview" aria-live="polite"></div>
+        <div id="preview" class="preview md-preview markdown-body" aria-live="polite"></div>
       </div>
     </main>
   </div>

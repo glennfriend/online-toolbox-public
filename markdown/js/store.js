@@ -6,9 +6,9 @@
 
 const KEY = 'markdown.docs.v1';
 
-// 內建示範文件:固定 id、不可刪除、清單置頂。
+// 內建文件:固定 id、不可刪除、清單置頂。慣例:內建 id 一律以 "__" 開頭。
 export const DEMO_ID = '__demo__';
-export function isProtected(id) { return id === DEMO_ID; }
+export function isProtected(id) { return typeof id === 'string' && id.startsWith('__'); }
 
 function load() {
   try {
@@ -34,10 +34,11 @@ function titleOf(content) {
   return line.replace(/^#+\s*/, '').slice(0, 40) || '未命名';
 }
 
-// 依「最近更新」排序的清單;內建示範置頂(穩定排序保留其餘順序)。
+// 清單:內建文件置頂(依建立順序,demo 最前),其餘使用者文件依「最近更新」。
 export function list() {
-  const docs = state.docs.slice().sort((a, b) => b.updatedAt - a.updatedAt);
-  return docs.sort((a, b) => (isProtected(b.id) ? 1 : 0) - (isProtected(a.id) ? 1 : 0));
+  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => a.createdAt - b.createdAt);
+  const userDocs = state.docs.filter((d) => !isProtected(d.id)).sort((a, b) => b.updatedAt - a.updatedAt);
+  return [...builtins, ...userDocs];
 }
 
 // 確保某個「固定 id」的內建文件存在(不存在才建,已存在則保留使用者編輯)。
@@ -50,6 +51,10 @@ export function ensureBuiltin(id, content) {
 
 export function getCurrent() {
   return state.docs.find((d) => d.id === state.currentId) || null;
+}
+
+export function exists(id) {
+  return state.docs.some((d) => d.id === id);
 }
 
 export function open(id) {

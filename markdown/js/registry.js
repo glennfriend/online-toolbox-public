@@ -15,12 +15,13 @@ export function registerModule(m) {
   modules.push(m);
 }
 
-// 套用 parse / render 型 module 到一個 markdown-it 實例(各自隔離)。
-export function applyMdModules(md) {
+// 套用 parse / render 型 module 到一個 markdown-it 實例(各自隔離;apply 可為 async,
+// 因為 plugin 多半要從 CDN 延遲載入)。某個 plugin 載入/套用失敗 → 略過它,核心照常。
+export async function applyMdModules(md) {
   for (const m of modules) {
     if (m.type !== 'parse' && m.type !== 'render') continue;
     try {
-      m.apply(md);
+      await m.apply(md);
     } catch (err) {
       console.error(`[markdown] module「${m.name}」套用失敗,已略過(其餘正常):`, err);
     }

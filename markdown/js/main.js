@@ -10,6 +10,10 @@ import * as store from './store.js';
 // ── 掛載功能 module(可插拔)──
 import './modules/highlight.js';
 import './modules/codeblock.js';
+import './modules/anchor.js';
+import './modules/mark.js';
+import './modules/katex.js';
+import './modules/link-attributes.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -23,93 +27,16 @@ const el = {
 const SAVE_DELAY = 250;
 const VIEW_KEY = 'markdown.view';
 const THEME_KEY = 'markdown.theme';
-const THEMES = ['default'];   // 加主題 = 丟一個 themes/<name>.css + 在這裡加名字
+const THEMES = ['default', 'github'];   // 加主題 = 丟一個 themes/<name>.css + 在這裡加名字
 
-const DEMO = [
-  '# 📘 Markdown 功能示範',
-  '',
-  '> 這是**內建示範文件,不可刪除**。左側可「＋ 新增」自己的筆記。',
-  '> 以下都是 markdown-it **不加 plugin** 就有的(再加我們的「上色 + 複製」module)。',
-  '',
-  '## 文字樣式',
-  '',
-  '**粗體**、*斜體*、~~刪除線~~、`行內程式碼`、[超連結](https://markdown-it.github.io/)',
-  '',
-  '裸網址自動連結:https://github.com/markdown-it/markdown-it',
-  '',
-  '## 標題',
-  '',
-  '### 第三層標題',
-  '#### 第四層標題',
-  '',
-  '## 清單',
-  '',
-  '- 無序項目',
-  '  - 巢狀項目',
-  '    - 再一層',
-  '- 第二項',
-  '',
-  '1. 有序項目',
-  '2. 第二項',
-  '   1. 巢狀有序',
-  '',
-  '## 引用',
-  '',
-  '> 一層引用',
-  '>> 巢狀引用',
-  '',
-  '## 表格(GFM,內建)',
-  '',
-  '| 語言 | 用途 | 上色 |',
-  '|---|---|:---:|',
-  '| JavaScript | 前端 | ✅ |',
-  '| PHP | 後端 | ✅ |',
-  '| JSON | 資料 | ✅ |',
-  '',
-  '## 程式碼(右上有語言名 + 複製鈕)',
-  '',
-  '```js',
-  'const greet = (name) => `Hi, ${name}`;',
-  'console.log(greet("world"));',
-  '```',
-  '',
-  '```json',
-  '{ "name": "demo", "ok": true, "n": 42 }',
-  '```',
-  '',
-  '```php',
-  '<?php echo "hello " . strtoupper("world"); ?>',
-  '```',
-  '',
-  '```bash',
-  'echo "hello"; ls -al | grep md',
-  '```',
-  '',
-  '```css',
-  '.title { color: #2563eb; font-weight: 700; }',
-  '```',
-  '',
-  '## 圖片',
-  '',
-  '![badge](https://img.shields.io/badge/markdown--it-CommonMark-blue)',
-  '',
-  '## 水平線',
-  '',
-  '---',
-  '',
-  '## 跳脫與原始 HTML(安全)',
-  '',
-  '反斜線跳脫:\\*這不是斜體\\*',
-  '',
-  '原始 HTML 一律當文字、不執行:<b>這不會變粗體</b>',
-  '',
-  '---',
-  '',
-  '## 這些要加 plugin 才有(目前尚未加)',
-  '',
-  '- 任務清單 `- [ ]`、註腳 `[^1]`、數學 `$E=mc^2$`、容器 `::: note`、emoji `:smile:`',
-  '- 之後會一個一個加成獨立 module。',
-].join('\n');
+// 內建文件(固定 id、不可刪、置頂):從 docs/*.md 載入(同源,離線可用)。
+const BUILTINS = [
+  [store.DEMO_ID, 'docs/demo.md'],
+  ['__p-anchor__', 'docs/anchor.md'],
+  ['__p-mark__', 'docs/mark.md'],
+  ['__p-katex__', 'docs/katex.md'],
+  ['__p-linkattr__', 'docs/link-attributes.md'],
+];
 
 // 注入 module 自帶的 css(若有)
 const mcss = moduleCss();
@@ -208,13 +135,28 @@ function setTheme(name) {
 }
 el.theme.addEventListener('change', () => setTheme(el.theme.value));
 
-// ── 啟動 ──
-for (const t of THEMES) {
-  const o = document.createElement('option');
-  o.value = t; o.textContent = t;
-  el.theme.appendChild(o);
+// 確保內建文件存在(從 docs/*.md fetch;已存在就跳過,保留使用者編輯)。
+async function seedBuiltins() {
+  for (const [id, url] of BUILTINS) {
+    if (store.exists(id)) continue;
+    try {
+      const txt = await (await fetch(url)).text();
+      store.ensureBuiltin(id, txt);
+    } catch (err) {
+      console.error('[markdown] 載入內建文件失敗:', url, err);
+    }
+  }
 }
-setTheme(localStorage.getItem(THEME_KEY) || 'default');
-setMode(localStorage.getItem(VIEW_KEY) || 'split');
-store.ensureBuiltin(store.DEMO_ID, DEMO);   // 確保內建示範存在(不可刪)
-openDoc(store.getCurrent()?.id || store.DEMO_ID);
+
+// ── 啟動 ──
+(async function init() {
+  for (const t of THEMES) {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t;
+    el.theme.appendChild(o);
+  }
+  setTheme(localStorage.getItem(THEME_KEY) || 'default');
+  setMode(localStorage.getItem(VIEW_KEY) || 'split');
+  await seedBuiltins();
+  openDoc(store.getCurrent()?.id || store.DEMO_ID);
+})();

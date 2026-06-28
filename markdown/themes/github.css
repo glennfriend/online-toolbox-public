@@ -1,0 +1,5 @@
+/* GitHub 主題:用官方 github-markdown-css(npm 下載量第一)。
+   它的樣式鎖在 .markdown-body —— 預覽元素同時帶有 .md-preview 與 .markdown-body,
+   故切到本主題時(只載入這個檔)由 .markdown-body 規則生效。
+   外部相依:透過 @import 從 CDN 取用;離線時本主題不會上樣式(預設主題是本機檔、離線正常)。 */
+@import url("https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css");

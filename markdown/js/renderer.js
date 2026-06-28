@@ -16,7 +16,7 @@ async function instance() {
       const mod = await import('markdown-it');
       const markdownit = mod.default || mod;
       const md = markdownit({ html: false, linkify: true, typographer: false });
-      applyMdModules(md);   // 套用 parse / render 型 module(各自隔離)
+      await applyMdModules(md);   // 套用 parse / render 型 module(各自隔離;plugin 從 CDN 載入)
       _md = md;
       return md;
     })();

@@ -16,6 +16,8 @@ const copyLinkBtn = document.querySelector('#copy-link');
 const exMathBtn = document.querySelector('#ex-math');
 const exThousandsBtn = document.querySelector('#ex-thousands');
 const exDatetimeBtn = document.querySelector('#ex-datetime');
+const exDateDiffBtn = document.querySelector('#ex-datediff');
+const exCommentBtn = document.querySelector('#ex-comment');
 const toast = document.querySelector('#toast');
 
 const RENDER_DELAY = 80; // 輸入後稍微 debounce 再重算
@@ -33,6 +35,17 @@ const EXAMPLE_DATETIME = [
   '2001-01-01T09:00:00+08:00 to America/Los_Angeles', // 1 月的 LA 是 PST(UTC-8)
   '',
   '2001-01-01T09:00:00-07:00 to Asia/Taipei',
+].join('\n');
+const EXAMPLE_DATEDIFF = [
+  '# 日期相減 → 期間',
+  '2026-03-01 to 2026-01-01',
+  '2026-12-31 to 2026-01-01',
+  '2026-01-01T18:00:00+08:00 to 2026-01-01T09:00:00+08:00',
+].join('\n');
+const EXAMPLE_COMMENT = [
+  '# 這行是註解 / 標題,不會計算',
+  '100 + 200',
+  '50 * 3',
 ].join('\n');
 
 // ── 逐行重算 + render ──
@@ -61,6 +74,10 @@ function renderLine(result) {
     case 'conflict':
       div.classList.add('result-conflict');
       div.textContent = `不能混用 (${result.names.join(' / ')})`;
+      break;
+    case 'comment':
+      div.classList.add('result-comment');
+      div.textContent = result.text || ' ';   // 在答案欄淡淡標出標題,確認這行被當註解
       break;
     default: // empty / none:不顯示答案,但保留一行高度以維持左右對齊
       div.textContent = ' ';
@@ -121,6 +138,8 @@ function appendExample(text) {
 exMathBtn.addEventListener('click', () => appendExample(EXAMPLE_MATH));
 exThousandsBtn.addEventListener('click', () => appendExample(EXAMPLE_THOUSANDS));
 exDatetimeBtn.addEventListener('click', () => appendExample(EXAMPLE_DATETIME));
+exDateDiffBtn.addEventListener('click', () => appendExample(EXAMPLE_DATEDIFF));
+exCommentBtn.addEventListener('click', () => appendExample(EXAMPLE_COMMENT));
 
 copyLinkBtn.addEventListener('click', async () => {
   try {

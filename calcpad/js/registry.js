@@ -15,6 +15,7 @@ export function registerEvaluator(evaluator) {
 // 對單一行做派發,回傳一個描述「該怎麼顯示」的結果物件。
 // kind:
 //   'empty'    空行 → 不顯示答案
+//   'comment'  # 開頭 → 註解 / 標題行,不計算、不報錯(text 為去掉 # 後的文字)
 //   'none'     沒有模組認領 → 不顯示答案
 //   'conflict' 多個模組同時認領 → 顯示「不能混用」
 //   'ok'       剛好一個模組 → value 為答案文字
@@ -22,6 +23,8 @@ export function registerEvaluator(evaluator) {
 export function evaluateLine(line) {
   const trimmed = line.trim();
   if (!trimmed) return { kind: 'empty' };
+  // 註解 / 標題行:# 開頭一律不計算(可放標題、分隔線、或刻意讓某行不算)。
+  if (trimmed.startsWith('#')) return { kind: 'comment', text: trimmed.replace(/^#+\s*/, '') };
 
   const matched = evaluators.filter((e) => e.match(trimmed));
   if (matched.length === 0) return { kind: 'none' };

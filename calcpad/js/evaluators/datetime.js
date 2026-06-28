@@ -2,6 +2,7 @@
 //
 //   <ISO 時間> + 2h + 30m + 30s   → 加減後的時間(沿用原本的時區 offset 顯示)
 //   <ISO 時間> to Asia/Taipei      → 換算到指定 IANA 時區(用原生 Intl,含 DST)
+//   <ISO 時間> to <ISO 時間>        → 兩個時間的期間(天/時/分/秒;絕對值)
 //
 // 零相依:時區換算完全交給瀏覽器內建的 Intl.DateTimeFormat。
 
@@ -19,7 +20,7 @@ const UNIT_MS = { d: 86400000, h: 3600000, m: 60000, s: 1000 };
 
 registerEvaluator({
   name: 'datetime',
-  // 認領條件:行首是日期,且後面接「加減運算」或「to 時區」其一。
+  // 認領條件:行首是日期,且後面接「加減運算」或「to 時區/日期」其一。
   // 光是一個裸日期(沒有運算)不認領 —— 避免把 2026-06-15 這種誤吞,也讓功能保持有意義。
   match: (line) => {
     if (!LEADING_DATE.test(line)) return false;
@@ -32,10 +33,38 @@ registerEvaluator({
     const date = new Date(token.replace(' ', 'T'));
     if (Number.isNaN(date.getTime())) throw new Error('看不懂的日期');
 
-    if (/^to\b/i.test(rest)) return convertTimezone(date, rest);
+    if (/^to\b/i.test(rest)) return handleTo(date, rest);
     return applyDurations(date, token, rest);
   },
 });
+
+// to 後面是「日期」→ 算兩個時間的期間;否則當「時區名」做換算。
+function handleTo(date, rest) {
+  const operand = rest.replace(/^to\s+/i, '').trim();
+  if (!operand) throw new Error('缺少時區或日期');
+  const dm = operand.match(LEADING_DATE);
+  if (dm && operand.slice(dm[0].length).trim() === '') {
+    const other = new Date(dm[0].replace(' ', 'T'));
+    if (Number.isNaN(other.getTime())) throw new Error('看不懂的日期');
+    return formatDuration(date, other);
+  }
+  return convertTimezone(date, rest);
+}
+
+// 兩個瞬間的期間(絕對值),用 天/時/分/秒 表示,省略為 0 的高位單位。
+function formatDuration(a, b) {
+  let ms = Math.abs(b.getTime() - a.getTime());
+  const d = Math.floor(ms / UNIT_MS.d); ms -= d * UNIT_MS.d;
+  const h = Math.floor(ms / UNIT_MS.h); ms -= h * UNIT_MS.h;
+  const m = Math.floor(ms / UNIT_MS.m); ms -= m * UNIT_MS.m;
+  const s = Math.floor(ms / UNIT_MS.s);
+  const parts = [];
+  if (d) parts.push(`${d} 天`);
+  if (h) parts.push(`${h} 時`);
+  if (m) parts.push(`${m} 分`);
+  if (s) parts.push(`${s} 秒`);
+  return parts.length ? parts.join(' ') : '0 秒';
+}
 
 // <時間> to <IANA 時區> → 在該時區的當地時間(含 offset)。
 function convertTimezone(date, rest) {

@@ -47,12 +47,17 @@ function progressMsg(p) {
   return `下載模型 ${mb(p.loaded)} MB…`;
 }
 
-// 辨識一張 canvas → 回傳純文字。onStatus 回報進度。
+// 辨識一張 canvas → 回傳 { text, lines, width, height }。
+//   text   逐行純文字(放進 textarea)
+//   lines  RecognitionResult[][]:每行一組 word,每個 word 帶 { text, box{x,y,width,height}, confidence }
+//   width/height  這張 canvas 的尺寸(座標換算用;前處理放大後仍以此為準,比例不變)
+// onStatus 回報進度。
 export async function recognizeCanvas(canvas, onStatus) {
   const svc = await ensureEngine(onStatus);
   onStatus?.('辨識中…');
-  const result = await svc.recognize(canvas);
-  return typeof result?.text === 'string' ? result.text : extractText(result);
+  const result = await svc.recognize(canvas);   // grouped:{ text, lines, confidence }
+  const text = typeof result?.text === 'string' ? result.text : extractText(result);
+  return { text, lines: Array.isArray(result?.lines) ? result.lines : [], width: canvas.width, height: canvas.height };
 }
 
 // 後備:萬一回傳沒有 .text,從常見形狀抽逐行文字。

@@ -38,6 +38,7 @@
           <div class="drop-sub">要從檔案選,請按下方「選擇檔案」</div>
         </div>
         <img id="preview" class="preview" alt="預覽" hidden>
+        <canvas id="overlay" class="overlay" hidden></canvas>
       </div>
       <input id="file" type="file" accept="image/*,application/pdf" hidden>
       <div class="actions">
@@ -68,6 +69,7 @@
       <div class="result-head">
         <button id="copy" class="btn" type="button" disabled>📋 複製</button>
       </div>
+      <div id="proof" class="proof" hidden></div>
       <textarea id="result" class="result" spellcheck="false" placeholder="辨識出的文字會出現在這裡,可直接編輯與複製…"></textarea>
     </div>
   </section>

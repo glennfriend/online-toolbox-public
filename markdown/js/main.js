@@ -37,6 +37,7 @@ const BUILTINS = [
   [store.DEMO_ID, 'docs/demo.md'],
   ['__p-mark__', 'docs/mark.md'],
   ['__p-katex__', 'docs/katex.md'],
+  ['__p-juniormath__', 'docs/junior-math.md'],
   ['__p-linkattr__', 'docs/link-attributes.md'],
   ['__p-tasklist__', 'docs/task-lists.md'],
   ['__p-tabletools__', 'docs/table-tools.md'],
@@ -173,7 +174,8 @@ async function seedBuiltins() {
   buildThemeButtons();
   setTheme(localStorage.getItem(THEME_KEY) || 'default');
   setMode(localStorage.getItem(VIEW_KEY) || 'split');
-  store.pruneBuiltins(BUILTINS.map(([id]) => id));   // 清掉已移除的舊內建文件(如 anchor)
+  store.setBuiltinOrder(BUILTINS.map(([id]) => id));   // 內建文件依此順序排在側欄
+  store.pruneBuiltins(BUILTINS.map(([id]) => id));     // 清掉已移除的舊內建文件(如 anchor)
   await seedBuiltins();
   openDoc(store.getCurrent()?.id || store.DEMO_ID);
 })();

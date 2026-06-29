@@ -34,10 +34,15 @@ function titleOf(content) {
   return line.replace(/^#+\s*/, '').slice(0, 40) || '未命名';
 }
 
-// 清單:使用者文件在上(依最近更新),內建示範在下(依建立順序,demo 最前)。
+// 內建文件的顯示順序(由 main.js 用 BUILTINS 設定);未列到的排最後。
+let builtinOrder = [];
+export function setBuiltinOrder(ids) { builtinOrder = ids.slice(); }
+
+// 清單:使用者文件在上(依最近更新),內建示範在下(依 builtinOrder 定義順序)。
 export function list() {
+  const rank = (id) => { const i = builtinOrder.indexOf(id); return i < 0 ? 1e9 : i; };
   const userDocs = state.docs.filter((d) => !isProtected(d.id)).sort((a, b) => b.updatedAt - a.updatedAt);
-  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => a.createdAt - b.createdAt);
+  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => rank(a.id) - rank(b.id));
   return [...userDocs, ...builtins];
 }
 

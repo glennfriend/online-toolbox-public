@@ -21,7 +21,7 @@ import './modules/task-lists.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
-  list: $('#doc-list'), newBtn: $('#new-doc'), sidebarToggle: $('#sidebar-toggle'),
+  list: $('#doc-list'), newBtn: $('#new-doc'), sidebarToggle: $('#sidebar-toggle'), downloadBtn: $('#download-html'),
   editor: $('#editor'), preview: $('#preview'),
   panes: $('#panes'),
   modeSplit: $('#mode-split'), modeEdit: $('#mode-edit'), modeView: $('#mode-view'),
@@ -133,6 +133,56 @@ function setSidebar(collapsed) {
   localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
 }
 el.sidebarToggle.addEventListener('click', () => setSidebar(!document.body.classList.contains('sidebar-collapsed')));
+
+// ── 下載成單一 HTML(CDN 式:存 markdown 原文 + 引用本站 render 模組 + CDN 庫,開啟時現場重渲染,跟這裡一樣)──
+// 需先於 highlight/codeblock 的模組順序要跟本檔一致(mermaid/chart 先)。
+const EXPORT_MODULES = ['mermaid', 'chart', 'highlight', 'codeblock', 'table-tools', 'mark', 'katex', 'link-attributes', 'task-lists'];
+
+function buildExportHtml(doc) {
+  const base = new URL('.', location.href).href;   // 本站 markdown/ 目錄(絕對網址)
+  const importMap = document.querySelector('script[type="importmap"]').textContent;
+  const themeName = localStorage.getItem(THEME_KEY) || 'default';
+  const moduleImports = EXPORT_MODULES.map((m) => `import ${JSON.stringify(base + 'js/modules/' + m + '.js')};`).join('\n');
+  const srcJson = JSON.stringify(doc.content).replace(/<\//g, '<\\/');   // 避免 </script> 提早結束
+  const titleText = (doc.title || 'Markdown').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  return `<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${titleText}</title>
+<link rel="stylesheet" href="${base}themes/${themeName}.css">
+<style>body{margin:0 auto;max-width:980px;padding:2rem 1.2rem;font-family:-apple-system,"Segoe UI","Noto Sans CJK TC","Microsoft JhengHei",sans-serif;}</style>
+<script type="importmap">${importMap}</script>
+</head>
+<body>
+<div id="preview" class="md-preview markdown-body" aria-live="polite"></div>
+<script type="application/json" id="md-src">${srcJson}</script>
+<script type="module">
+import { render, enhance } from ${JSON.stringify(base + 'js/renderer.js')};
+import { moduleCss } from ${JSON.stringify(base + 'js/registry.js')};
+${moduleImports}
+const st = document.createElement('style'); st.textContent = moduleCss(); document.head.appendChild(st);
+const SRC = JSON.parse(document.getElementById('md-src').textContent);
+const el = document.getElementById('preview');
+el.innerHTML = await render(SRC);
+await enhance(el);
+</script>
+</body>
+</html>`;
+}
+
+function downloadHtml() {
+  const doc = store.getCurrent();
+  if (!doc) return;
+  const blob = new Blob([buildExportHtml(doc)], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (doc.title || 'markdown').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 50) + '.html';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+el.downloadBtn.addEventListener('click', downloadHtml);
 
 // ── 編輯 / 預覽 捲動同步(比例對應,避免兩邊不一致)──
 let syncing = false;

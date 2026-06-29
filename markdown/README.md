@@ -17,6 +17,8 @@
   - 程式碼上色(highlight.js)、程式碼工具列(語言名 + 複製)
   - 表格工具(複製成 Markdown / Unicode / CSV / JSON + 欄寬拖曳記憶)
   - Mermaid 圖(渲染 + 匯出:原始碼 / PNG / SVG / Base64 / 複製到剪貼簿)
+  - Chart 圖表(宣告式 ```chart:radar/bar/line/pie,ECharts)
+- **下載單一 HTML**(⬇ HTML):存 markdown 原文 + 引用本站 render 模組 + CDN 庫,開啟時(需連網)現場重渲染,效果與工具內一致;檔案很小。
   - 任務清單 `- [ ]`(markdown-it-task-lists)、螢光標記 `==…==`(markdown-it-mark)
   - 數學公式(@vscode/markdown-it-katex)、外部連結開新分頁(markdown-it-link-attributes)
 

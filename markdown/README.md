@@ -82,7 +82,6 @@ registerModule({
 
 - 更多功能 module:任務清單、callout 容器(`::: note`)、emoji、圖表(mermaid)…(各自獨立、逐一加)。
 - 更多主題(含深色)。
-- 編輯/預覽捲動同步。
 
 ## 部署
 

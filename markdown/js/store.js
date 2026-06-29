@@ -34,15 +34,13 @@ function titleOf(content) {
   return line.replace(/^#+\s*/, '').slice(0, 40) || '未命名';
 }
 
-// 內建文件的顯示順序(由 main.js 用 BUILTINS 設定);未列到的排最後。
-let builtinOrder = [];
-export function setBuiltinOrder(ids) { builtinOrder = ids.slice(); }
-
-// 清單:使用者文件在上(依最近更新),內建示範在下(依 builtinOrder 定義順序)。
+// 清單(上下兩群排序規則不同):
+//   使用者文件在上,依「最近更新」;
+//   內建示範在下,依「名稱」排序(去掉開頭的 emoji / 符號再比)。
 export function list() {
-  const rank = (id) => { const i = builtinOrder.indexOf(id); return i < 0 ? 1e9 : i; };
+  const nameKey = (d) => (d.title || '').replace(/^[^\p{L}\p{N}]+/u, '');
   const userDocs = state.docs.filter((d) => !isProtected(d.id)).sort((a, b) => b.updatedAt - a.updatedAt);
-  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => rank(a.id) - rank(b.id));
+  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => nameKey(a).localeCompare(nameKey(b), 'zh-Hant'));
   return [...userDocs, ...builtins];
 }
 

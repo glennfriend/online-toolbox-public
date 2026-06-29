@@ -20,7 +20,7 @@ import './modules/task-lists.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
-  list: $('#doc-list'), newBtn: $('#new-doc'),
+  list: $('#doc-list'), newBtn: $('#new-doc'), sidebarToggle: $('#sidebar-toggle'),
   editor: $('#editor'), preview: $('#preview'),
   panes: $('#panes'),
   modeSplit: $('#mode-split'), modeEdit: $('#mode-edit'), modeView: $('#mode-view'),
@@ -29,6 +29,7 @@ const el = {
 
 const SAVE_DELAY = 250;
 const VIEW_KEY = 'markdown.view';
+const SIDEBAR_KEY = 'markdown.sidebar';
 const THEME_KEY = 'markdown.theme';
 const THEMES = ['default', 'github'];   // 加主題 = 丟一個 themes/<name>.css + 在這裡加名字
 
@@ -124,6 +125,26 @@ el.editor.addEventListener('input', () => {
 
 el.newBtn.addEventListener('click', () => { openDoc(store.create('').id); el.editor.focus(); });
 
+// ── 側欄收合 ──
+function setSidebar(collapsed) {
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
+}
+el.sidebarToggle.addEventListener('click', () => setSidebar(!document.body.classList.contains('sidebar-collapsed')));
+
+// ── 編輯 / 預覽 捲動同步(比例對應,避免兩邊不一致)──
+let syncing = false;
+function syncScroll(from, to) {
+  if (syncing) return;
+  syncing = true;
+  const fromMax = from.scrollHeight - from.clientHeight;
+  const toMax = to.scrollHeight - to.clientHeight;
+  to.scrollTop = fromMax > 0 ? (from.scrollTop / fromMax) * toMax : 0;
+  requestAnimationFrame(() => { syncing = false; });
+}
+el.editor.addEventListener('scroll', () => syncScroll(el.editor, el.preview));
+el.preview.addEventListener('scroll', () => syncScroll(el.preview, el.editor));
+
 // ── 檢視模式:左右 / 編輯 / 預覽 ──
 function setMode(mode) {
   el.panes.className = 'panes mode-' + mode;
@@ -174,7 +195,7 @@ async function seedBuiltins() {
   buildThemeButtons();
   setTheme(localStorage.getItem(THEME_KEY) || 'default');
   setMode(localStorage.getItem(VIEW_KEY) || 'split');
-  store.setBuiltinOrder(BUILTINS.map(([id]) => id));   // 內建文件依此順序排在側欄
+  setSidebar(localStorage.getItem(SIDEBAR_KEY) === '1');
   store.pruneBuiltins(BUILTINS.map(([id]) => id));     // 清掉已移除的舊內建文件(如 anchor)
   await seedBuiltins();
   openDoc(store.getCurrent()?.id || store.DEMO_ID);

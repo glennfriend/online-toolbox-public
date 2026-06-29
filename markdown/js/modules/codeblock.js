@@ -1,7 +1,7 @@
-// 功能 module #2:程式碼區塊工具列(post 型,獨立於上色 module)。
+// 功能 module #2:程式碼區塊複製鈕(post 型,獨立於上色 module)。
 //
-// 在每個 <pre><code> 上方加一條工具列:左邊語言名、右邊「複製」鈕。
-// 與 highlight module 互不相依:這個壞了不影響上色,反之亦然。
+// 風格:右上角浮一顆「= 語言名」的按鈕(沒有分隔線、不佔上方一排);點它複製整段程式碼,
+// 回饋顯示「語言 (已複製)」。與 highlight module 互不相依。
 
 import { registerModule } from '../registry.js';
 
@@ -14,59 +14,57 @@ const LABELS = {
   yaml: 'YAML', yml: 'YAML', md: 'Markdown', markdown: 'Markdown', diff: 'Diff',
 };
 
-// 取原始語言代碼:markdown-it 給的是第一個 language-xxx(highlight 之後可能再追加別的)。
 function langOf(code) {
   const m = (code.className || '').match(/language-([\w+#-]+)/);
   return m ? m[1].toLowerCase() : '';
 }
 
-registerModule({
-  name: 'codeblock-toolbar',
-  type: 'post',
-  css: `
-.cb { margin: .8em 0; border: 1px solid #d0d7de; border-radius: 8px; overflow: hidden; }
-.cb-bar { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .25em .6em; background: #f6f8fa; border-bottom: 1px solid #d8dee4; font-size: .78rem; }
-.cb-lang { color: #57606a; }
-.cb-copy { font: inherit; font-size: .76rem; cursor: pointer; border: 1px solid #d0d7de; border-radius: 6px; background: #fff; color: #24292f; padding: .1em .65em; }
-.cb-copy:hover { background: #eef1f4; }
-.cb > pre { margin: 0; border: 0; border-radius: 0; }
-`,
-  apply(root) {
-    root.querySelectorAll('pre > code').forEach((code) => {
-      const pre = code.parentElement;
-      if (!pre || pre.parentElement?.classList?.contains('cb')) return;   // 已加過就跳過
-      try {
-        const lang = langOf(code);
-        const wrap = document.createElement('div');
-        wrap.className = 'cb';
-
-        const bar = document.createElement('div');
-        bar.className = 'cb-bar';
-        const label = document.createElement('span');
-        label.className = 'cb-lang';
-        label.textContent = lang ? (LABELS[lang] || lang) : '';
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'cb-copy';
-        btn.textContent = '複製';
-        btn.addEventListener('click', () => copyCode(code, btn));
-        bar.append(label, btn);
-
-        pre.replaceWith(wrap);     // 把 pre 換成 wrap…
-        wrap.append(bar, pre);     // …再把工具列 + pre 放進 wrap
-      } catch (err) {
-        console.error('[markdown] code 工具列失敗,保留原樣:', err);
-      }
-    });
-  },
-});
-
 function copyCode(code, btn) {
   const text = code.textContent;
-  const done = (msg) => { btn.textContent = msg; setTimeout(() => { btn.textContent = '複製'; }, 1200); };
+  const done = (msg) => {
+    btn.textContent = msg;
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = btn.dataset.label; btn.classList.remove('copied'); }, 1300);
+  };
   if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text).then(() => done('複製 (copyed)'), () => done('複製失敗'));
+    navigator.clipboard.writeText(text).then(() => done(`${btn.dataset.label} (已複製)`), () => done('複製失敗'));
   } else {
     done('複製失敗');
   }
 }
+
+registerModule({
+  name: 'codeblock-copy',
+  type: 'post',
+  css: `
+.md-preview .cb { position: relative; margin: .9em 0; }
+.md-preview .cb > pre { margin: 0; }
+.md-preview .cb-copy { position: absolute; top: .4rem; right: .4rem; z-index: 2; font: inherit; font-size: .74rem; line-height: 1; cursor: pointer; border: 1px solid var(--border, #d0d7de); border-radius: 5px; background: #fff; color: var(--muted, #57606a); padding: .28em .6em; opacity: .5; transition: opacity .15s, color .15s, border-color .15s; }
+.md-preview .cb:hover .cb-copy, .md-preview .cb-copy:focus { opacity: 1; }
+.md-preview .cb-copy:hover { color: var(--fg, #24292f); border-color: var(--accent, #2563eb); opacity: 1; }
+.md-preview .cb-copy.copied { color: #1a7f37; border-color: #1a7f37; opacity: 1; }
+`,
+  apply(root) {
+    root.querySelectorAll('pre > code').forEach((code) => {
+      const pre = code.parentElement;
+      if (!pre || pre.parentElement?.classList?.contains('cb')) return;   // 已處理過
+      try {
+        const lang = langOf(code);
+        const label = lang ? (LABELS[lang] || lang) : '複製';
+        const wrap = document.createElement('div');
+        wrap.className = 'cb';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cb-copy';
+        btn.textContent = label;
+        btn.title = '複製程式碼';
+        btn.dataset.label = label;
+        btn.addEventListener('click', () => copyCode(code, btn));
+        pre.replaceWith(wrap);
+        wrap.append(btn, pre);
+      } catch (err) {
+        console.error('[markdown] code 複製鈕失敗,保留原樣:', err);
+      }
+    });
+  },
+});

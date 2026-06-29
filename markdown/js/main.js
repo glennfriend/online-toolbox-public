@@ -11,6 +11,7 @@ import * as store from './store.js';
 // mermaid 要先於 highlight / codeblock(post 依註冊順序執行):先把圖換掉,後兩者就不會碰它。
 import './modules/mermaid.js';
 import './modules/chart.js';
+import './modules/json-format.js';
 import './modules/highlight.js';
 import './modules/codeblock.js';
 import './modules/table-tools.js';

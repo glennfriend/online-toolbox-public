@@ -15,13 +15,3 @@
 - 站內錨點 `#…` 與相對連結**刻意不加** `target="_blank"` —— 否則點了會跳出新視窗,而不是留在本頁。
 
 > 註:站內 `#錨點` 要能真的「跳到該段」,需要標題有 `id`(由 anchor 類 plugin 提供)。本工具目前沒裝,所以內連只示範「不開新分頁」這個行為。
-
-## 怎麼用(`js/modules/link-attributes.js`)
-
-```js
-const la = (await import('markdown-it-link-attributes')).default;
-md.use(la, {
-  matcher: (href) => /^https?:\/\//i.test(href),   // 只對外部 http(s) 連結
-  attrs: { target: '_blank', rel: 'noopener noreferrer' },
-});
-```

@@ -144,12 +144,3 @@ $$
 $$
 \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
 $$
-
----
-
-**怎麼用**(`js/modules/katex.js`):
-
-```js
-const katex = (await import('@vscode/markdown-it-katex')).default;
-md.use(katex);
-```

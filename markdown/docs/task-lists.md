@@ -10,10 +10,3 @@
 **用途**:待辦清單、檢查清單。
 
 > 預覽中的核取方塊是**唯讀**的(只反映原始碼的勾選);要改狀態請改原始碼的 `[ ]` / `[x]`。
-
-**怎麼用**(`js/modules/task-lists.js`):
-
-```js
-const taskLists = (await import('markdown-it-task-lists')).default;
-md.use(taskLists);
-```

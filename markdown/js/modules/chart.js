@@ -94,10 +94,10 @@ function renderXY(echarts, wrap, header, rows, opts, type) {
   const categories = rows.map((r) => String(r[0] ?? ''));
   const series = header.slice(1).map((name, ci) => ({ name, type, data: rows.map((r) => num(r[ci + 1])) }));
   mountChart(echarts, div, {
-    title: opts.title ? { text: opts.title, left: 'center' } : undefined,
+    title: opts.title ? { text: opts.title, left: 'center', top: 6 } : undefined,
     tooltip: { trigger: 'axis' },
-    legend: {},
-    grid: { left: 48, right: 24, top: opts.title ? 56 : 32, bottom: 40 },
+    legend: { top: opts.title ? 32 : 6 },          // 圖例放標題下方,避免疊住
+    grid: { left: 48, right: 24, top: opts.title ? 66 : 40, bottom: 40 },
     xAxis: { type: 'category', data: categories },
     yAxis: { type: 'value' },
     series,
@@ -109,10 +109,10 @@ function renderPie(echarts, wrap, header, rows, opts) {
   wrap.appendChild(div);
   const data = rows.map((r) => ({ name: String(r[0] ?? ''), value: num(r[1]) }));
   mountChart(echarts, div, {
-    title: opts.title ? { text: opts.title, left: 'center' } : undefined,
+    title: opts.title ? { text: opts.title, left: 'center', top: 6 } : undefined,
     tooltip: { trigger: 'item' },
-    legend: {},
-    series: [{ type: 'pie', radius: '60%', data, label: { show: true } }],
+    legend: { top: opts.title ? 32 : 6 },          // 圖例放標題下方,避免疊住
+    series: [{ type: 'pie', radius: '58%', center: ['50%', '58%'], data, label: { show: true } }],
   });
 }
 

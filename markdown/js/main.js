@@ -136,6 +136,14 @@ function setTheme(name) {
   localStorage.setItem(THEME_KEY, name);
 }
 el.theme.addEventListener('change', () => setTheme(el.theme.value));
+// 上下鍵即時套用(聚焦在主題選單時,按 ↑/↓ 就換並套用,不必先 commit)。
+el.theme.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const n = el.theme.options.length;
+  el.theme.selectedIndex = (el.theme.selectedIndex + (e.key === 'ArrowDown' ? 1 : -1) + n) % n;
+  setTheme(el.theme.value);
+});
 
 // 從 docs/*.md 載入內建文件,並以 .md 為準更新(它們是參考文件,永遠保持最新)。
 async function seedBuiltins() {

@@ -133,13 +133,12 @@ function setTheme(name) {
 }
 el.theme.addEventListener('change', () => setTheme(el.theme.value));
 
-// 確保內建文件存在(從 docs/*.md fetch;已存在就跳過,保留使用者編輯)。
+// 從 docs/*.md 載入內建文件,並以 .md 為準更新(它們是參考文件,永遠保持最新)。
 async function seedBuiltins() {
   for (const [id, url] of BUILTINS) {
-    if (store.exists(id)) continue;
     try {
       const txt = await (await fetch(url)).text();
-      store.ensureBuiltin(id, txt);
+      store.upsertBuiltin(id, txt);   // 每次載入都以 .md 為準更新(內容沒變則不寫)
     } catch (err) {
       console.error('[markdown] 載入內建文件失敗:', url, err);
     }

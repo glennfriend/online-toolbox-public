@@ -41,12 +41,17 @@ export function list() {
   return [...builtins, ...userDocs];
 }
 
-// 確保某個「固定 id」的內建文件存在(不存在才建,已存在則保留使用者編輯)。
-export function ensureBuiltin(id, content) {
-  if (state.docs.some((d) => d.id === id)) return;
-  const t = nowTs();
-  state.docs.push({ id, title: titleOf(content), content, createdAt: t, updatedAt: t });
-  persist();
+// 內建文件:不存在則建立、已存在則更新內容(讓 docs/*.md 的更新能反映出來)。
+// createdAt 保留(維持置頂排序);內容沒變則不寫入。內建文件是「參考」,以 .md 為準。
+export function upsertBuiltin(id, content) {
+  const d = state.docs.find((x) => x.id === id);
+  if (d) {
+    if (d.content !== content) { d.content = content; d.title = titleOf(content); d.updatedAt = nowTs(); persist(); }
+  } else {
+    const t = nowTs();
+    state.docs.push({ id, title: titleOf(content), content, createdAt: t, updatedAt: t });
+    persist();
+  }
 }
 
 export function getCurrent() {

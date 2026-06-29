@@ -1,14 +1,27 @@
 # 🔗 markdown-it-link-attributes
 
-讓所有連結自動加屬性。本工具設定為:**外部連結在新分頁開啟**,並加上安全的 `rel`。
+讓**外部連結**自動加屬性:在新分頁開啟 + 安全的 `rel`。**站內 / 相對連結不受影響**(維持本頁行為)。
 
-範例:[這個連結會開新分頁](https://markdown-it.github.io/)
+## 範例
 
-**用途**:外部連結開新分頁、加 `rel="noopener noreferrer"` 防止 tabnabbing(新分頁竄改原頁)。
+- 外連(會開**新分頁**):[markdown-it 官網](https://markdown-it.github.io/)
+- 內連(留在**本頁**、不開新分頁):[內部連結](#用途)
 
-**怎麼用**(`js/modules/link-attributes.js`):
+> 滑鼠移到連結看狀態列、或右鍵看屬性:外連有 `target="_blank"`,內連沒有。
+
+## 用途
+
+- 外部連結開新分頁、加 `rel="noopener noreferrer"`(防 tabnabbing:新分頁竄改原頁)。
+- 站內錨點 `#…` 與相對連結**刻意不加** `target="_blank"` —— 否則點了會跳出新視窗,而不是留在本頁。
+
+> 註:站內 `#錨點` 要能真的「跳到該段」,需要標題有 `id`(由 anchor 類 plugin 提供)。本工具目前沒裝,所以內連只示範「不開新分頁」這個行為。
+
+## 怎麼用(`js/modules/link-attributes.js`)
 
 ```js
 const la = (await import('markdown-it-link-attributes')).default;
-md.use(la, { attrs: { target: '_blank', rel: 'noopener noreferrer' } });
+md.use(la, {
+  matcher: (href) => /^https?:\/\//i.test(href),   // 只對外部 http(s) 連結
+  attrs: { target: '_blank', rel: 'noopener noreferrer' },
+});
 ```

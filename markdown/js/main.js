@@ -10,9 +10,11 @@ import * as store from './store.js';
 // ── 掛載功能 module(可插拔)──
 import './modules/highlight.js';
 import './modules/codeblock.js';
+import './modules/table-tools.js';
 import './modules/mark.js';
 import './modules/katex.js';
 import './modules/link-attributes.js';
+import './modules/task-lists.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -34,6 +36,8 @@ const BUILTINS = [
   ['__p-mark__', 'docs/mark.md'],
   ['__p-katex__', 'docs/katex.md'],
   ['__p-linkattr__', 'docs/link-attributes.md'],
+  ['__p-tasklist__', 'docs/task-lists.md'],
+  ['__p-tabletools__', 'docs/table-tools.md'],
 ];
 
 // 注入 module 自帶的 css(若有)

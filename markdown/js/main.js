@@ -10,6 +10,7 @@ import * as store from './store.js';
 // ── 掛載功能 module(可插拔)──
 // mermaid 要先於 highlight / codeblock(post 依註冊順序執行):先把圖換掉,後兩者就不會碰它。
 import './modules/mermaid.js';
+import './modules/chart.js';
 import './modules/highlight.js';
 import './modules/codeblock.js';
 import './modules/table-tools.js';
@@ -43,6 +44,7 @@ const BUILTINS = [
   ['__p-tasklist__', 'docs/task-lists.md'],
   ['__p-tabletools__', 'docs/table-tools.md'],
   ['__p-mermaid__', 'docs/mermaid.md'],
+  ['__p-chart__', 'docs/chart.md'],
 ];
 
 // 注入 module 自帶的 css(若有)

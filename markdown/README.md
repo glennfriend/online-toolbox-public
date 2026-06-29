@@ -15,8 +15,8 @@
 - **內建示範文件(不可刪、置頂)**:一份總覽 + 每個 plugin 各一份(`docs/*.md`),打開即看效果與用法。
 - **功能 module(可插拔,各自獨立)**:
   - 程式碼上色(highlight.js)、程式碼工具列(語言名 + 複製)
-  - 標題錨點(markdown-it-anchor)、螢光標記 `==…==`(markdown-it-mark)
-  - 數學公式(@vscode/markdown-it-katex)、連結開新分頁(markdown-it-link-attributes)
+  - 螢光標記 `==…==`(markdown-it-mark)、數學公式(@vscode/markdown-it-katex)
+  - 外部連結開新分頁(markdown-it-link-attributes)
 
 ## 安全(目前的決定)
 
@@ -44,7 +44,6 @@ markdown/
     └── modules/          功能 module(可插拔)
         ├── highlight.js        程式碼上色(post)
         ├── codeblock.js        程式碼工具列:語言名 + 複製(post)
-        ├── anchor.js           標題錨點(parse)
         ├── mark.js             ==螢光標記==(parse)
         ├── katex.js            數學公式(parse)
         └── link-attributes.js  連結開新分頁(parse)
@@ -69,7 +68,7 @@ registerModule({
 
 - 走 CDN(`index.html` 的 import map)、**延遲載入**,抓不到時誠實退回、外殼仍可用:
   - `markdown-it`(核心)、`highlight.js`(上色)
-  - plugin:`markdown-it-anchor`、`markdown-it-mark`、`@vscode/markdown-it-katex`(+ `katex` CSS)、`markdown-it-link-attributes`
+  - plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ `katex` CSS)、`markdown-it-link-attributes`
 - CSS:`github` 主題 `@import` 自 `github-markdown-css`(CDN);`katex` 主題 CSS 由 katex module 注入。
 - 自己寫的 module 是本機檔,不需 CDN、不需建置。
 

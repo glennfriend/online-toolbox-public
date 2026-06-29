@@ -10,7 +10,6 @@ import * as store from './store.js';
 // ── 掛載功能 module(可插拔)──
 import './modules/highlight.js';
 import './modules/codeblock.js';
-import './modules/anchor.js';
 import './modules/mark.js';
 import './modules/katex.js';
 import './modules/link-attributes.js';
@@ -32,7 +31,6 @@ const THEMES = ['default', 'github'];   // 加主題 = 丟一個 themes/<name>.c
 // 內建文件(固定 id、不可刪、置頂):從 docs/*.md 載入(同源,離線可用)。
 const BUILTINS = [
   [store.DEMO_ID, 'docs/demo.md'],
-  ['__p-anchor__', 'docs/anchor.md'],
   ['__p-mark__', 'docs/mark.md'],
   ['__p-katex__', 'docs/katex.md'],
   ['__p-linkattr__', 'docs/link-attributes.md'],
@@ -157,6 +155,7 @@ async function seedBuiltins() {
   }
   setTheme(localStorage.getItem(THEME_KEY) || 'default');
   setMode(localStorage.getItem(VIEW_KEY) || 'split');
+  store.pruneBuiltins(BUILTINS.map(([id]) => id));   // 清掉已移除的舊內建文件(如 anchor)
   await seedBuiltins();
   openDoc(store.getCurrent()?.id || store.DEMO_ID);
 })();

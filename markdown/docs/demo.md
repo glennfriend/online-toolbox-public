@@ -17,7 +17,7 @@ $$
 \int_0^1 x^2 \,dx = \frac{1}{3}
 $$
 
-## 標題(會自動加錨點 #)
+## 標題
 
 ### 第三層標題
 #### 第四層標題
@@ -79,7 +79,7 @@ console.log(greet("world"));
 
 ## 已加的 plugin(見左側 📌 各自的示範文件)
 
-- 標題錨點(anchor)、螢光標記 `==…==`(mark)、數學公式(KaTeX)、連結開新分頁(link-attributes)
+- 螢光標記 `==…==`(mark)、數學公式(KaTeX)、外部連結開新分頁(link-attributes)
 
 ## 還沒加的(之後可一個一個加)
 

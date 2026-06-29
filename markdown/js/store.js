@@ -57,6 +57,16 @@ export function exists(id) {
   return state.docs.some((d) => d.id === id);
 }
 
+// 移除「已不在內建清單」的舊內建文件(例如某 plugin 被拿掉)。內建本來不可刪,這是刻意清理。
+export function pruneBuiltins(validIds) {
+  const before = state.docs.length;
+  state.docs = state.docs.filter((d) => !isProtected(d.id) || validIds.includes(d.id));
+  if (state.docs.length !== before) {
+    if (!exists(state.currentId)) state.currentId = list()[0]?.id || null;
+    persist();
+  }
+}
+
 export function open(id) {
   state.currentId = id;
   persist();

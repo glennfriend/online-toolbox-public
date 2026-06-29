@@ -1,6 +1,6 @@
 # Markdown
 
-用 Markdown 語法即時 render 成 HTML 顯示。**本機文件庫(像 HackMD,邊打邊自動存)**、三種檢視、可切主題、程式碼上色。純前端、無後端、無 API key。
+瀏覽器內的 Markdown 編輯/預覽工具:**本機文件庫(像 HackMD,邊打邊自動存)**、即時預覽、可切主題、多種功能模組(程式碼上色、表格工具、數學、Mermaid、Chart…)、可下載成單一 HTML。純前端、無後端、無 API key。
 
 線上版:<https://glennfriend.github.io/online-toolbox-public/markdown/>
 
@@ -8,82 +8,81 @@
 
 ## 功能
 
-- **即時預覽**:左邊寫 Markdown,右邊即時出 HTML。
-- **本機文件庫**:多份筆記存在瀏覽器(localStorage)。開啟某份 = 正在編輯它,**改了就自動存回那份**(概念同 HackMD;無暫存區、不走網址分享)。標題自動取內容第一行。
-- **三種檢視**:左右並排 / 只編輯 / 只預覽。
-- **主題可切**:`default`(GitHub 風,本機檔)、`github`(官方 github-markdown-css)。每個主題 = 一個 `themes/<name>.css`。
-- **內建示範文件(不可刪、置頂)**:一份總覽 + 每個 plugin 各一份(`docs/*.md`),打開即看效果與用法。
-- **功能 module(可插拔,各自獨立)**:
-  - 程式碼上色(highlight.js)、程式碼工具列(語言名 + 複製)
-  - 表格工具(複製成 Markdown / Unicode / CSV / JSON + 欄寬拖曳記憶)
-  - Mermaid 圖(渲染 + 匯出:原始碼 / PNG / SVG / Base64 / 複製到剪貼簿)
-  - Chart 圖表(宣告式 ```chart:radar/bar/line/pie,ECharts)
-- **下載單一 HTML**(⬇ HTML):存 markdown 原文 + 引用本站 render 模組 + CDN 庫,開啟時(需連網)現場重渲染,效果與工具內一致;檔案很小。
-  - 任務清單 `- [ ]`(markdown-it-task-lists)、螢光標記 `==…==`(markdown-it-mark)
-  - 數學公式(@vscode/markdown-it-katex)、外部連結開新分頁(markdown-it-link-attributes)
+- **即時預覽**:左邊寫 Markdown、右邊即時出 HTML(`breaks` 開啟:單一換行就斷行,像 HackMD)。
+- **本機文件庫**:多份筆記存瀏覽器(localStorage),開啟即編輯、**改了自動存回**;標題取內容第一行。側欄上半是你的文件(依最近更新)、下半是內建示範(依名稱排序、不可刪)。
+- **三種檢視**:左右並排 / 只編輯 / 只預覽;側欄可收合;編輯與預覽**捲動同步**。
+- **主題**:`default`(clean)、`github`(官方 github-markdown-css),並排按鈕即時切換。
+- **下載單一 HTML**:見下方〈下載 HTML〉。
 
-## 安全(目前的決定)
+### 功能模組(可插拔,各自獨立)
 
-**目前策略:全部 escape。** markdown-it 以 `html:false` 啟動 → 使用者寫的原始 HTML **一律當純文字**,從根本避免 XSS(render = 把 HTML 塞進 DOM,瀏覽器會執行其中的 `onerror` / `javascript:` 連結等)。
+| 模組 | 作用 | 語法 |
+|---|---|---|
+| highlight | 程式碼上色(highlight.js) | ```` ```js ```` |
+| codeblock | 程式碼右上角「語言名複製鈕」 | (自動) |
+| json-format | JSON 自動以 2 空格格式化 | ```` ```json ```` |
+| table-tools | 表格複製成 Markdown/Unicode/CSV/JSON + 欄寬拖曳記憶 | (自動,任何表格) |
+| mark | 螢光標記 | `==文字==` |
+| katex | 數學公式(KaTeX) | `$…$` / `$$…$$` |
+| link-attributes | 外部連結開新分頁(站內 `#` 不受影響) | (自動) |
+| task-lists | 任務清單 | `- [ ]` / `- [x]` |
+| mermaid | 圖(渲染 + 5 種匯出:原始碼/PNG/SVG/Base64/複製圖片) | ```` ```mermaid ```` |
+| chart | 圖表(宣告式,ECharts) | ```` ```chart ```` |
 
-> 之後若要像 GitHub / HackMD 允許部分原始 HTML,**不能只 escape,要改成「允許 + 消毒(allowlist sanitizer)」**:HackMD/CodiMD 用 markdown-it + DOMPurify;GitHub 用 cmark-gfm + 白名單過濾。屆時參考其做法,並把消毒器列為誠實的外部相依。
+> 內建示範文件:總覽(功能示範)+ 各模組一份(打開就看效果與寫法)。
+
+## 安全
+
+預設 **`html: false`**:使用者寫的原始 HTML **一律當純文字**(escape),從根本避免 XSS。
+日後若要允許部分原始 HTML,需改用「允許 + 消毒(DOMPurify 之類白名單)」,並把消毒器列為外部相依。
 
 ## 架構
 
-純前端 ES modules,**核心(解析)與功能(module)分離,功能可插拔**(沿用本 repo 的登記表模式)。
+純前端 ES modules,**核心(解析)與功能(模組)分離,功能可插拔**。
 
 ```
 markdown/
-├── index.html            外框 + import map(CDN 核心/plugin)+ 載入 js/main.js
+├── index.html            外框 + import map(CDN 庫)+ 載入 js/main.js
 ├── styles.css            app 外框與三種檢視版面
-├── themes/
-│   ├── default.css       預覽內文樣式(GitHub 風,本機檔)
-│   └── github.css        官方 github-markdown-css(CDN @import)
-├── docs/                 內建文件(.md):demo + 各 plugin 示範(同源 fetch 載入)
+├── themes/{default,github}.css   預覽內文樣式(套在 .md-preview;換主題=換檔)
+├── docs/*.md             內建文件(同源 fetch 載入)
 └── js/
-    ├── main.js           殼層:文件庫 / 編輯器 / 預覽 / 檢視模式 / 主題 / 內建文件 串接
-    ├── renderer.js       markdown-it 薄 adapter(核心可抽換;html:false 安全基線)
-    ├── registry.js       module 登記表 + 隔離(try/catch,壞了只錯單一 module)
-    ├── store.js          文件庫(localStorage;內建文件 id 以 __ 開頭、不可刪、置頂)
-    └── modules/          功能 module(可插拔)
-        ├── mermaid.js          Mermaid 圖渲染 + 5 種匯出(post,需先於 highlight/codeblock)
-        ├── highlight.js        程式碼上色(post)
-        ├── codeblock.js        程式碼工具列:語言名 + 複製(post)
-        ├── table-tools.js      表格:複製 Markdown/Unicode/CSV/JSON + 欄寬拖曳(post,純前端)
-        ├── mark.js             ==螢光標記==(parse)
-        ├── katex.js            數學公式(parse)
-        ├── link-attributes.js  連結開新分頁(parse)
-        └── task-lists.js       任務清單 - [ ] / - [x](parse)
+    ├── main.js           殼層:文件庫/編輯/預覽/檢視/主題/側欄/捲動同步/下載 串接
+    ├── renderer.js       markdown-it 薄 adapter(核心可抽換;html:false;breaks:true)
+    ├── registry.js       模組登記表 + 隔離(try/catch:壞了只錯單一模組)
+    ├── store.js          文件庫(localStorage:list/開啟/自動存/刪/內建保護)
+    └── modules/*.js      各功能模組(見上表)
 ```
 
-### module 介面(可插拔的關鍵)
+### 模組介面(可插拔的關鍵)
 
 ```js
 registerModule({
-  name: 'highlight',
-  type: 'post',           // 'parse' | 'render' | 'post'
-  apply,                  // parse/render: apply(md);  post: apply(rootEl)(可 async)
-  css,                    // (選填)模組自帶的 CSS 字串
+  name,
+  type,      // 'parse' | 'render' | 'post'
+  apply,     // parse/render: apply(md)(可 async,plugin 多從 CDN 載);post: apply(rootEl)
+  css,       // (選填)模組自帶的 CSS 字串
 });
 ```
 
-- **post**(對 render 後的 DOM 再加工)隔離最佳:單一元素失敗只影響它自己。**建議新功能優先用 post / render 規則覆寫**。
-- **parse**(改 tokenizer)隔離較粗:套用失敗則該 module 失效,但其餘與整個程式照常。
-- registry 對每個 module 包 try/catch:**任一 module 壞掉只記 console、略過,不讓整個程式掛掉。**
+- **post**(對 render 後的 DOM 加工)隔離最好;**parse**(掛 markdown-it plugin)套用失敗則該模組失效,但其餘與整個程式照常。
+- registry 對每個模組包 try/catch:**任一模組壞掉只記 console、略過,不讓整個程式掛掉。**
+- 順序要求:會「接管程式碼區塊」的模組(mermaid、chart、json-format)需**先於** highlight/codeblock 註冊(見 `main.js` import 順序)。
 
-### 外部相依(誠實列出)
+### 外部相依(誠實列出,皆 CDN、延遲載入、抓不到誠實降級)
 
-- 走 CDN(`index.html` 的 import map)、**延遲載入**,抓不到時誠實退回、外殼仍可用:
-  - `markdown-it`(核心)、`highlight.js`(上色)
-  - plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ `katex` CSS)、`markdown-it-link-attributes`、`markdown-it-task-lists`、`mermaid`
-  - 註:`table-tools` 是純前端、無外部相依(自己讀 DOM 表格 + 複製/拖曳)
-- CSS:`github` 主題 `@import` 自 `github-markdown-css`(CDN);`katex` 主題 CSS 由 katex module 注入。
-- 自己寫的 module 是本機檔,不需 CDN、不需建置。
+- 核心/上色:`markdown-it`、`highlight.js`
+- plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ katex CSS)、`markdown-it-link-attributes`、`markdown-it-task-lists`
+- 圖:`mermaid`、`echarts`(Chart 用,script tag 載入)
+- 主題:`github` 主題 `@import` 自 `github-markdown-css`
+- 自己寫的模組是本機檔,不需 CDN、不需建置。
 
-## 計畫(TODO)
+## 下載 HTML
 
-- 更多功能 module:任務清單、callout 容器(`::: note`)、emoji、圖表(mermaid)…(各自獨立、逐一加)。
-- 更多主題(含深色)。
+頂列「Download HTML」:把目前文件存成**單一 HTML**——內含 markdown 原文 + import map(CDN 庫)+ 以絕對網址引用本站 render 模組 + 當前主題。**開啟時(需連網)現場重渲染,效果與工具內一致**(連 ECharts 互動都在),檔案很小(~3KB,不打包 MB 級的庫)。
+
+- 取捨:**需連網**才畫得出來;`![]()` 圖片走原網址連線(不內嵌)。
+- 因引用本站 JS,本站網址變動會使舊檔失效(個人用可接受;要完全自包需改成「內嵌全部 JS」,檔案會大很多)。
 
 ## 部署
 

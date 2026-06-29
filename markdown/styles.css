@@ -51,10 +51,8 @@ body.sidebar-collapsed .sidebar { display: none; }
 .panes.mode-split { grid-template-columns: 1fr 1fr; }
 .panes.mode-edit { grid-template-columns: 1fr; }
 .panes.mode-view { grid-template-columns: 1fr; }
-.panes.mode-edit .preview-wrap { display: none; }
+.panes.mode-edit .preview { display: none; }
 .panes.mode-view .editor { display: none; }
-.preview-wrap { position: relative; min-height: 0; overflow: hidden; }
-.dl-btn { position: absolute; top: .5rem; right: .5rem; z-index: 5; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
 
 .editor {
   border: 0; outline: none; resize: none; width: 100%; height: 100%; padding: 1rem;

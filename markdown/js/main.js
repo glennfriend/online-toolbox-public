@@ -129,21 +129,25 @@ el.modeEdit.addEventListener('click', () => setMode('edit'));
 el.modeView.addEventListener('click', () => setMode('view'));
 
 // ── 主題:換 themes/<name>.css ──
+// 主題用並排按鈕(點一下即時套用,不必開下拉/按 Enter;與檢視模式控制一致)。
+function buildThemeButtons() {
+  el.theme.replaceChildren();
+  for (const name of THEMES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'seg-btn';
+    b.dataset.theme = name;
+    b.textContent = name;
+    b.addEventListener('click', () => setTheme(name));
+    el.theme.appendChild(b);
+  }
+}
 function setTheme(name) {
   if (!THEMES.includes(name)) name = 'default';
   el.themeLink.href = `themes/${name}.css`;
-  el.theme.value = name;
+  [...el.theme.children].forEach((b) => b.classList.toggle('active', b.dataset.theme === name));
   localStorage.setItem(THEME_KEY, name);
 }
-el.theme.addEventListener('change', () => setTheme(el.theme.value));
-// 上下鍵即時套用(聚焦在主題選單時,按 ↑/↓ 就換並套用,不必先 commit)。
-el.theme.addEventListener('keydown', (e) => {
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-  e.preventDefault();
-  const n = el.theme.options.length;
-  el.theme.selectedIndex = (el.theme.selectedIndex + (e.key === 'ArrowDown' ? 1 : -1) + n) % n;
-  setTheme(el.theme.value);
-});
 
 // 從 docs/*.md 載入內建文件,並以 .md 為準更新(它們是參考文件,永遠保持最新)。
 async function seedBuiltins() {
@@ -159,11 +163,7 @@ async function seedBuiltins() {
 
 // ── 啟動 ──
 (async function init() {
-  for (const t of THEMES) {
-    const o = document.createElement('option');
-    o.value = t; o.textContent = t;
-    el.theme.appendChild(o);
-  }
+  buildThemeButtons();
   setTheme(localStorage.getItem(THEME_KEY) || 'default');
   setMode(localStorage.getItem(VIEW_KEY) || 'split');
   store.pruneBuiltins(BUILTINS.map(([id]) => id));   // 清掉已移除的舊內建文件(如 anchor)

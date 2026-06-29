@@ -16,6 +16,7 @@
 - **功能 module(可插拔,各自獨立)**:
   - 程式碼上色(highlight.js)、程式碼工具列(語言名 + 複製)
   - 表格工具(複製成 Markdown / Unicode / CSV / JSON + 欄寬拖曳記憶)
+  - Mermaid 圖(渲染 + 匯出:原始碼 / PNG / SVG / Base64 / 複製到剪貼簿)
   - 任務清單 `- [ ]`(markdown-it-task-lists)、螢光標記 `==…==`(markdown-it-mark)
   - 數學公式(@vscode/markdown-it-katex)、外部連結開新分頁(markdown-it-link-attributes)
 
@@ -43,6 +44,7 @@ markdown/
     ├── registry.js       module 登記表 + 隔離(try/catch,壞了只錯單一 module)
     ├── store.js          文件庫(localStorage;內建文件 id 以 __ 開頭、不可刪、置頂)
     └── modules/          功能 module(可插拔)
+        ├── mermaid.js          Mermaid 圖渲染 + 5 種匯出(post,需先於 highlight/codeblock)
         ├── highlight.js        程式碼上色(post)
         ├── codeblock.js        程式碼工具列:語言名 + 複製(post)
         ├── table-tools.js      表格:複製 Markdown/Unicode/CSV/JSON + 欄寬拖曳(post,純前端)
@@ -71,7 +73,7 @@ registerModule({
 
 - 走 CDN(`index.html` 的 import map)、**延遲載入**,抓不到時誠實退回、外殼仍可用:
   - `markdown-it`(核心)、`highlight.js`(上色)
-  - plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ `katex` CSS)、`markdown-it-link-attributes`、`markdown-it-task-lists`
+  - plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ `katex` CSS)、`markdown-it-link-attributes`、`markdown-it-task-lists`、`mermaid`
   - 註:`table-tools` 是純前端、無外部相依(自己讀 DOM 表格 + 複製/拖曳)
 - CSS:`github` 主題 `@import` 自 `github-markdown-css`(CDN);`katex` 主題 CSS 由 katex module 注入。
 - 自己寫的 module 是本機檔,不需 CDN、不需建置。

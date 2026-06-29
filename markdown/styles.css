@@ -39,7 +39,7 @@ body {
 .doc-name { flex: 1; min-width: 0; text-align: left; border: 0; background: transparent; font: inherit; font-size: .88rem; color: var(--fg); padding: .35em .5em; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .doc-del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 .45em; border-radius: 6px; }
 .doc-del:hover { color: var(--danger); }
-.doc-pin { font-size: .8rem; padding: 0 .45em; opacity: .7; cursor: default; }
+.doc-sep { list-style: none; font-size: .72rem; color: var(--muted); padding: .55em .6em .2em; margin-top: .25rem; border-top: 1px solid var(--border-soft); }
 
 .main { min-width: 0; display: flex; }
 .panes { flex: 1; min-height: 0; width: 100%; display: grid; }

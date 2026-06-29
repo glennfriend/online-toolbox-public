@@ -8,6 +8,8 @@ import { moduleCss } from './registry.js';
 import * as store from './store.js';
 
 // ── 掛載功能 module(可插拔)──
+// mermaid 要先於 highlight / codeblock(post 依註冊順序執行):先把圖換掉,後兩者就不會碰它。
+import './modules/mermaid.js';
 import './modules/highlight.js';
 import './modules/codeblock.js';
 import './modules/table-tools.js';
@@ -38,6 +40,7 @@ const BUILTINS = [
   ['__p-linkattr__', 'docs/link-attributes.md'],
   ['__p-tasklist__', 'docs/task-lists.md'],
   ['__p-tabletools__', 'docs/table-tools.md'],
+  ['__p-mermaid__', 'docs/mermaid.md'],
 ];
 
 // 注入 module 自帶的 css(若有)
@@ -68,7 +71,16 @@ function openDoc(id) {
 
 function renderList() {
   el.list.replaceChildren();
+  let sepDone = false;
   for (const doc of store.list()) {
+    const builtin = store.isProtected(doc.id);
+    if (builtin && !sepDone) {   // 使用者文件與示範文件之間的分隔
+      const sep = document.createElement('li');
+      sep.className = 'doc-sep';
+      sep.textContent = '示範';
+      el.list.appendChild(sep);
+      sepDone = true;
+    }
     const li = document.createElement('li');
     li.className = 'doc-item' + (doc.id === currentId ? ' active' : '');
     const name = document.createElement('button');
@@ -76,20 +88,15 @@ function renderList() {
     name.className = 'doc-name';
     name.textContent = doc.title || '未命名';
     name.addEventListener('click', () => openDoc(doc.id));
-    if (store.isProtected(doc.id)) {
-      const pin = document.createElement('span');
-      pin.className = 'doc-pin';
-      pin.textContent = '📌';
-      pin.title = '內建示範,不可刪除';
-      li.append(name, pin);
-    } else {
+    li.appendChild(name);
+    if (!builtin) {   // 只有使用者文件有刪除鈕;示範文件不可刪、也不放圖示
       const del = document.createElement('button');
       del.type = 'button';
       del.className = 'doc-del';
       del.textContent = '×';
       del.title = '刪除';
       del.addEventListener('click', (e) => { e.stopPropagation(); deleteDoc(doc); });
-      li.append(name, del);
+      li.appendChild(del);
     }
     el.list.appendChild(li);
   }

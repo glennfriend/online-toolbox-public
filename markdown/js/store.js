@@ -34,11 +34,11 @@ function titleOf(content) {
   return line.replace(/^#+\s*/, '').slice(0, 40) || '未命名';
 }
 
-// 清單:內建文件置頂(依建立順序,demo 最前),其餘使用者文件依「最近更新」。
+// 清單:使用者文件在上(依最近更新),內建示範在下(依建立順序,demo 最前)。
 export function list() {
-  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => a.createdAt - b.createdAt);
   const userDocs = state.docs.filter((d) => !isProtected(d.id)).sort((a, b) => b.updatedAt - a.updatedAt);
-  return [...builtins, ...userDocs];
+  const builtins = state.docs.filter((d) => isProtected(d.id)).sort((a, b) => a.createdAt - b.createdAt);
+  return [...userDocs, ...builtins];
 }
 
 // 內建文件:不存在則建立、已存在則更新內容(讓 docs/*.md 的更新能反映出來)。

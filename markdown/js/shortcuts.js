@@ -4,12 +4,19 @@
 // 動作一律「點對應的按鈕」,邏輯留在 main.js,這裡不重複。
 // 在編輯器打字中也能用(Alt 不會打出字;Alt+鍵會 preventDefault,不會打進文章)。
 
+const byId = (id) => document.getElementById(id);
+const themeBtn = (i) => document.querySelectorAll('#theme .seg-btn')[i] || null;
+
+// 每個目標:key(要按的鍵)+ get()(回傳該按鈕元素;支援動態產生的主題按鈕)
 const TARGETS = [
-  { id: 'new-doc', key: 'n' },         // ＋ 新增
-  { id: 'sidebar-toggle', key: 'f' },  // 文件列表 開/關
-  { id: 'mode-split', key: '1' },      // 左右
-  { id: 'mode-edit', key: '2' },       // 編輯
-  { id: 'mode-view', key: '3' },       // 預覽
+  { key: 'n', get: () => byId('new-doc') },         // ＋ 新增
+  { key: 'f', get: () => byId('sidebar-toggle') },  // 文件列表 開/關
+  { key: '1', get: () => byId('mode-split') },       // 左右
+  { key: '2', get: () => byId('mode-edit') },        // 編輯
+  { key: '3', get: () => byId('mode-view') },        // 預覽
+  { key: '4', get: () => themeBtn(0) },              // 主題 1(default)
+  { key: '5', get: () => themeBtn(1) },              // 主題 2(github)
+  { key: '6', get: () => themeBtn(2) },              // 主題 3(pandoc)
 ];
 
 let layer = null;
@@ -19,8 +26,8 @@ function showHints() {
   layer = document.createElement('div');
   layer.className = 'keyhint-layer';
   for (const t of TARGETS) {
-    const btn = document.getElementById(t.id);
-    const r = btn?.getBoundingClientRect();
+    const el = t.get();
+    const r = el?.getBoundingClientRect();
     if (!r || !r.width) continue;
     const tip = document.createElement('span');
     tip.className = 'keyhint';
@@ -40,7 +47,7 @@ window.addEventListener('keydown', (e) => {
     const t = TARGETS.find((x) => x.key === e.key.toLowerCase());
     if (t) {
       e.preventDefault();
-      document.getElementById(t.id)?.click();
+      t.get()?.click();
       // 提示維持顯示(仍按住 Alt 可連續操作),放開 Alt 才收起
     }
   }

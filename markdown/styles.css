@@ -51,8 +51,12 @@ body.sidebar-collapsed .sidebar { display: none; }
 .panes.mode-split { grid-template-columns: 1fr 1fr; }
 .panes.mode-edit { grid-template-columns: 1fr; }
 .panes.mode-view { grid-template-columns: 1fr; }
-.panes.mode-edit .preview { display: none; }
+.panes.mode-edit .preview-pane { display: none; }
 .panes.mode-view .editor { display: none; }
+/* 預覽窗 = 上方一條工具列(Download HTML)+ 下方可捲動的內容 */
+.preview-pane { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.preview-bar { flex: 0 0 auto; display: flex; justify-content: flex-end; padding: .35rem .5rem; }
+.preview-bar .btn { font-size: .8rem; padding: .2em .7em; }
 
 .editor {
   border: 0; outline: none; resize: none; width: 100%; height: 100%; padding: 1rem;
@@ -60,7 +64,7 @@ body.sidebar-collapsed .sidebar { display: none; }
   color: var(--fg); background: #fff; border-right: 1px solid var(--border-soft);
 }
 .panes.mode-edit .editor { border-right: 0; }
-.preview { height: 100%; overflow: auto; padding: 1rem 1.4rem; background: #fff; }
+.preview { flex: 1; min-height: 0; overflow: auto; padding: 1rem 1.4rem; background: #fff; }
 
 .md-fallback { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .md-note { color: var(--danger); font-size: .85rem; }

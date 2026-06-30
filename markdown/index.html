@@ -53,7 +53,6 @@
       <button id="mode-view" class="seg-btn" type="button">預覽</button>
     </span>
     <span id="theme" class="seg" role="group" aria-label="主題"></span>
-    <button id="download-html" class="btn" type="button" title="下載成單一 HTML(開啟需連網,效果與這裡一致)">Download HTML</button>
   </header>
 
   <div class="app">
@@ -66,7 +65,12 @@
     <main class="main">
       <div id="panes" class="panes mode-split">
         <textarea id="editor" class="editor" wrap="soft" spellcheck="false" placeholder="在這裡寫 Markdown…"></textarea>
-        <div id="preview" class="preview md-preview markdown-body" aria-live="polite"></div>
+        <div class="preview-pane">
+          <div class="preview-bar">
+            <button id="download-html" class="btn" type="button" title="下載成單一 HTML(開啟需連網,效果與這裡一致)">Download HTML</button>
+          </div>
+          <div id="preview" class="preview md-preview markdown-body" aria-live="polite"></div>
+        </div>
       </div>
     </main>
   </div>

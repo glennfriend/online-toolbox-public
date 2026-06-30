@@ -19,6 +19,7 @@ import './modules/mark.js';
 import './modules/katex.js';
 import './modules/link-attributes.js';
 import './modules/task-lists.js';
+import './modules/callout.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -33,7 +34,7 @@ const SAVE_DELAY = 250;
 const VIEW_KEY = 'markdown.view';
 const SIDEBAR_KEY = 'markdown.sidebar';
 const THEME_KEY = 'markdown.theme';
-const THEMES = ['default', 'github'];   // 加主題 = 丟一個 themes/<name>.css + 在這裡加名字
+const THEMES = ['default', 'github', 'pandoc'];   // 加主題 = 丟一個 themes/<name>.css + 在這裡加名字
 
 // 內建文件(固定 id、不可刪、置頂):從 docs/*.md 載入(同源,離線可用)。
 const BUILTINS = [
@@ -46,6 +47,7 @@ const BUILTINS = [
   ['__p-tabletools__', 'docs/table-tools.md'],
   ['__p-mermaid__', 'docs/mermaid.md'],
   ['__p-chart__', 'docs/chart.md'],
+  ['__p-callout__', 'docs/callout.md'],
 ];
 
 // 注入 module 自帶的 css(若有)

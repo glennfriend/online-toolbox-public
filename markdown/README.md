@@ -11,7 +11,7 @@
 - **即時預覽**:左邊寫 Markdown、右邊即時出 HTML(`breaks` 開啟:單一換行就斷行,像 HackMD)。
 - **本機文件庫**:多份筆記存瀏覽器(localStorage),開啟即編輯、**改了自動存回**;標題取內容第一行。側欄上半是你的文件(依最近更新)、下半是內建示範(依名稱排序、不可刪)。
 - **三種檢視**:左右並排 / 只編輯 / 只預覽;側欄可收合;編輯與預覽**捲動同步**。
-- **主題**:`default`(clean)、`github`(官方 github-markdown-css),並排按鈕即時切換。
+- **主題**:`default`(clean)、`github`(官方 github-markdown-css)、`pandoc`(JetBrains Mono + 藍系,含深色,擷取 pandoc/simple.css 風),並排按鈕即時切換。
 - **下載單一 HTML**:見下方〈下載 HTML〉。
 
 ### 功能模組(可插拔,各自獨立)
@@ -26,6 +26,7 @@
 | katex | 數學公式(KaTeX) | `$…$` / `$$…$$` |
 | link-attributes | 外部連結開新分頁(站內 `#` 不受影響) | (自動) |
 | task-lists | 任務清單 | `- [ ]` / `- [x]` |
+| callout | 有顏色的提示框(note/tip/warning/danger/info) | `::: warning … :::` |
 | mermaid | 圖(渲染 + 5 種匯出:原始碼/PNG/SVG/Base64/複製圖片) | ```` ```mermaid ```` |
 | chart | 圖表(宣告式,ECharts) | ```` ```chart ```` |
 
@@ -72,7 +73,7 @@ registerModule({
 ### 外部相依(誠實列出,皆 CDN、延遲載入、抓不到誠實降級)
 
 - 核心/上色:`markdown-it`、`highlight.js`
-- plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ katex CSS)、`markdown-it-link-attributes`、`markdown-it-task-lists`
+- plugin:`markdown-it-mark`、`@vscode/markdown-it-katex`(+ katex CSS)、`markdown-it-link-attributes`、`markdown-it-task-lists`、`markdown-it-container`(callout)
 - 圖:`mermaid`、`echarts`(Chart 用,script tag 載入)
 - 主題:`github` 主題 `@import` 自 `github-markdown-css`
 - 自己寫的模組是本機檔,不需 CDN、不需建置。

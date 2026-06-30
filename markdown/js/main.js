@@ -6,6 +6,7 @@
 import { render, enhance } from './renderer.js';
 import { moduleCss } from './registry.js';
 import * as store from './store.js';
+import './shortcuts.js';   // Alt 快速鍵提示(殼層 UI,非 markdown 模組)
 
 // ── 掛載功能 module(可插拔)──
 // mermaid 要先於 highlight / codeblock(post 依註冊順序執行):先把圖換掉,後兩者就不會碰它。

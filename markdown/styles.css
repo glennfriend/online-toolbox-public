@@ -58,6 +58,10 @@ body.sidebar-collapsed .sidebar { display: none; }
 .preview-bar { flex: 0 0 auto; display: flex; justify-content: flex-end; padding: .35rem .5rem; }
 .preview-bar .btn { font-size: .8rem; padding: .2em .7em; }
 
+/* Alt 快速鍵提示(KeyTips) */
+.keyhint-layer { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+.keyhint { position: fixed; transform: translateX(-50%); background: var(--accent); color: #fff; font: 700 .7rem/1 -apple-system, "Segoe UI", sans-serif; padding: .22em .45em; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.35); white-space: nowrap; }
+
 .editor {
   border: 0; outline: none; resize: none; width: 100%; height: 100%; padding: 1rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .95rem; line-height: 1.7;

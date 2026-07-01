@@ -109,7 +109,7 @@ body.sidebar-collapsed .sidebar, body.sidebar-collapsed #app-gutter { display: n
 
   html, body { height: auto; background: #fff !important; }
   .app, .main, .panes { display: block !important; height: auto !important; min-height: 0 !important; }
-  .preview { height: auto !important; overflow: visible !important; padding: 0 !important; background: #fff !important; }
+  .preview { height: auto !important; overflow: visible !important; padding: 1.2cm 1.4cm !important; background: #fff !important; }
 
   /* 分頁:標題不落在頁尾;整塊的東西盡量不被切成兩頁 */
   .md-preview h1, .md-preview h2, .md-preview h3, .md-preview h4 { break-after: avoid; }
@@ -117,5 +117,6 @@ body.sidebar-collapsed .sidebar, body.sidebar-collapsed #app-gutter { display: n
   .md-preview .mm-fig, .md-preview .ch-fig, .md-preview svg, .md-preview img { break-inside: avoid; }
   .md-preview img, .md-preview svg { max-width: 100% !important; }
 
-  @page { margin: 1.5cm; }
+  /* margin:0 → 瀏覽器沒有邊界空間可放,就不會印出頁首(日期/標題)與頁尾(網址/頁碼);留白改由 .preview 的 padding 負責 */
+  @page { margin: 0; }
 }

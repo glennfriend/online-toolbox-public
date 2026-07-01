@@ -30,12 +30,12 @@ body {
 
 /* 側欄收合 */
 body.sidebar-collapsed .app { grid-template-columns: 1fr; }
-body.sidebar-collapsed .sidebar { display: none; }
+body.sidebar-collapsed .sidebar, body.sidebar-collapsed #app-gutter { display: none; }
 
-/* 主區:側欄 + 主編輯區 */
-.app { flex: 1; min-height: 0; display: grid; grid-template-columns: 14rem 1fr; grid-template-rows: minmax(0, 1fr); }
+/* 主區:側欄 + 分隔線 + 主編輯區 */
+.app { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--sidebar-w, 14rem) 6px 1fr; grid-template-rows: minmax(0, 1fr); }
 
-.sidebar { display: flex; flex-direction: column; min-height: 0; background: #fff; border-right: 1px solid var(--border); }
+.sidebar { display: flex; flex-direction: column; min-height: 0; background: #fff; }
 .sidebar-head { display: flex; align-items: center; justify-content: space-between; padding: .5rem .6rem; border-bottom: 1px solid var(--border-soft); font-size: .85rem; color: var(--muted); }
 .doc-list { list-style: none; margin: 0; padding: .3rem; overflow: auto; flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .doc-item { display: flex; align-items: center; border-radius: 6px; }
@@ -48,11 +48,16 @@ body.sidebar-collapsed .sidebar { display: none; }
 
 .main { min-width: 0; min-height: 0; display: flex; }
 .panes { flex: 1; min-height: 0; width: 100%; display: grid; grid-template-rows: minmax(0, 1fr); }
-.panes.mode-split { grid-template-columns: 1fr 1fr; }
+.panes.mode-split { grid-template-columns: var(--split, 50%) 6px 1fr; }
 .panes.mode-edit { grid-template-columns: 1fr; }
 .panes.mode-view { grid-template-columns: 1fr; }
-.panes.mode-edit .preview { display: none; }
-.panes.mode-view .editor { display: none; }
+.panes.mode-edit .preview, .panes.mode-edit .panes-gutter { display: none; }
+.panes.mode-view .editor, .panes.mode-view .panes-gutter { display: none; }
+
+/* 可拖曳分隔線(側欄寬 / 左右比例) */
+.gutter { position: relative; cursor: col-resize; background: transparent; user-select: none; touch-action: none; z-index: 3; }
+.gutter::after { content: ''; position: absolute; top: 0; bottom: 0; left: 2px; width: 1px; background: var(--border); }
+.gutter:hover::after, .gutter.dragging::after { width: 2px; background: var(--accent); }
 
 /* Alt 快速鍵提示(KeyTips) */
 .keyhint-layer { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
@@ -61,9 +66,8 @@ body.sidebar-collapsed .sidebar { display: none; }
 .editor {
   border: 0; outline: none; resize: none; width: 100%; height: 100%; padding: 1rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .95rem; line-height: 1.7;
-  color: var(--fg); background: #fff; border-right: 1px solid var(--border-soft);
+  color: var(--fg); background: #fff;
 }
-.panes.mode-edit .editor { border-right: 0; }
 .preview { height: 100%; overflow: auto; padding: 1rem 1.4rem; background: #fff; }
 
 .md-fallback { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -83,5 +87,6 @@ body.sidebar-collapsed .sidebar { display: none; }
   .app { grid-template-columns: 1fr; }
   .sidebar { max-height: 30vh; }
   .panes.mode-split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-  .panes.mode-split .editor { border-right: 0; border-bottom: 1px solid var(--border-soft); }
+  .panes.mode-split .editor { border-bottom: 1px solid var(--border-soft); }
+  #app-gutter, .panes-gutter { display: none; }   /* 窄螢幕改直向堆疊,不提供拖曳 */
 }

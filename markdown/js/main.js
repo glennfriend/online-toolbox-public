@@ -7,6 +7,7 @@ import { render, enhance } from './renderer.js';
 import { moduleCss } from './registry.js';
 import * as store from './store.js';
 import './shortcuts.js';   // Alt 快速鍵提示(殼層 UI,非 markdown 模組)
+import { setupResizers } from './resize.js';
 
 // ── 掛載功能 module(可插拔)──
 // mermaid 要先於 highlight / codeblock(post 依註冊順序執行):先把圖換掉,後兩者就不會碰它。
@@ -57,6 +58,7 @@ if (mcss) { const s = document.createElement('style'); s.textContent = mcss; doc
 
 let currentId = null;
 let renderSeq = 0;
+let applySplit = () => {};   // 由 setupResizers 提供:套用該文件記住的左右分割位置
 
 // 預覽:render 是 async(核心延遲載入),用序號丟棄過時的渲染。
 async function renderPreview(text) {
@@ -73,6 +75,7 @@ function openDoc(id) {
   currentId = doc.id;
   store.open(doc.id);
   el.editor.value = doc.content;
+  applySplit(doc.id);        // 套用這份文件記住的左右分割位置
   renderList();
   renderPreview(doc.content);
 }
@@ -253,6 +256,7 @@ async function seedBuiltins() {
   setMode(localStorage.getItem(VIEW_KEY) || 'split');
   setSidebar(localStorage.getItem(SIDEBAR_KEY) === '1');
   store.pruneBuiltins(BUILTINS.map(([id]) => id));     // 清掉已移除的舊內建文件(如 anchor)
+  applySplit = setupResizers({ getDocId: () => currentId }).applySplit;
   await seedBuiltins();
   openDoc(store.getCurrent()?.id || store.DEMO_ID);
 })();

@@ -26,7 +26,8 @@ import './modules/callout.js';
 const $ = (s) => document.querySelector(s);
 const el = {
   list: $('#doc-list'), newBtn: $('#new-doc'), sidebarToggle: $('#sidebar-toggle'),
-  exportMenu: $('#export-menu'), exportToggle: $('#export-toggle'), exportPop: $('#export-pop'), downloadBtn: $('#download-html'),
+  exportMenu: $('#export-menu'), exportToggle: $('#export-toggle'), exportPop: $('#export-pop'),
+  downloadBtn: $('#download-html'), downloadPdfBtn: $('#download-pdf'),
   editor: $('#editor'), preview: $('#preview'),
   panes: $('#panes'),
   modeSplit: $('#mode-split'), modeEdit: $('#mode-edit'), modeView: $('#mode-view'),
@@ -199,6 +200,8 @@ el.exportToggle.addEventListener('click', (e) => { e.stopPropagation(); setExpor
 document.addEventListener('click', (e) => { if (!el.exportMenu.contains(e.target)) setExportMenu(false); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setExportMenu(false); });
 el.downloadBtn.addEventListener('click', () => { setExportMenu(false); downloadHtml(); });
+// Download PDF:靠 @media print,直接叫瀏覽器列印(選「另存為 PDF」);chart/mermaid 已是 DOM 內 SVG,無需逐功能轉換。
+el.downloadPdfBtn.addEventListener('click', () => { setExportMenu(false); window.print(); });
 
 // ── 編輯 / 預覽 捲動同步(比例對應,避免兩邊不一致)──
 let syncing = false;

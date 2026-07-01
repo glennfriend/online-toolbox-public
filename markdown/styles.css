@@ -33,7 +33,10 @@ body {
 .menu-toggle .caret { font-size: .7em; margin-left: .3em; opacity: .7; }
 .menu-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 40; min-width: 12rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .25rem; }
 .menu-pop[hidden] { display: none; }
-.menu-item { display: block; width: 100%; text-align: left; border: 0; background: transparent; font: inherit; font-size: .85rem; color: var(--fg); padding: .45em .6em; border-radius: 6px; cursor: pointer; }
+.menu-title { display: flex; align-items: center; gap: .5em; font-size: .72rem; color: var(--muted); padding: .3em .55em .35em; }   /* 標題(不可選,置中夾兩條線) */
+.menu-title::before, .menu-title::after { content: ''; flex: 1; height: 1px; background: var(--border-soft); }
+.menu-group { font-size: .72rem; font-weight: 700; color: var(--muted); padding: .35em .6em .15em; }   /* 分組標籤(不可選) */
+.menu-item { display: block; width: 100%; text-align: left; border: 0; background: transparent; font: inherit; font-size: .85rem; color: var(--fg); padding: .45em .6em .45em 1.1em; border-radius: 6px; cursor: pointer; }
 .menu-item:hover { background: var(--bg-code); }
 
 /* 側欄收合 */

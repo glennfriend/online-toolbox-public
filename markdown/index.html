@@ -53,7 +53,12 @@
       <button id="mode-view" class="seg-btn" type="button">預覽</button>
     </span>
     <span id="theme" class="seg" role="group" aria-label="主題"></span>
-    <button id="download-html" class="btn" type="button" title="下載成單一 HTML(開啟需連網,效果與這裡一致)">Download HTML</button>
+    <div class="menu" id="export-menu">
+      <button id="export-toggle" class="btn menu-toggle" type="button" aria-haspopup="true" aria-expanded="false" title="下載">下載<span class="caret">▾</span></button>
+      <div id="export-pop" class="menu-pop" role="menu" hidden>
+        <button id="download-html" class="menu-item" type="button" role="menuitem" title="下載成單一 HTML(開啟需連網,效果與這裡一致)">Download HTML</button>
+      </div>
+    </div>
   </header>
 
   <div class="app">

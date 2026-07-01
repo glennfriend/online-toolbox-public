@@ -28,6 +28,14 @@ body {
 .btn:hover { background: var(--bg-code); }
 .icon-btn { font-size: 1rem; line-height: 1; padding: .3em .55em; }
 
+/* 下拉選單(右上角「下載」)。目前一項 Download HTML,之後可再加。 */
+.menu { position: relative; display: inline-block; }
+.menu-toggle .caret { font-size: .7em; margin-left: .3em; opacity: .7; }
+.menu-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 40; min-width: 12rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .25rem; }
+.menu-pop[hidden] { display: none; }
+.menu-item { display: block; width: 100%; text-align: left; border: 0; background: transparent; font: inherit; font-size: .85rem; color: var(--fg); padding: .45em .6em; border-radius: 6px; cursor: pointer; }
+.menu-item:hover { background: var(--bg-code); }
+
 /* 側欄收合 */
 body.sidebar-collapsed .app { grid-template-columns: 1fr; }
 body.sidebar-collapsed .sidebar, body.sidebar-collapsed #app-gutter { display: none; }
@@ -89,4 +97,24 @@ body.sidebar-collapsed .sidebar, body.sidebar-collapsed #app-gutter { display: n
   .panes.mode-split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
   .panes.mode-split .editor { border-bottom: 1px solid var(--border-soft); }
   #app-gutter, .panes-gutter { display: none; }   /* 窄螢幕改直向堆疊,不提供拖曳 */
+}
+
+/* 列印 / 存 PDF(永久保留;螢幕上不生效,只在 Ctrl+P 時啟動)。
+   只留預覽內文,藏掉所有 app 外框與各模組的互動按鈕;主題無關,任何 theme 都適用。 */
+@media print {
+  .topbar, .sidebar, #app-gutter, .panes-gutter, .editor,
+  .keyhint-layer, .menu-pop,
+  .mm-tools, .cb-copy, .tt-tools, .tt-resize { display: none !important; }
+
+  html, body { height: auto; background: #fff !important; }
+  .app, .main, .panes { display: block !important; height: auto !important; min-height: 0 !important; }
+  .preview { height: auto !important; overflow: visible !important; padding: 0 !important; background: #fff !important; }
+
+  /* 分頁:標題不落在頁尾;整塊的東西盡量不被切成兩頁 */
+  .md-preview h1, .md-preview h2, .md-preview h3, .md-preview h4 { break-after: avoid; }
+  .md-preview pre, .md-preview table, .md-preview blockquote, .md-preview figure,
+  .md-preview .mm-fig, .md-preview .ch-fig, .md-preview svg, .md-preview img { break-inside: avoid; }
+  .md-preview img, .md-preview svg { max-width: 100% !important; }
+
+  @page { margin: 1.5cm; }
 }

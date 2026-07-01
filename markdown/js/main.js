@@ -25,7 +25,8 @@ import './modules/callout.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
-  list: $('#doc-list'), newBtn: $('#new-doc'), sidebarToggle: $('#sidebar-toggle'), downloadBtn: $('#download-html'),
+  list: $('#doc-list'), newBtn: $('#new-doc'), sidebarToggle: $('#sidebar-toggle'),
+  exportMenu: $('#export-menu'), exportToggle: $('#export-toggle'), exportPop: $('#export-pop'), downloadBtn: $('#download-html'),
   editor: $('#editor'), preview: $('#preview'),
   panes: $('#panes'),
   modeSplit: $('#mode-split'), modeEdit: $('#mode-edit'), modeView: $('#mode-view'),
@@ -189,7 +190,15 @@ function downloadHtml() {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
-el.downloadBtn.addEventListener('click', downloadHtml);
+// ── 右上角「下載」下拉選單(目前一項:Download HTML;之後可再加)──
+function setExportMenu(open) {
+  el.exportPop.hidden = !open;
+  el.exportToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+el.exportToggle.addEventListener('click', (e) => { e.stopPropagation(); setExportMenu(el.exportPop.hidden); });
+document.addEventListener('click', (e) => { if (!el.exportMenu.contains(e.target)) setExportMenu(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setExportMenu(false); });
+el.downloadBtn.addEventListener('click', () => { setExportMenu(false); downloadHtml(); });
 
 // ── 編輯 / 預覽 捲動同步(比例對應,避免兩邊不一致)──
 let syncing = false;

@@ -40,11 +40,19 @@ const EXAMPLE_DATETIME = [
 // 美國太平洋時區:夏令(日光節約 PDT)= UTC-7,標準(PST)= UTC-8。
 // 口訣:日光節約把時鐘往前撥快 1 小時 → offset 變大(負得比較少),所以 -7 是夏季那個。
 const EXAMPLE_DST = [
-  '# -7 → 夏令 / 日光節約(PDT,夏季)',
-  '2001-07-01T09:00:00-07:00 to Asia/Taipei',
+  '# Taipei 08 20',
+  '2001-01-01T08:00:00+08:00 to America/Los_Angeles',
+  '2001-01-01T20:00:00+08:00 to America/Los_Angeles',
   '',
-  '# -8 → 標準時間(PST,冬季)',
+  '# PDT (夏令/日光節約, 夏季) 00 08 20 ',
+  '2001-01-01T09:00:00-07:00 to Asia/Taipei',
+  '2001-01-01T08:00:00-07:00 to Asia/Taipei',
+  '2001-01-01T20:00:00-07:00 to Asia/Taipei',
+  '',
+  '# PST (標準時間, 冬季) 00 08 20 ',
   '2001-01-01T09:00:00-08:00 to Asia/Taipei',
+  '2001-01-01T08:00:00-08:00 to Asia/Taipei',
+  '2001-01-01T20:00:00-08:00 to Asia/Taipei',
 ].join('\n');
 const EXAMPLE_DATEDIFF = [
   '# 日期相減 → 期間',

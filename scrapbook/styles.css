@@ -105,7 +105,7 @@ body {
 .display .hint { color: var(--muted); }
 
 /* ── 已儲存清單(chips) ── */
-.saved-section { margin-top: 2rem; }
+.saved-section { margin-top: 1rem; }   /* 位於左欄輸入框下方 */
 .saved-section h2 { border-bottom: 1px solid var(--border-soft); padding-bottom: .2em; font-size: 1.1rem; }
 .storage-status { font-size: .8rem; font-weight: normal; color: var(--muted); }
 

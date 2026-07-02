@@ -41,18 +41,18 @@ const EXAMPLE_DATETIME = [
 // 口訣:日光節約把時鐘往前撥快 1 小時 → offset 變大(負得比較少),所以 -7 是夏季那個。
 const EXAMPLE_DST = [
   '# Taipei 08 20',
-  '2001-01-01T08:00:00+08:00 to America/Los_Angeles',
-  '2001-01-01T20:00:00+08:00 to America/Los_Angeles',
+  '2000-02-02T08:00:00+08:00 to America/Los_Angeles',
+  '2000-02-02T20:00:00+08:00 to America/Los_Angeles',
   '',
   '# PDT (夏令/日光節約, 夏季) 00 08 20 ',
-  '2001-01-01T09:00:00-07:00 to Asia/Taipei',
-  '2001-01-01T08:00:00-07:00 to Asia/Taipei',
-  '2001-01-01T20:00:00-07:00 to Asia/Taipei',
+  '2000-02-02T09:00:00-07:00 to Asia/Taipei',
+  '2000-02-02T08:00:00-07:00 to Asia/Taipei',
+  '2000-02-02T20:00:00-07:00 to Asia/Taipei',
   '',
   '# PST (標準時間, 冬季) 00 08 20 ',
-  '2001-01-01T09:00:00-08:00 to Asia/Taipei',
-  '2001-01-01T08:00:00-08:00 to Asia/Taipei',
-  '2001-01-01T20:00:00-08:00 to Asia/Taipei',
+  '2000-02-02T09:00:00-08:00 to Asia/Taipei',
+  '2000-02-02T08:00:00-08:00 to Asia/Taipei',
+  '2000-02-02T20:00:00-08:00 to Asia/Taipei',
 ].join('\n');
 const EXAMPLE_DATEDIFF = [
   '# 日期相減 → 期間',

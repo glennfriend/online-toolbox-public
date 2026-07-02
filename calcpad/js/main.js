@@ -16,6 +16,7 @@ const copyLinkBtn = document.querySelector('#copy-link');
 const exMathBtn = document.querySelector('#ex-math');
 const exThousandsBtn = document.querySelector('#ex-thousands');
 const exDatetimeBtn = document.querySelector('#ex-datetime');
+const exDstBtn = document.querySelector('#ex-dst');
 const exDateDiffBtn = document.querySelector('#ex-datediff');
 const exCommentBtn = document.querySelector('#ex-comment');
 const toast = document.querySelector('#toast');
@@ -35,6 +36,15 @@ const EXAMPLE_DATETIME = [
   '2001-01-01T09:00:00+08:00 to America/Los_Angeles', // 1 月的 LA 是 PST(UTC-8)
   '',
   '2001-01-01T09:00:00-07:00 to Asia/Taipei',
+].join('\n');
+// 美國太平洋時區:夏令(日光節約 PDT)= UTC-7,標準(PST)= UTC-8。
+// 口訣:日光節約把時鐘往前撥快 1 小時 → offset 變大(負得比較少),所以 -7 是夏季那個。
+const EXAMPLE_DST = [
+  '# -7 → 夏令 / 日光節約(PDT,夏季)',
+  '2001-07-01T09:00:00-07:00 to Asia/Taipei',
+  '',
+  '# -8 → 標準時間(PST,冬季)',
+  '2001-01-01T09:00:00-08:00 to Asia/Taipei',
 ].join('\n');
 const EXAMPLE_DATEDIFF = [
   '# 日期相減 → 期間',
@@ -138,6 +148,7 @@ function appendExample(text) {
 exMathBtn.addEventListener('click', () => appendExample(EXAMPLE_MATH));
 exThousandsBtn.addEventListener('click', () => appendExample(EXAMPLE_THOUSANDS));
 exDatetimeBtn.addEventListener('click', () => appendExample(EXAMPLE_DATETIME));
+exDstBtn.addEventListener('click', () => appendExample(EXAMPLE_DST));
 exDateDiffBtn.addEventListener('click', () => appendExample(EXAMPLE_DATEDIFF));
 exCommentBtn.addEventListener('click', () => appendExample(EXAMPLE_COMMENT));
 

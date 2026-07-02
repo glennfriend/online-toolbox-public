@@ -65,6 +65,8 @@ const EXAMPLE_COMMENT = [
   '100 + 200',
   '50 * 3',
 ].join('\n');
+// 全部範例(用來判斷「目前內容是不是某個範例」)
+const ALL_EXAMPLES = [EXAMPLE_MATH, EXAMPLE_THOUSANDS, EXAMPLE_DATETIME, EXAMPLE_DST, EXAMPLE_DATEDIFF, EXAMPLE_COMMENT];
 
 // ── 逐行重算 + render ──
 function recompute() {
@@ -144,21 +146,24 @@ input.addEventListener('scroll', () => {
   results.scrollTop = input.scrollTop;
 });
 
-// 把範例附加到目前內容後面(各起新行),非破壞性,故不需 confirm。
-function appendExample(text) {
+// 套用範例:
+//   1) 目前空白,或 2) 目前內容剛好就是某個範例 → 直接「取代」成新範例(方便逐個瀏覽,不會愈疊愈長);
+//   其它(使用者自己打的內容)→ 「附加」在後面,不破壞使用者資料,故不需 confirm。
+function applyExample(text) {
   const current = input.value.replace(/\s+$/, '');
-  input.value = current ? `${current}\n${text}` : text;
+  const isExample = ALL_EXAMPLES.some((ex) => ex === current);
+  input.value = (!current || isExample) ? text : `${current}\n${text}`;
   recompute();
   syncUrl();
   input.focus();
   input.selectionStart = input.selectionEnd = input.value.length;
 }
-exMathBtn.addEventListener('click', () => appendExample(EXAMPLE_MATH));
-exThousandsBtn.addEventListener('click', () => appendExample(EXAMPLE_THOUSANDS));
-exDatetimeBtn.addEventListener('click', () => appendExample(EXAMPLE_DATETIME));
-exDstBtn.addEventListener('click', () => appendExample(EXAMPLE_DST));
-exDateDiffBtn.addEventListener('click', () => appendExample(EXAMPLE_DATEDIFF));
-exCommentBtn.addEventListener('click', () => appendExample(EXAMPLE_COMMENT));
+exMathBtn.addEventListener('click', () => applyExample(EXAMPLE_MATH));
+exThousandsBtn.addEventListener('click', () => applyExample(EXAMPLE_THOUSANDS));
+exDatetimeBtn.addEventListener('click', () => applyExample(EXAMPLE_DATETIME));
+exDstBtn.addEventListener('click', () => applyExample(EXAMPLE_DST));
+exDateDiffBtn.addEventListener('click', () => applyExample(EXAMPLE_DATEDIFF));
+exCommentBtn.addEventListener('click', () => applyExample(EXAMPLE_COMMENT));
 
 copyLinkBtn.addEventListener('click', async () => {
   try {

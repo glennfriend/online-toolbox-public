@@ -59,7 +59,7 @@ function renderCharacter(entry, warnings) {
     headTopY: y + def.headTop * CHAR_SCALE,
     svg: `<g transform="translate(${x} ${y}) scale(${flip * CHAR_SCALE} ${CHAR_SCALE})"
              stroke-linecap="round" stroke-linejoin="round">
-            ${p.neck || ''}${p.body || ''}${p.head || ''}${face}${p.hair || ''}
+            ${p.back || ''}${p.neck || ''}${p.body || ''}${p.head || ''}${face}${p.hair || ''}
           </g>`,
   };
 }

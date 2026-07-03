@@ -15,7 +15,7 @@ for (const [id, def] of Object.entries(CHARACTERS)) {
       <svg viewBox="-110 -110 220 250" width="220" height="250" xmlns="http://www.w3.org/2000/svg">
         <rect x="-110" y="-110" width="220" height="250" fill="${STYLE.paper}"/>
         <g stroke-linecap="round" stroke-linejoin="round">
-          ${p.neck || ''}${p.body || ''}${p.head || ''}${face}${p.hair || ''}
+          ${p.back || ''}${p.neck || ''}${p.body || ''}${p.head || ''}${face}${p.hair || ''}
         </g>
       </svg>
       <figcaption><b>${def.name}</b>(${id})× ${emotion}</figcaption>`;

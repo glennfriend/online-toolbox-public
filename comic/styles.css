@@ -1,0 +1,57 @@
+/* Comic — app 外框(延續站上風格)。漫畫本身的畫風在 js/assets.js,與此無關。 */
+:root {
+  --fg: #24292f; --muted: #57606a; --border: #d0d7de; --border-soft: #d8dee4;
+  --accent: #2563eb; --bg-code: #f6f8fa; --bg-page: #dde2e9; --danger: #cf222e;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; display: flex; flex-direction: column;
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  color: var(--fg); background: var(--bg-page);
+}
+
+.topbar { display: flex; align-items: center; gap: .6rem; padding: .5rem .8rem; background: #fff; border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+.brand { font-weight: 700; font-size: 1.1rem; }
+.spacer { flex: 1; }
+.btn { font: inherit; font-size: .85rem; cursor: pointer; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: var(--fg); padding: .25em .7em; text-decoration: none; }
+.btn:hover { background: var(--bg-code); }
+
+/* 編輯器:左 JSON、右預覽 */
+.workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 34%) 1fr; gap: 0; }
+.pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.pane-head { padding: .4rem .8rem; font-size: .85rem; color: var(--muted); background: #fff; border-bottom: 1px solid var(--border-soft); }
+.pane + .pane { border-left: 1px solid var(--border); }
+
+#input {
+  flex: 1; border: 0; outline: none; resize: none; padding: .8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem; line-height: 1.6;
+  color: var(--fg); background: #fff;
+}
+.preview { flex: 1; overflow: auto; padding: 1rem; background: #fff; }
+.preview svg { max-width: 100%; height: auto; }
+.preview .err { color: var(--danger); font-size: .9rem; }
+.warnings { margin: 0; padding: .5rem .8rem; font-size: .8rem; line-height: 1.6; color: #9a6700; background: #fff8c5; border-bottom: 1px solid #d4a72c66; white-space: pre-wrap; }
+
+/* 型錄頁 */
+.catalog { flex: 1; overflow: auto; padding: 1rem 1.2rem; }
+.catalog .hint { color: var(--muted); font-size: .9rem; }
+.grid { display: flex; flex-wrap: wrap; gap: 1rem; }
+.cell { margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .6rem; }
+.cell figcaption { font-size: .82rem; color: var(--muted); text-align: center; margin-top: .4rem; }
+
+/* 💡 說明氣泡 */
+.info { position: relative; display: inline-block; font-size: 1rem; font-weight: 400; vertical-align: middle; }
+.info-btn { color: var(--muted); cursor: help; }
+.info-btn:hover { color: var(--accent); }
+.info-tip { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 30; width: max-content; max-width: 90vw; background: #fff; color: var(--fg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; font-size: .82rem; line-height: 1.6; text-align: left; }
+.info:hover .info-tip, .info-btn:focus + .info-tip { display: block; }
+.info-tip > span { display: block; margin: .15rem 0 .15rem .8rem; color: var(--muted); }
+.info-tip > .tip-h { margin: .55rem 0 .15rem; color: var(--fg); font-weight: 700; }
+.info-tip > .tip-h:first-child { margin-top: 0; }
+
+@media (max-width: 760px) {
+  .workspace { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
+  .pane + .pane { border-left: 0; border-top: 1px solid var(--border); }
+}

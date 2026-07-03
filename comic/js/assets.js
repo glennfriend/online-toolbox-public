@@ -130,7 +130,7 @@ const TB_INK = '#1C1C1C';
 const bun2Faces = {
   neutral: tb(TRACED_BUN.eyes + TRACED_BUN.mouth),
   happy: tb(`
-    <path d="M 99 205 Q 105.5 197 112 205 M 134.5 195 Q 141 187 147.5 195"
+    <path d="M 99 204 Q 105.5 196 112 204 M 134.5 199 Q 141 191 147.5 199"
           stroke="${TB_INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
     <path d="M 119 213 Q 128 223 137 213" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
   surprised: tb(`
@@ -142,8 +142,8 @@ const bun2Faces = {
     <circle cx="105.5" cy="202.5" r="4.5" fill="${TB_INK}"/><circle cx="141" cy="192.5" r="4.5" fill="${TB_INK}"/>
     <path d="M 121 219 Q 128 215 135 219" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
   sad: tb(`
-    <path d="M 97 197 L 111 191 M 149 187 L 135 181" stroke="${TB_INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <circle cx="105.5" cy="202.5" r="4.5" fill="${TB_INK}"/><circle cx="141" cy="192.5" r="4.5" fill="${TB_INK}"/>
+    <path d="M 97 196 L 111 190 M 149 190 L 135 184" stroke="${TB_INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="105.5" cy="202.5" r="4.5" fill="${TB_INK}"/><circle cx="141" cy="196.5" r="4.5" fill="${TB_INK}"/>
     <path d="M 120 221 Q 128 214 136 221" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
 };
 

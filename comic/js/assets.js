@@ -19,6 +19,8 @@ export const STYLE = {
   paper: '#FDFCF8',   // 格子底色
 };
 
+import { TRACED_BUN } from './bun-traced-parts.js';
+
 const L = STYLE;
 const SW = 3; // 統一線寬
 
@@ -115,9 +117,47 @@ const longhairFront = `
   <path d="M -46 -6 C -55 6 -57 26 -54 48 C -52 66 -48 78 -42 84
            C -38 76 -37 62 -38 48 C -39 28 -41 8 -46 -6 Z" fill="${L.hair}"/>`;
 
+// ── 角色:bun2(丸子頭・描線版)────────────────────────
+// 零件來自 vtracer 管線(raw/head-bun-q.svg → bun-traced-parts.js),手繪感 100%。
+// 描線原始座標是 288x286 像素空間,用下面的 transform 對位到角色座標系:
+//   雙眼中點 (123,197) → (0,0) 附近、縮放 0.72。
+// 表情採混合式:neutral 用描線原生的眼/嘴;其餘 4 種是手寫小零件(座標跟著描線空間,
+// 注意原圖頭微傾,右眼比左眼高 10px,手寫表情也要跟著傾斜才不會歪)。
+const T_BUN = 'scale(0.72) translate(-123 -197)';
+const tb = (inner) => `<g transform="${T_BUN}">${inner}</g>`;
+const TB_INK = '#1C1C1C';
+
+const bun2Faces = {
+  neutral: tb(TRACED_BUN.eyes + TRACED_BUN.mouth),
+  happy: tb(`
+    <path d="M 99 205 Q 105.5 197 112 205 M 134.5 195 Q 141 187 147.5 195"
+          stroke="${TB_INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M 119 213 Q 128 223 137 213" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
+  surprised: tb(`
+    <circle cx="105.5" cy="202.5" r="6" fill="${TB_INK}"/><circle cx="141" cy="192.5" r="6" fill="${TB_INK}"/>
+    <circle cx="103.8" cy="200.8" r="1.8" fill="#FFFFFF"/><circle cx="139.3" cy="190.8" r="1.8" fill="#FFFFFF"/>
+    <ellipse cx="128" cy="219" rx="5" ry="6.5" fill="#FFFFFF" stroke="${TB_INK}" stroke-width="3.4"/>`),
+  angry: tb(`
+    <path d="M 96 191 L 111 197 M 150 181 L 135 187" stroke="${TB_INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="105.5" cy="202.5" r="4.5" fill="${TB_INK}"/><circle cx="141" cy="192.5" r="4.5" fill="${TB_INK}"/>
+    <path d="M 121 219 Q 128 215 135 219" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
+  sad: tb(`
+    <path d="M 97 197 L 111 191 M 149 187 L 135 181" stroke="${TB_INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="105.5" cy="202.5" r="4.5" fill="${TB_INK}"/><circle cx="141" cy="192.5" r="4.5" fill="${TB_INK}"/>
+    <path d="M 120 221 Q 128 214 136 221" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
+};
+
 // ── 角色總表 ──────────────────────────────────────────
 // 新增角色 = 加一個 entry。parts 依序輸出:back → neck → body → head → face → hair。
 export const CHARACTERS = {
+  bun2: {
+    name: '丸子頭(描線版)',
+    desc: '參考圖 vtracer 描線而來;手繪感基準',
+    headTop: -109,
+    bustBottom: 64,     // 描線只裁到肩上緣,軀幹比手寫版短(renderer 據此貼齊格底)
+    parts: { body: tb(TRACED_BUN.base + TRACED_BUN.blush) },
+    faces: bun2Faces,
+  },
   bun: {
     name: '丸子頭女生',
     desc: '黑髮丸子頭、米白開襟衫、白T',

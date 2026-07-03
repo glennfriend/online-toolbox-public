@@ -51,7 +51,7 @@ function renderCharacter(entry, warnings) {
   const pos = entry.pos || 'center';
   const relX = typeof pos === 'object' ? pos.x : (POS_X[pos] ?? (warnings.push(`未知位置「${pos}」,改用 center`), 0.5));
   const x = relX * PANEL_W;
-  const y = PANEL_H - 20 - 132 * CHAR_SCALE;          // 軀幹底貼齊格子下緣
+  const y = PANEL_H - 20 - (def.bustBottom ?? 132) * CHAR_SCALE;   // 軀幹底貼齊格子下緣
   const flip = entry.face === 'left' ? -1 : 1;
   const p = def.parts;
   return {

@@ -18,7 +18,7 @@ const DEFAULT_SCRIPT = {
   layout: 'single',
   panels: [{
     bg: 'room-wood',
-    items: [{ item: 'adult_female', pos: { x: 0.36, y: 0.64 }, scale: 0.78 }],
+    items: [{ item: 'girl/1', pos: { x: 0.36, y: 0.64 }, scale: 0.78 }],
     texts: [{ text: '把 JSON 貼進左邊,右邊就出圖!', pos: { x: 0.05, y: 0.06 }, w: 0.5 }],
   }],
 };

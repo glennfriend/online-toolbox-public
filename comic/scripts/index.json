@@ -1,10 +1,1 @@
-[
-  { "id": "salary", "name": "2026-07-04 年薪多少", "file": "salary.json" },
-  { "id": "son-scolded", "name": "2026-07-04 被媽媽罵", "file": "son-scolded.json" },
-  { "id": "both-pigs", "name": "2026-07-04 都是豬", "file": "both-pigs.json" },
-  { "id": "laundry", "name": "2026-07-04 洗衣店", "file": "laundry.json" },
-  { "id": "mochi", "name": "2026-07-04 哪兒賣的", "file": "mochi.json" },
-  { "id": "sleep-one-hour", "name": "2026-07-04 只睡一個小時", "file": "sleep-one-hour.json" },
-  { "id": "surgery", "name": "2026-07-04 動手術", "file": "surgery.json" },
-  { "id": "computer-virus", "name": "2026-07-04 電腦病毒", "file": "computer-virus.json" }
-]
+[]

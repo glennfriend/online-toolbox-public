@@ -5,8 +5,8 @@
 // 素材都是點陣圖(raw/backgrounds/、raw/items/),不再向量建模。
 // 錯誤容忍原則:缺欄位用預設值、未知值 fallback,全部收進 warnings 回報(絕不無聲)。
 
-import { STYLES, STYLE_DIR, DEFAULT_STYLE, itemsOf } from './items.js';
-import { bgOf, bgPath } from './backgrounds.js';
+import { ITEMS, ITEM_DIR, resolveItem } from './items.js';
+import { BACKGROUNDS, BG_DIR } from './backgrounds.js';
 
 const PANEL_W = 800;
 const PANEL_H = 560;
@@ -66,41 +66,41 @@ function renderTextBox(t, cursorY, warnings) {
   return { svg, height: boxH };
 }
 
-// 配件:去背點陣圖,pos={x,y}=格內比例(配件中心),scale=佔格高比例(預設 0.6),flip=水平翻轉。
-function renderItem(it, style, warnings) {
-  const items = itemsOf(style);
-  const def = items[it.item];
-  if (!def) {
-    warnings.push(`畫風「${style}」沒有配件「${it.item}」,已略過(可用:${Object.keys(items).join(', ')})`);
+// 配件:去背點陣圖。item="角色/變化"(或只給角色→第一個變化)。
+//   pos={x,y}=格內比例(配件中心),scale=佔格高比例(預設 0.6),flip=水平翻轉。
+function renderItem(it, warnings) {
+  const r = resolveItem(it.item);
+  if (!r) {
+    warnings.push(`未知配件「${it.item}」,已略過(可用角色:${Object.keys(ITEMS).join(', ')};格式「角色/變化」)`);
     return '';
   }
+  const def = r.def;
   const scale = it.scale ?? 0.6;
   const dh = scale * PANEL_H;
   const dw = dh * (def.w / def.h);
   const pos = it.pos || { x: 0.5, y: 0.62 };
   const cx = (pos.x ?? 0.5) * PANEL_W, cy = (pos.y ?? 0.62) * PANEL_H;
   const x = cx - dw / 2, y = cy - dh / 2;
-  const href = `${STYLE_DIR}${style}/items/${def.file}`;
+  const href = `${ITEM_DIR}${r.char}/${def.file}`;
   const img = `<image href="${href}" x="${f1(x)}" y="${f1(y)}" width="${f1(dw)}" height="${f1(dh)}" preserveAspectRatio="xMidYMid meet"/>`;
   return it.flip ? `<g transform="translate(${f1(2 * cx)} 0) scale(-1 1)">${img}</g>` : img;
 }
 
-function renderPanel(panel, style, warnings, idx = 0) {
+function renderPanel(panel, warnings, idx = 0) {
   // 背景(完全不透明,鋪滿一格)
   const bg = panel.bg || 'plain';
   let bgLayer = `<rect x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" fill="${PAPER}"/>`;
   if (bg !== 'plain') {
-    const bgs = bgOf(style);
-    const def = bgs[bg];
+    const def = BACKGROUNDS[bg];
     if (def) {
-      bgLayer = `<image href="${bgPath(style, def.file)}" x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" preserveAspectRatio="xMidYMid slice"/>`;
+      bgLayer = `<image href="${BG_DIR}${def.file}" x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" preserveAspectRatio="xMidYMid slice"/>`;
     } else {
-      warnings.push(`畫風「${style}」沒有背景「${bg}」,改用 plain(可用:${Object.keys(bgs).join(', ') || '(此畫風尚無背景)'})`);
+      warnings.push(`未知背景「${bg}」,改用 plain(可用:${Object.keys(BACKGROUNDS).join(', ')})`);
     }
   }
 
   // 配件(依陣列順序疊,後者在上)
-  const items = (panel.items || []).map((it) => renderItem(it, style, warnings)).join('');
+  const items = (panel.items || []).map((it) => renderItem(it, warnings)).join('');
 
   // 對話框(未給 pos 者由上而下自動堆疊)
   let texts = '', cursorY = 16;
@@ -133,8 +133,6 @@ const LAYOUTS = {
 // 主入口:劇本 → { svg, warnings }
 export function renderComic(script) {
   const warnings = [];
-  let style = script.style || DEFAULT_STYLE;
-  if (!STYLES[style]) { warnings.push(`未知畫風「${style}」,改用 ${DEFAULT_STYLE}(可用:${Object.keys(STYLES).join(', ')})`); style = DEFAULT_STYLE; }
   let layout = script.layout || 'single';
   if (!LAYOUTS[layout]) { warnings.push(`未知版型「${layout}」,改用 grid-2x2`); layout = 'grid-2x2'; }
   const { cols, rows } = LAYOUTS[layout];
@@ -146,7 +144,7 @@ export function renderComic(script) {
   const W = cols * PANEL_W, H = rows * PANEL_H;
   const cells = panels.slice(0, cap).map((p, i) => {
     const col = i % cols, row = Math.floor(i / cols);
-    return `<g transform="translate(${col * PANEL_W} ${row * PANEL_H})">${renderPanel(p, style, warnings, i)}</g>`;
+    return `<g transform="translate(${col * PANEL_W} ${row * PANEL_H})">${renderPanel(p, warnings, i)}</g>`;
   }).join('');
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${cells}</svg>`;

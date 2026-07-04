@@ -11,9 +11,10 @@
 
 ```powershell
 Add-Type -Path ItemCut.cs -ReferencedAssemblies System.Drawing
-[ItemCut]::Cut("raw\items_before_clean\xxx.png", "raw\items\my_item.png", 232)        # 乾淨白底
-[ItemCut]::CutNoisy("raw\items_before_noisy\yyy.png", "raw\items\my_item.png", 212)   # 附近有雜質
-[ItemCut]::FillHoles("raw\items\my_item.png", 6)                                       # 搶救:補內部破洞
+# 輸出到 raw\assets\items\<角色>\<變化>.png
+[ItemCut]::Cut("raw\assets\items_before_clean\xxx.png", "raw\assets\items\penguin\hello.png", 232)  # 乾淨白底
+[ItemCut]::CutNoisy("raw\assets\items_before_noisy\yyy.png", "raw\assets\items\dog\run.png", 212)   # 附近有雜質
+[ItemCut]::FillHoles("raw\assets\items\penguin\hello.png", 6)                                        # 搶救:補內部破洞
 ```
 
 **演算法(去背怎麼保住主體內部的白)**:單純「四邊泛洪清近白 → 透明」會從細縫漏進主體,把該有的白
@@ -33,21 +34,22 @@ Add-Type -Path ItemCut.cs -ReferencedAssemblies System.Drawing
 
 ## 收件匣 → items(用完即空)
 
-兩個收件匣,依主體週圍乾不乾淨分。**規則:只要收件匣有可轉換的檔案就全部轉換到 `raw/items/`,轉換後刪原檔**
-(正常情況收件匣是空的,只留 README)。命名用 **WordNet**(ImageNet 的詞彙階層):id = 該物的 WordNet
-詞位(小寫底線),同類多張加 `_2`、`_3`;細節(姿勢/顏色/畫風)放 tags,不進檔名。
+兩個收件匣(不分畫風),依主體週圍乾不乾淨分。**規則:只要收件匣有可轉換的檔案就全部轉換到
+`raw/assets/items/<角色>/<變化>.png`,轉換後刪原檔**(正常情況收件匣是空的,只留 README)。
+命名 = **角色資料夾 / 變化檔名**:同角色(或同種類)同資料夾,不同角色各自一夾,同種類再多一種就 `dog`→`dog_2`;
+變化(姿勢/顏色)當檔名。
 
 | 收件匣 | 放什麼 | 工具 |
 |--------|--------|------|
-| `raw/style/<style>/items_before_clean/` | 主體 + 乾淨白底 | `Cut`,thr 232(人像加 `,6,$false`) |
-| `raw/style/<style>/items_before_noisy/` | 主體附近有雜質 | `CutNoisy`,thr ~212 |
+| `raw/assets/items_before_clean/` | 主體 + 乾淨白底 | `Cut`,thr 232(人像加 `,6,$false`) |
+| `raw/assets/items_before_noisy/` | 主體附近有雜質 | `CutNoisy`,thr ~212 |
 
-流程:逐張看圖 → 依 WordNet 決定 id → 去背到 `raw/items/<id>.png` → 登記 `js/items.js` + `items.md`
+流程:逐張看圖 → 決定角色/變化 → 去背到 `raw/assets/items/<角色>/<變化>.png` → 登記 `js/items.js` + `items.md`
 → 刪收件匣原檔 → 素材頁(catalog.html)棋盤格檢查。原檔刪後若要用更好演算法重跑,需重新提供原圖。
 
 ### convert-items.ps1
 
-把「批次轉換 + 刪原檔」包成一支(乾淨圖用)。編輯檔頭 `$map`(原檔名→id[,thr])後執行:
+把「批次轉換 + 刪原檔」包成一支(乾淨圖用)。編輯檔頭 `$map`(原檔名→"角色/變化"[,thr])後執行:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools\convert-items.ps1

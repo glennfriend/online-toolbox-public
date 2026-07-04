@@ -17,9 +17,13 @@
     <a class="btn" href="index.html">編輯器</a>
   </header>
   <main class="catalog">
-    <p class="hint">素材都是點陣圖,依<b>畫風(style)</b>分層 —— 配件與背景都分畫風,同一 id 在不同畫風是不同圖,畫風不混。<b>配件</b>已去背(週圍透明)、<b>背景</b>不透明鋪滿整格。故事用 <code>style</code> 選畫風、<code>items[].item</code> 選配件、<code>bg</code> 選背景。定義見 <code>items.md</code>、<code>backgrounds.md</code>。</p>
+    <p class="hint">素材都是點陣圖。<b>配件</b>依<b>角色/種類</b>分組(同角色一個資料夾,變化=各姿勢),已去背週圍透明;故事用 <code>items[].item = "角色/變化"</code>(如 <code>penguin/sleepy</code>)引用。<b>背景</b>不透明鋪滿整格,用 <code>bg</code> 選。<b>多個人的故事請用不同角色</b>,別用同一角色扮兩人。定義見 <code>items.md</code>、<code>backgrounds.md</code>。</p>
 
-    <div id="sections"></div>
+    <h2 class="sec">配件 <span class="sec-note">依角色/種類分組</span></h2>
+    <div id="item-sections"></div>
+
+    <h2 class="sec">背景 <span class="sec-note">不透明,鋪滿整格</span></h2>
+    <div id="bg-grid" class="grid"></div>
   </main>
   <script type="module" src="js/catalog.js"></script>
 </body>

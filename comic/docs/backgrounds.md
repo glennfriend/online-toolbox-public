@@ -19,10 +19,17 @@
 `室內` `室外` `樓梯` `大樓` `辦公室` `廚房` `教室` `診間` `街道` `山` `海` `天空` `草地`
 `白天` `夜晚` `黃昏` `晴` `陰` `溫馨` `冷色` `熱鬧` `空曠`
 
-## 目前清單
+## 目前清單(20 張,來源:いらすとや)
 
-| id | 檔案 | tags |
-|---|---|---|
-| sky-field | sky-field.jpg | 天空 · 戶外 · 白天 · 草地 · 太陽 |
+**室內**:classroom(教室)· gym(體育館)· room-wood(木地板房)· room-tatami(和室)
+**城市/道路**:city-night(夜城市)· highway(高速公路)· road(道路)· schoolyard(學校操場)
+**自然/戶外**:mountain(山)· mountain-field(山與田)· sea(海)· river(河)· cliff(懸崖)· bamboo(竹林)· lavender(薰衣草田)· winter-waterfall(冰瀑)
+**天空**:sky-blue(藍天白雲)· horizon-field(地平線草原)· night-moon(月夜)
+**特效**:effect-lines(效果線,適合 shout/動作格)
 
-> (示範用 1 張;等你放入更多圖,我逐張下 tag 補進來。)
+> 完整 id → 檔案 → tags 對照見 `js/backgrounds.js`。
+
+## 尚缺(irasutoya 沒有「整幅背景」版本,只有物件 clip-art)
+
+樓梯、電梯、白天城市街景(街並み)—— 這些在 irasutoya 只有單物件插圖,不是整幅場景背景。
+要的話需換來源(自己 AI 生、或其他插畫庫)。

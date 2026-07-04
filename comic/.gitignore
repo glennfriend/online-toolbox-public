@@ -1,2 +1,3 @@
-# 本機工具(vtracer 執行檔,1.7MB binary 不進 repo;取得方式見 README)
-tools/
+# vtracer 執行檔(1.7MB binary 不進 repo;取得方式見 tools/README.md)
+tools/*.exe
+tools/vtracer.zip

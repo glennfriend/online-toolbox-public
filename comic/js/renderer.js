@@ -4,6 +4,7 @@
 // 錯誤容忍原則:缺欄位用預設值、未知值 fallback,全部收進 warnings 回報(絕不無聲)。
 
 import { STYLE, CHARACTERS } from './assets.js';
+import { PROPS } from './props.js';
 
 const PANEL_W = 800;
 const PANEL_H = 600;
@@ -104,6 +105,17 @@ function renderPanel(panel, warnings) {
   const bg = panel.bg || 'plain';
   if (bg !== 'plain') warnings.push(`背景「${bg}」Phase 1 尚未實作,改用 plain`);
 
+  // 道具:放在角色之前(當背景陳設)。pos={x,y} 為格內比例(0~1,道具中心),scale 預設 1。
+  let propsSvg = '';
+  for (const it of panel.props || []) {
+    const def = PROPS[it.prop];
+    if (!def) { warnings.push(`未知道具「${it.prop}」,已略過(可用:${Object.keys(PROPS).join(', ')})`); continue; }
+    const s = it.scale || 1;
+    const pos = it.pos || { x: 0.5, y: 0.5 };
+    const cx = (pos.x ?? 0.5) * PANEL_W, cy = (pos.y ?? 0.5) * PANEL_H;
+    propsSvg += `<g transform="translate(${(cx - def.w * s / 2).toFixed(1)} ${(cy - def.h * s / 2).toFixed(1)}) scale(${s})">${def.svg}</g>`;
+  }
+
   const castPlaced = (panel.cast || []).map((entry) => {
     const r = renderCharacter(entry, warnings);
     return r ? { entry, ...r } : null;
@@ -121,6 +133,7 @@ function renderPanel(panel, warnings) {
   return `
     <rect x="6" y="6" width="${PANEL_W - 12}" height="${PANEL_H - 12}" rx="16"
           fill="${STYLE.paper}" stroke="${STYLE.line}" stroke-width="3"/>
+    ${propsSvg}
     ${castPlaced.map((c) => c.svg).join('')}
     ${bubbles}`;
 }

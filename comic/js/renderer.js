@@ -5,6 +5,7 @@
 
 import { STYLE, CHARACTERS } from './assets.js';
 import { PROPS } from './props.js';
+import { BACKGROUNDS, BG_DIR } from './backgrounds.js';
 
 const PANEL_W = 800;
 const PANEL_H = 500;             // 較矮的格子 → 少空白、更緊湊(不影響 token)
@@ -146,9 +147,18 @@ function renderBubble(bubble, castPlaced, cursorY, warnings) {
   return { height: bh, svg: tail + box + texts };
 }
 
-function renderPanel(panel, warnings) {
+function renderPanel(panel, warnings, idx = 0) {
   const bg = panel.bg || 'plain';
-  if (bg !== 'plain') warnings.push(`背景「${bg}」Phase 1 尚未實作,改用 plain`);
+  // 背景:plain=米白紙底;否則查背景圖庫,鋪成該格底圖(cover 裁切);未知則 fallback plain + 警告
+  let bgLayer = `<rect x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" fill="${STYLE.paper}"/>`;
+  if (bg !== 'plain') {
+    const def = BACKGROUNDS[bg];
+    if (def) {
+      bgLayer = `<image href="${BG_DIR}${def.file}" x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" preserveAspectRatio="xMidYMid slice"/>`;
+    } else {
+      warnings.push(`未知背景「${bg}」,改用 plain(可用:${Object.keys(BACKGROUNDS).join(', ') || '(尚無)'})`);
+    }
+  }
 
   // 道具:放在角色之前(當背景陳設)。pos={x,y} 為格內比例(0~1,道具中心),scale 預設 1。
   //   有向量資產 → 用資產;否則用 emoji 當低成本替身(zero-asset fallback):
@@ -186,12 +196,17 @@ function renderPanel(panel, warnings) {
   }
   if (panel.effects?.length) warnings.push('effects Phase 1 尚未實作,已略過');
 
+  const clip = `panelclip${idx}`;
   return `
+    <clipPath id="${clip}"><rect x="4" y="4" width="${PANEL_W - 8}" height="${PANEL_H - 8}" rx="12"/></clipPath>
+    <g clip-path="url(#${clip})">
+      ${bgLayer}
+      ${propsSvg}
+      ${castPlaced.map((c) => c.svg).join('')}
+      ${bubbles}
+    </g>
     <rect x="4" y="4" width="${PANEL_W - 8}" height="${PANEL_H - 8}" rx="12"
-          fill="${STYLE.paper}" stroke="${STYLE.line}" stroke-width="3"/>
-    ${propsSvg}
-    ${castPlaced.map((c) => c.svg).join('')}
-    ${bubbles}`;
+          fill="none" stroke="${STYLE.line}" stroke-width="3"/>`;
 }
 
 // 版型:格子欄列數
@@ -216,7 +231,7 @@ export function renderComic(script) {
   const W = cols * PANEL_W, H = rows * PANEL_H;
   const cells = panels.slice(0, cap).map((p, i) => {
     const col = i % cols, row = Math.floor(i / cols);
-    return `<g transform="translate(${col * PANEL_W} ${row * PANEL_H})">${renderPanel(p, warnings)}</g>`;
+    return `<g transform="translate(${col * PANEL_W} ${row * PANEL_H})">${renderPanel(p, warnings, i)}</g>`;
   }).join('');
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${cells}</svg>`;

@@ -2,6 +2,7 @@
 
 import { CHARACTERS, EMOTIONS, STYLE } from './assets.js';
 import { PROPS } from './props.js';
+import { BACKGROUNDS, BG_DIR } from './backgrounds.js';
 
 // 角色 × 表情:先依「人」分區(bun / longhair),每個人底下列出各姿勢 × 5 表情
 const charSections = document.querySelector('#char-sections');
@@ -51,4 +52,18 @@ for (const [name, p] of Object.entries(PROPS)) {
   cell.innerHTML = `<svg viewBox="0 0 ${p.w} ${p.h}" width="${w.toFixed(0)}" height="${h.toFixed(0)}" style="background:#fff">${p.svg}</svg>
     <figcaption><b>${name}</b> · ${p.w}×${p.h}</figcaption>`;
   propGrid.appendChild(cell);
+}
+
+// 背景(點陣圖 + tags)
+const bgGrid = document.querySelector('#bg-grid');
+const bgEntries = Object.entries(BACKGROUNDS);
+if (!bgEntries.length) {
+  bgGrid.innerHTML = `<p class="hint">尚無背景。把圖丟進 <code>raw/backgrounds/</code>,我再幫每張下 tag。</p>`;
+}
+for (const [id, b] of bgEntries) {
+  const cell = document.createElement('figure');
+  cell.className = 'cell';
+  cell.innerHTML = `<img src="${BG_DIR}${b.file}" width="200" alt="${id}" style="border-radius:6px;display:block">
+    <figcaption><b>${id}</b><br><span style="color:var(--muted)">${(b.tags || []).join(' · ')}</span></figcaption>`;
+  bgGrid.appendChild(cell);
 }

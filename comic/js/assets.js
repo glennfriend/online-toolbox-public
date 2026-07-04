@@ -18,6 +18,7 @@ export const STYLE = {
 import { TRACED_BUN } from './bun-traced-parts.js';
 import { TRACED_LONGHAIR } from './longhair-traced-parts.js';
 import { TRACED_BUN_STUDY } from './bun-study-parts.js';
+import { TRACED_MAN } from './man-parts.js';
 
 export const EMOTIONS = ['neutral', 'happy', 'surprised', 'angry', 'sad'];
 
@@ -68,6 +69,7 @@ function facesFor(geom) {
 const BUN_XF = 'scale(0.6) translate(-127.5 -195.5)';   // 上半身描線(306x398),眼中點→原點
 const LONG_XF = 'scale(0.6) translate(-233 -147)';   // 上半身描線(320x378),眼中點→原點
 const BUNSTUDY_XF = 'scale(0.6) translate(-100 -185.5)';   // 讀書姿勢(330x358)
+const MAN_XF = 'scale(0.5) translate(-233 -267.5)';   // 男生上半身(470x372),眼中點→原點
 
 export const CHARACTERS = {
   bun: {
@@ -94,5 +96,13 @@ export const CHARACTERS = {
     bustBottom: 104,
     parts: { body: `<g transform="${BUNSTUDY_XF}">${TRACED_BUN_STUDY.base}${TRACED_BUN_STUDY.blush}</g>` },
     faces: facesFor({ eyeL: [79, 188], eyeR: [121, 183], mouth: [100, 212], xform: BUNSTUDY_XF }),
+  },
+  man: {
+    name: '男生',
+    desc: '黑短髮男生、白毛衣(上半身)',
+    headTop: -134,
+    bustBottom: 52,
+    parts: { body: `<g transform="${MAN_XF}">${TRACED_MAN.base}</g>` },
+    faces: facesFor({ eyeL: [187, 272], eyeR: [279, 263], mouth: [247, 315], xform: MAN_XF }),
   },
 };

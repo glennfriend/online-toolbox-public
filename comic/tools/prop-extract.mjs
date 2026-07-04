@@ -34,8 +34,9 @@ const isDark = (fill) => {
   const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), bb = parseInt(h.slice(4, 6), 16);
   return (r * 299 + g * 587 + bb * 114) / 1000 < 100;
 };
-// 線稿類(如狗):只留黑線,白底/白內部全丟 → 透明內部的純線稿。以檔名字首判斷(不必去背/量化)。
-const isLineArt = (name) => name.startsWith('dog');
+// 線稿類(狗/雲/海鷗…):只留黑線,白底/白內部全丟 → 透明內部的純線稿。以檔名字首判斷(不必去背/量化)。
+const LINEART = ['dog', 'cloud-', 'gull', 'bird'];
+const isLineArt = (name) => LINEART.some((p) => name.startsWith(p));
 
 const props = {};
 for (const file of svgs) {

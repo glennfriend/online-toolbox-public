@@ -66,7 +66,7 @@ function showToast(msg) {
 // ── 存好的劇本下拉(版本控管:scripts/*.json)──
 async function loadScriptList() {
   try {
-    const list = await (await fetch('scripts/index.json')).json();
+    const list = await (await fetch('scripts/index.json', { cache: 'no-store' })).json();
     const sel = $('#scripts');
     for (const it of list) {
       const opt = document.createElement('option');
@@ -76,7 +76,7 @@ async function loadScriptList() {
     sel.addEventListener('change', async () => {
       if (!sel.value) return;
       try {
-        const txt = await (await fetch('scripts/' + sel.value)).text();
+        const txt = await (await fetch('scripts/' + sel.value, { cache: 'no-store' })).text();
         input.value = JSON.stringify(JSON.parse(txt), null, 2);
         rerender(); syncUrl();
       } catch (err) {

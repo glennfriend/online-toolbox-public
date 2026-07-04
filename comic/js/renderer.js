@@ -16,6 +16,7 @@ const MAX_CHARS = 9;             // 每行上限(中文字數)
 const POS_X = { left: 0.27, center: 0.5, right: 0.73 };
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // CJK 換行:全形算 1 字寬、半形算 0.55;支援 \n 強制換行。回傳 [{ text, units }]
 function wrapText(text, maxChars = MAX_CHARS) {
@@ -65,40 +66,79 @@ function renderCharacter(entry, warnings) {
   };
 }
 
-// 氣泡:圓角矩形 + 指向說話者頭頂的 tail。回傳 { svg, height }
-function renderBubble(bubble, castPlaced, cursorY, warnings) {
-  if (bubble.type && bubble.type !== 'speech') {
-    warnings.push(`氣泡類型「${bubble.type}」Phase 1 尚未實作,先以 speech 呈現`);
+const BUBBLE_INK = '#1A1A1A', BW_STROKE = 4;
+const FONT = `-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif`;
+
+// 尖尾(短 stub,朝說話者頭頂,任意角度都行)。回傳三角形 path 的 d。
+function tailPath(bx, by, bw, bh, speaker) {
+  const cxB = bx + bw / 2, cyB = by + bh;              // 從氣泡底邊中點附近長出
+  let vx = speaker.x - cxB, vy = speaker.headTopY - cyB;
+  const len = Math.hypot(vx, vy) || 1; vx /= len; vy /= len;
+  const stub = 34;                                     // 固定短長度,不隨距離拉長(像參考圖的短尾)
+  const tipX = cxB + vx * stub, tipY = cyB + vy * stub;
+  const px = -vy, py = vx, half = 13;                  // 底邊沿垂直方向張開
+  const b1x = clamp(cxB + px * half, bx + 8, bx + bw - 8), b1y = cyB + py * half;
+  const b2x = clamp(cxB - px * half, bx + 8, bx + bw - 8), b2y = cyB - py * half;
+  return `M ${b1x.toFixed(1)} ${b1y.toFixed(1)} L ${tipX.toFixed(1)} ${tipY.toFixed(1)} L ${b2x.toFixed(1)} ${b2y.toFixed(1)} Z`;
+}
+
+// 爆炸鋸齒外框(shout)
+function spikyPath(cx, cy, rx, ry) {
+  const n = 18, pts = [];
+  for (let i = 0; i < n * 2; i++) {
+    const a = Math.PI * i / n, r = i % 2 ? 0.78 : 1;
+    pts.push(`${(cx + Math.cos(a) * rx * r).toFixed(1)} ${(cy + Math.sin(a) * ry * r).toFixed(1)}`);
   }
+  return `M ${pts.join(' L ')} Z`;
+}
+
+// 氣泡:依 type 畫不同外框 + 朝說話者的短尾。回傳 { svg, height }
+function renderBubble(bubble, castPlaced, cursorY, warnings) {
+  const type = ['speech', 'thought', 'shout', 'narration'].includes(bubble.type) ? bubble.type
+    : (bubble.type ? (warnings.push(`未知氣泡類型「${bubble.type}」,改用 speech`), 'speech') : 'speech');
   const lines = wrapText(bubble.text ?? (warnings.push('氣泡缺 text,顯示空白'), ''));
-  const padX = 20, padY = 14;
+  const padX = 22, padY = 15;
   const maxUnits = Math.max(...lines.map((l) => l.units));
-  const bw = maxUnits * FONT_SIZE + padX * 2;
+  const bw = Math.max(maxUnits * FONT_SIZE + padX * 2, 72);
   const bh = lines.length * LINE_H + padY * 2;
 
   const speaker = castPlaced.find((c) => c.entry.char === bubble.speaker);
-  if (bubble.speaker && !speaker) warnings.push(`氣泡的 speaker「${bubble.speaker}」不在本格 cast 中,tail 省略`);
+  if (bubble.speaker && !speaker && type !== 'narration') warnings.push(`氣泡的 speaker「${bubble.speaker}」不在本格 cast 中,尾巴省略`);
   const sx = speaker ? speaker.x : PANEL_W / 2;
-
-  const bx = Math.min(Math.max(sx - bw / 2, 14), PANEL_W - 14 - bw);
+  const bx = clamp(sx - bw / 2, 14, PANEL_W - 14 - bw);
   const by = cursorY;
+
+  const texts = lines.map((l, i) =>
+    `<text x="${(bx + bw / 2).toFixed(1)}" y="${(by + padY + FONT_SIZE * 0.85 + i * LINE_H).toFixed(1)}" font-size="${FONT_SIZE}"
+       text-anchor="middle" fill="#1F1F1F" font-family="${FONT}">${esc(l.text)}</text>`).join('');
+
+  // 旁白:頂端字幕框,方角、無尾巴、淡黃底
+  if (type === 'narration') {
+    return { height: bh,
+      svg: `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="5" fill="#FFFCEC" stroke="${BUBBLE_INK}" stroke-width="2.5"/>${texts}` };
+  }
 
   let tail = '';
   if (speaker) {
-    const baseX = Math.min(Math.max(sx, bx + 26), bx + bw - 26);
-    const tipY = speaker.headTopY - 6;
-    tail = `<path d="M ${baseX - 11} ${by + bh} L ${sx} ${tipY} L ${baseX + 11} ${by + bh} Z"
-                  fill="#FFFFFF" stroke="${STYLE.line}" stroke-width="3" stroke-linejoin="round"/>
-            <rect x="${baseX - 9}" y="${by + bh - 2.5}" width="18" height="5" fill="#FFFFFF"/>`;
+    if (type === 'thought') {                          // 想法:兩顆小圓當尾巴
+      const cxB = bx + bw / 2, cyB = by + bh;
+      let vx = speaker.x - cxB, vy = speaker.headTopY - cyB; const len = Math.hypot(vx, vy) || 1; vx /= len; vy /= len;
+      tail = `<circle cx="${(cxB + vx * 20).toFixed(1)}" cy="${(cyB + vy * 20).toFixed(1)}" r="7" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="3"/>
+              <circle cx="${(cxB + vx * 38).toFixed(1)}" cy="${(cyB + vy * 38).toFixed(1)}" r="4.5" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="2.5"/>`;
+    } else {                                           // speech / shout:尖尾
+      tail = `<path d="${tailPath(bx, by, bw, bh, speaker)}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}" stroke-linejoin="round"/>`;
+    }
   }
-  const texts = lines.map((l, i) =>
-    `<text x="${bx + padX}" y="${by + padY + FONT_SIZE * 0.85 + i * LINE_H}" font-size="${FONT_SIZE}"
-           fill="#2B2B2B" font-family="-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif">${esc(l.text)}</text>`).join('');
-  return {
-    height: bh,
-    svg: `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="16"
-                fill="#FFFFFF" stroke="${STYLE.line}" stroke-width="3"/>${tail}${texts}`,
-  };
+
+  let box;
+  if (type === 'shout') {
+    box = `<path d="${spikyPath(bx + bw / 2, by + bh / 2, bw / 2 + 6, bh / 2 + 6)}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}" stroke-linejoin="round"/>`;
+  } else {
+    const rx = type === 'thought' ? 26 : 20;
+    box = `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${rx}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}"/>`;
+  }
+  // 尾巴先畫,外框蓋在上面(遮住接縫),文字最後
+  return { height: bh, svg: tail + box + texts };
 }
 
 function renderPanel(panel, warnings) {
@@ -106,14 +146,25 @@ function renderPanel(panel, warnings) {
   if (bg !== 'plain') warnings.push(`背景「${bg}」Phase 1 尚未實作,改用 plain`);
 
   // 道具:放在角色之前(當背景陳設)。pos={x,y} 為格內比例(0~1,道具中心),scale 預設 1。
+  //   有向量資產 → 用資產;否則用 emoji 當低成本替身(zero-asset fallback):
+  //   { "emoji":"🏹", pos, scale } 明確指定,或 { "prop":"🍎" } 傳入 emoji 也行。
   let propsSvg = '';
   for (const it of panel.props || []) {
-    const def = PROPS[it.prop];
-    if (!def) { warnings.push(`未知道具「${it.prop}」,已略過(可用:${Object.keys(PROPS).join(', ')})`); continue; }
     const s = it.scale || 1;
     const pos = it.pos || { x: 0.5, y: 0.5 };
     const cx = (pos.x ?? 0.5) * PANEL_W, cy = (pos.y ?? 0.5) * PANEL_H;
-    propsSvg += `<g transform="translate(${(cx - def.w * s / 2).toFixed(1)} ${(cy - def.h * s / 2).toFixed(1)}) scale(${s})">${def.svg}</g>`;
+    const def = it.prop && PROPS[it.prop];
+    if (def) {
+      propsSvg += `<g transform="translate(${(cx - def.w * s / 2).toFixed(1)} ${(cy - def.h * s / 2).toFixed(1)}) scale(${s})">${def.svg}</g>`;
+      continue;
+    }
+    const ch = it.emoji || it.prop;                    // emoji 替身
+    if (ch && (it.emoji || [...String(ch)].length <= 3)) {
+      const size = (it.size || 88) * s;
+      propsSvg += `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" font-size="${size.toFixed(0)}" text-anchor="middle" dominant-baseline="central">${esc(ch)}</text>`;
+    } else {
+      warnings.push(`未知道具「${it.prop}」,已略過(可用向量:${Object.keys(PROPS).join(', ')};或用 emoji 欄位)`);
+    }
   }
 
   const castPlaced = (panel.cast || []).map((entry) => {

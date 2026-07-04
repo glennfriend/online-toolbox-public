@@ -14,13 +14,14 @@
     <span class="brand">Comic
       <span class="info"><span class="info-btn" tabindex="0" aria-label="說明">💡</span>
         <span class="info-tip">
-          <span class="tip-h">[Feature]</span>
-          <span>JSON 劇本 → SVG 漫畫(劇本與渲染分離)</span>
-          <span>畫風由固定向量資產庫保證,100% 一致</span>
+          <span class="tip-h">[怎麼用]</span>
+          <span>左邊貼 JSON 劇本 → 右邊即時出圖(像 calcpad)</span>
+          <span>「劇本」下拉 = 版本控管裡存好的漫畫</span>
+          <span>小改即時編進網址,可「複製連結」分享/重現</span>
           <span>下載 SVG / PNG(2x)</span>
-          <span class="tip-h">[Phase 1 範圍]</span>
-          <span>1 角色 × 2 表情、單格、speech 氣泡</span>
-          <span>版型/背景/效果/更多角色 → 畫風定稿後擴充</span>
+          <span class="tip-h">[素材]</span>
+          <span>角色 bun / longhair × 5 表情、11 個道具</span>
+          <span>沒有的道具用 emoji 當低成本替身(不必建模)</span>
           <span class="tip-h">[技術支援]</span>
           <span>純前端零依賴,無 CDN、無 API key</span>
         </span>
@@ -29,7 +30,8 @@
     <span class="spacer"></span>
     <a class="btn" href="catalog.html">角色型錄</a>
     <a class="btn" href="props.html">道具型錄</a>
-    <button id="example" class="btn" type="button">範例</button>
+    <select id="scripts" class="btn" title="載入版本控管裡存好的劇本"><option value="">劇本…</option></select>
+    <button id="copy-link" class="btn" type="button">複製連結</button>
     <button id="dl-svg" class="btn" type="button">下載 SVG</button>
     <button id="dl-png" class="btn" type="button">下載 PNG</button>
   </header>
@@ -45,6 +47,8 @@
       <div id="preview" class="preview"></div>
     </section>
   </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="js/main.js"></script>
 </body>

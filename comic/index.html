@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="JSON 劇本 → 向量漫畫。畫風由固定 SVG 資產庫保證,永遠一致。">
+  <meta name="description" content="JSON 劇本 → 漫畫。背景 + 去背配件 + 白底黑字對話框,點陣素材組合。">
   <title>Comic</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
@@ -20,15 +20,16 @@
           <span>小改即時編進網址,可「複製連結」分享/重現</span>
           <span>下載 SVG / PNG(2x)</span>
           <span class="tip-h">[素材]</span>
-          <span>角色 bun / longhair × 5 表情、11 個道具</span>
-          <span>沒有的道具用 emoji 當低成本替身(不必建模)</span>
+          <span>背景(不透明整格)+ 配件(去背疊上去)</span>
+          <span>對話 = 白底黑字方框,直接放空白處</span>
+          <span>「素材」看所有背景與配件</span>
           <span class="tip-h">[技術支援]</span>
           <span>純前端零依賴,無 CDN、無 API key</span>
         </span>
       </span>
     </span>
     <span class="spacer"></span>
-    <a class="btn" href="catalog.html" title="這個畫風的角色與道具">畫風</a>
+    <a class="btn" href="catalog.html" title="所有背景與配件素材">素材</a>
     <select id="scripts" class="btn" title="載入版本控管裡存好的劇本"><option value="">劇本</option></select>
     <button id="copy-link" class="btn" type="button">複製連結</button>
     <select id="download" class="btn" title="下載">

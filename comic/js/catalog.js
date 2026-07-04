@@ -1,67 +1,24 @@
-// catalog.js — 畫風頁:這個畫風的「角色 × 表情」與「道具」,供人工核對畫風。
+// catalog.js — 素材頁:列出所有「配件(去背點陣圖)」與「背景(不透明整格)」,供挑圖與核對。
 
-import { CHARACTERS, EMOTIONS, STYLE } from './assets.js';
-import { PROPS } from './props.js';
+import { ITEMS, ITEM_DIR } from './items.js';
 import { BACKGROUNDS, BG_DIR } from './backgrounds.js';
 
-// 角色 × 表情:先依「人」分區(bun / longhair),每個人底下列出各姿勢 × 5 表情
-const charSections = document.querySelector('#char-sections');
-const byPerson = {};
-for (const [id, def] of Object.entries(CHARACTERS)) {
-  const key = def.person || id;
-  (byPerson[key] = byPerson[key] || []).push([id, def]);
-}
-for (const [person, entries] of Object.entries(byPerson)) {
-  const h = document.createElement('h3');
-  h.className = 'char-name';
-  h.textContent = (CHARACTERS[person] || entries[0][1]).name;
-  charSections.appendChild(h);
-  for (const [id, def] of entries) {
-    const label = document.createElement('div');
-    label.className = 'pose-label';
-    label.textContent = `${def.name}(${id})`;
-    charSections.appendChild(label);
-    const grid = document.createElement('div');
-    grid.className = 'grid';
-    const emos = def.fixedFace ? ['neutral'] : EMOTIONS;   // 固定表情角色只顯示一格
-    for (const emotion of emos) {
-      const face = def.faces[emotion];
-      if (face === undefined) continue;
-      const p = def.parts;
-      const cell = document.createElement('figure');
-      cell.className = 'cell';
-      cell.innerHTML = `
-        <svg viewBox="-110 -110 220 260" width="160" height="189" xmlns="http://www.w3.org/2000/svg">
-          <rect x="-110" y="-110" width="220" height="260" fill="${STYLE.paper}"/>
-          <g stroke-linecap="round" stroke-linejoin="round">
-            ${p.back || ''}${p.neck || ''}${p.body || ''}${p.head || ''}${face}${p.hair || ''}
-          </g>
-        </svg>
-        <figcaption>${emotion}</figcaption>`;
-      grid.appendChild(cell);
-    }
-    charSections.appendChild(grid);
-  }
-}
-
-// 道具
-const propGrid = document.querySelector('#prop-grid');
-for (const [name, p] of Object.entries(PROPS)) {
-  const w = Math.min(p.w, 160), h = p.h * w / p.w;
+// 配件:去背 → 用棋盤格底襯,一眼看出透明範圍是否乾淨
+const CHECKER = 'background:linear-gradient(45deg,#d8d8d8 25%,transparent 25%,transparent 75%,#d8d8d8 75%),linear-gradient(45deg,#d8d8d8 25%,#fff 25%,#fff 75%,#d8d8d8 75%);background-size:18px 18px;background-position:0 0,9px 9px;border-radius:6px';
+const itemGrid = document.querySelector('#item-grid');
+for (const [id, it] of Object.entries(ITEMS)) {
   const cell = document.createElement('figure');
   cell.className = 'cell';
-  cell.innerHTML = `<svg viewBox="0 0 ${p.w} ${p.h}" width="${w.toFixed(0)}" height="${h.toFixed(0)}" style="background:#fff">${p.svg}</svg>
-    <figcaption><b>${name}</b> · ${p.w}×${p.h}</figcaption>`;
-  propGrid.appendChild(cell);
+  cell.innerHTML = `<div style="${CHECKER};display:flex;align-items:center;justify-content:center;height:150px">
+      <img src="${ITEM_DIR}${it.file}" alt="${id}" style="max-width:170px;max-height:140px;display:block">
+    </div>
+    <figcaption><b>${id}</b> · ${it.w}×${it.h}<br><span style="color:var(--muted)">${(it.tags || []).join(' · ')}</span></figcaption>`;
+  itemGrid.appendChild(cell);
 }
 
-// 背景(點陣圖 + tags)
+// 背景:點陣圖 + tags
 const bgGrid = document.querySelector('#bg-grid');
-const bgEntries = Object.entries(BACKGROUNDS);
-if (!bgEntries.length) {
-  bgGrid.innerHTML = `<p class="hint">尚無背景。把圖丟進 <code>raw/backgrounds/</code>,我再幫每張下 tag。</p>`;
-}
-for (const [id, b] of bgEntries) {
+for (const [id, b] of Object.entries(BACKGROUNDS)) {
   const cell = document.createElement('figure');
   cell.className = 'cell';
   cell.innerHTML = `<img src="${BG_DIR}${b.file}" width="200" alt="${id}" style="border-radius:6px;display:block">

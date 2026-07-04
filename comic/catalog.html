@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="Comic 畫風:這個畫風的角色與道具。">
-  <title>Comic 畫風</title>
+  <meta name="description" content="Comic 素材:所有背景與配件。">
+  <title>Comic 素材</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,19 +13,16 @@
   <header class="topbar">
     <span class="brand">Comic</span>
     <span class="spacer"></span>
-    <span class="btn" aria-current="page" style="background:var(--bg-code)">畫風</span>
+    <span class="btn" aria-current="page" style="background:var(--bg-code)">素材</span>
     <a class="btn" href="index.html">編輯器</a>
   </header>
   <main class="catalog">
-    <p class="hint">目前只有一種畫風(韓系手繪日記)。之後每多一種畫風,就在這裡多一個區塊。看哪裡不對直接說,改 <code>js/assets.js</code>(角色)或重跑道具管線即全站生效。</p>
+    <p class="hint">素材都是點陣圖。<b>背景</b>不透明、鋪滿整格;<b>配件</b>已去背(週圍透明),疊在背景上不會有白框。講故事時用 tag 挑圖,JSON 以 <code>bg</code> / <code>items[].item</code> 指定。定義見 <code>backgrounds.md</code>、<code>items.md</code>。</p>
 
-    <h2 class="sec">角色 <span class="sec-note">× 5 表情</span></h2>
-    <div id="char-sections"></div>
+    <h2 class="sec">配件 <span class="sec-note">去背,週圍透明</span></h2>
+    <div id="item-grid" class="grid"></div>
 
-    <h2 class="sec">道具</h2>
-    <div id="prop-grid" class="grid"></div>
-
-    <h2 class="sec">背景 <span class="sec-note">點陣圖,不建模;講故事時用 tag 挑,JSON 以 bg 指定</span></h2>
+    <h2 class="sec">背景 <span class="sec-note">不透明,鋪滿整格</span></h2>
     <div id="bg-grid" class="grid"></div>
   </main>
   <script type="module" src="js/catalog.js"></script>

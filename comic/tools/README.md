@@ -1,51 +1,32 @@
-# comic/tools — 建模工具鏈(離線,不進執行期)
+# comic/tools — 素材製作工具(離線,不進執行期)
 
-把「參考圖 → 角色零件」的機械勞動自動化。這些是**離線資產製作工具**,不屬於部署的純前端網站。
+把「原圖 → 可用配件」的機械勞動自動化。屬**離線資產製作**,不屬部署的純前端網站。
 
-## 需要的東西
+> 註:本專案已改為**點陣素材**路線(背景不透明 + 配件去背疊上去),不再向量描線。
+> 舊的向量建模工具(vtracer / QFlood / QBg / extract-parts / prop-extract)已移除,見 git 歷史。
 
-- **vtracer.exe**(不進 repo,見 .gitignore):點陣 → 向量描線。
-  下載:<https://github.com/visioncortex/vtracer/releases>(Windows 版 `vtracer-x86_64-pc-windows-msvc.zip`,解壓後放這裡)
-- **Node.js**(extract-parts.mjs 用)
-- **QFlood.cs**(量化 + 去背,PowerShell `Add-Type -Path` 載入;C# 5 語法以相容 Win PowerShell 5.1)
+## ItemCut.cs —— 配件去背
 
-## 管線(單一角色)
+把一張「主體 + 白底」的圖去背成「主體不透明、週圍透明」的 PNG,並裁切到主體外框。
+從四邊泛洪清掉**與邊緣相連**的近白像素 → 透明;主體內部的白(白外套、白狗身)因為被輪廓
+包住、不與邊緣相連,會保留 → 不會挖穿主體。
 
-```
-# 1. 裁出頭部(PowerShell System.Drawing Clone;避開安全帶/方向盤/背包等雜物)
+需要:Windows PowerShell(System.Drawing)。
 
-# 2. 量化 3 色 + flood-fill 去背(QFlood.cs)
-#    量化:黑→#1C1C1C(髮/線)、腮紅→#F0D6C6、其餘→白(消除 JPEG 噪點,否則描出上百條垃圾)
-#    去背:從四角沿白色外擴填成 magenta sentinel;被髮/輪廓包住的白(膚)保留
-Add-Type -Path QFlood.cs -ReferencedAssemblies System.Drawing
-[QFlood]::Run('head.png','head-q.png')
-
-# 3. 描向量 —— 必須 --hierarchical cutout(非堆疊):各區不重疊,髮才是獨立形狀,
-#    背景 magenta 才能整塊丟掉(堆疊模式底層會鋪滿,丟了會露出下層)
-vtracer.exe --input head-q.png --output head-q.svg --colormode color --hierarchical cutout --mode spline --filter_speckle 6 --color_precision 8
-
-# 4. 分析 + 拆零件(先看表,複核後寫 groups.json 再 emit)
-node extract-parts.mjs head-q.svg                          # 只印分類表
-node extract-parts.mjs head-q.svg --emit TRACED_X --groups g.json --skin '#FCFCFC' --out ../js/x-traced-parts.js
+```powershell
+Add-Type -Path ItemCut.cs -ReferencedAssemblies System.Drawing
+# Cut(輸入, 輸出, 近白門檻)  門檻 232:R/G/B 皆 ≥ 232 才算背景白
+[ItemCut]::Cut("raw\items_before\xxx.png", "raw\items\my-item.png", 232)
 ```
 
-groups.json 四組:`base`(髮+臉+耳+頸肩)、`blush`(腮紅)、`drop`(magenta 背景→留透明)、
-`patch`(臉內五官洞→填膚色補平成空白臉,再由手寫表情覆蓋)。
+## 新增配件的流程
 
-## extract-parts.mjs 做什麼
+1. 原圖(主體 + 白底)丟進 `raw/items_before/`。
+2. 跑 `[ItemCut]::Cut(...)` 去背 + 裁切,輸出到 `raw/items/`,取語意檔名(如 `dog-run.png`)。
+3. 在 `js/items.js` 加一筆 `id → { file, w, h, tags }`,並更新 `items.md`。
+4. 到「素材」頁(catalog.html)用棋盤格底檢查去背是否乾淨。
 
-解析每條 path 的**顏色 + bounding box + 面積**,印出可複核的分類表並自動猜測分組,再輸出零件模組。
-消掉最慢的人工步驟(逐條讀座標、心算幾何、分眼/嘴/髮)。
+## 背景
 
-- **base** = 髮 + 臉輪廓 + 耳 + 頸肩(描線的難處,保留)
-- **blush** = 粉色腮紅
-- **drop** = 臉內小暗塊(眼/嘴/鼻)→ **丟掉,改用手寫表情**(跨角色共用同一套 5 表情)
-- 一律印表供複核(絕不無聲);要覆寫自動猜測就寫 `groups.json` 傳 `--groups`
-
-純解析、無模型、無隨機 → 同一 SVG 同一輸出(確定性)。
-
-## 為什麼不用 AI 拆零件
-
-全管線工具調查(../docs/tooling-research.md)結論:沒有「SVG 語意分層」現成品;動漫臉分割模型
-(Anime-Face-Segmentation 等)要 PyTorch 且輸出點陣遮罩、對細線粉彩風無保證。啟發式(顏色+位置+面積)
-是這類扁平風的業界現實做法,零依賴、確定性,故自寫。
+背景是整格不透明底圖,不需去背;直接丟 `raw/backgrounds/`,在 `js/backgrounds.js` +
+`backgrounds.md` 各加一筆(id → file + tags)。

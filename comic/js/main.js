@@ -17,9 +17,9 @@ const DEFAULT_SCRIPT = {
   title: '範例',
   layout: 'single',
   panels: [{
-    bg: 'plain',
-    cast: [{ char: 'bun', pos: 'right', emotion: 'happy' }],
-    bubbles: [{ speaker: 'bun', type: 'speech', text: '把 JSON 貼進左邊,右邊就出圖!' }],
+    bg: 'room-wood',
+    items: [{ item: 'girl', pos: { x: 0.36, y: 0.64 }, scale: 0.78 }],
+    texts: [{ text: '把 JSON 貼進左邊,右邊就出圖!', pos: { x: 0.05, y: 0.06 }, w: 0.5 }],
   }],
 };
 

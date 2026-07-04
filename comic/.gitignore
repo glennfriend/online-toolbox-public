@@ -1,3 +1,6 @@
-# vtracer 執行檔(1.7MB binary 不進 repo;取得方式見 tools/README.md)
+# 舊素材備份(向量路線的原圖/裁切;使用者會自行刪除,不進 repo)
+raw/old/
+
+# 大型 binary 不進 repo
 tools/*.exe
-tools/vtracer.zip
+tools/*.zip

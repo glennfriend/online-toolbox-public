@@ -1,6 +1,3 @@
 [
-  { "id": "computer-virus-v2", "name": "電腦病毒 2026-07-04 v2", "file": "computer-virus-v2.json" },
-  { "id": "computer-virus", "name": "電腦病毒 2026-07-04", "file": "computer-virus.json" },
-  { "id": "sleeptalk", "name": "說夢話 2026-07-04", "file": "sleeptalk.json" },
-  { "id": "archery", "name": "射箭比賽 2026-07-04", "file": "archery.json" }
+  { "id": "computer-virus", "name": "2026-07-04 電腦病毒", "file": "computer-virus.json" }
 ]

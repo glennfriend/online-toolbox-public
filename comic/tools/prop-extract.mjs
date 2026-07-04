@@ -29,10 +29,9 @@ const isMagenta = (fill) => {
   // 純 magenta 及其被 vtracer 混色後的紫色殘邊(R、B 高、G 明顯低);膚色/腮紅 G 接近 R 不會中
   return r > 150 && bb > 150 && g < Math.min(r, bb) - 45;
 };
-const isDark = (fill) => {
-  const h = fill.replace('#', ''); if (h.length < 6) return false;
-  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), bb = parseInt(h.slice(4, 6), 16);
-  return (r * 299 + g * 587 + bb * 114) / 1000 < 100;
+const lumOf = (fill) => {
+  const h = fill.replace('#', ''); if (h.length < 6) return 255;
+  return (parseInt(h.slice(0, 2), 16) * 299 + parseInt(h.slice(2, 4), 16) * 587 + parseInt(h.slice(4, 6), 16) * 114) / 1000;
 };
 // 線稿類(狗/雲/海鷗…):只留黑線,白底/白內部全丟 → 透明內部的純線稿。以檔名字首判斷(不必去背/量化)。
 const LINEART = ['dog', 'cloud-', 'gull', 'bird'];
@@ -54,7 +53,9 @@ for (const file of svgs) {
     const bb = bboxOf(m[1], tx, ty);
     const area = (bb.maxX - bb.minX) * (bb.maxY - bb.minY);
     if (lineart) {
-      if (!isDark(fill)) continue;                       // 線稿:只留黑線
+      const lum = lumOf(fill);
+      if (lum > 210 || isMagenta(fill)) continue;         // 丟白底/白內部
+      if (lum > 110 && area > 500) continue;              // 丟大片中灰(雜色暈),保留小的(如眼睛)
     } else {
       if (isMagenta(fill)) continue;                     // 背景 sentinel
       if (canvasArea && area > canvasArea * 0.92) continue; // 殘留滿版背景

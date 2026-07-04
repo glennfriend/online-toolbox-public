@@ -6,7 +6,7 @@
     {
       "bg": "plain",
       "items": [
-        { "item": "girl_2/main", "pos": { "x": 0.5, "y": 0.64 }, "scale": 0.76 }
+        { "item": "penguin/grumpy", "pos": { "x": 0.5, "y": 0.64 }, "scale": 0.72 }
       ],
       "texts": [
         { "text": "旁白:「兒子又被媽媽罵了。」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.52, "align": "left" }
@@ -15,31 +15,29 @@
     {
       "bg": "plain",
       "items": [
-        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.64 }, "scale": 0.66 },
-        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
-      ],
-      "texts": [
-        { "text": "爸爸:「被媽媽罵,你有什麼感覺?」", "pos": { "x": 0.38, "y": 0.05 }, "w": 0.58, "align": "left" }
-      ]
-    },
-    {
-      "bg": "plain",
-      "items": [
-        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.64 }, "scale": 0.68 },
-        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
-      ],
-      "texts": [
-        { "text": "兒子(哀怨):「你為什麼要娶她?」", "pos": { "x": 0.03, "y": 0.05 }, "w": 0.54, "align": "left" }
-      ]
-    },
-    {
-      "bg": "plain",
-      "items": [
-        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.64 }, "scale": 0.66 },
+        { "item": "penguin/grumpy", "pos": { "x": 0.28, "y": 0.66 }, "scale": 0.58 },
         { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.62, "flip": true }
       ],
       "texts": [
-        { "text": "爸爸(哀怨):「還不是因為你。」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.56, "align": "left" }
+        { "text": "爸爸:「被媽媽罵,你有什麼感覺?」", "pos": { "x": 0.36, "y": 0.05 }, "w": 0.58, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "penguin/grumpy", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.74 }
+      ],
+      "texts": [
+        { "text": "兒子(哀怨):「你為什麼要娶她?」", "pos": { "x": 0.4, "y": 0.05 }, "w": 0.56, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "old_man/main", "pos": { "x": 0.5, "y": 0.66 }, "scale": 0.74 }
+      ],
+      "texts": [
+        { "text": "爸爸(哀怨):「還不是因為你。」", "pos": { "x": 0.06, "y": 0.05 }, "w": 0.56, "align": "left" }
       ]
     }
   ]

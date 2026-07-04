@@ -62,6 +62,34 @@ export const STYLES = {
       'adult_female_3': { file: 'adult_female_3.png', w: 271, h: 236, tags: ['女生', '女性', '人物', '黑髮', '長髮', '捲髮', '寫實', '黑白', '素描', '無奈'] },
     },
   },
+
+  '3d': {
+    label: '3D 黏土企鵝（GUGU GAGA）',
+    items: {
+      'penguin':    { file: 'penguin.png',    w: 233, h: 279, tags: ['企鵝', '動物', '揮手', '打招呼', 'hello', '開心'] },
+      'penguin_2':  { file: 'penguin_2.png',  w: 183, h: 281, tags: ['企鵝', '動物', '雙手合十', '害羞', '期待'] },
+      'penguin_3':  { file: 'penguin_3.png',  w: 193, h: 269, tags: ['企鵝', '動物', '坐', '張手', '大笑'] },
+      'penguin_4':  { file: 'penguin_4.png',  w: 244, h: 285, tags: ['企鵝', '動物', '眨眼', '得意', '酷', '星星'] },
+      'penguin_5':  { file: 'penguin_5.png',  w: 243, h: 249, tags: ['企鵝', '動物', '抱愛心', '喜歡', '戀愛', 'love'] },
+      'penguin_6':  { file: 'penguin_6.png',  w: 222, h: 263, tags: ['企鵝', '動物', '跳舞', '音符', '開心', 'dance'] },
+      'penguin_7':  { file: 'penguin_7.png',  w: 230, h: 254, tags: ['企鵝', '動物', '睡覺', '睡帽', '想睡', 'Zzz'] },
+      'penguin_8':  { file: 'penguin_8.png',  w: 207, h: 253, tags: ['企鵝', '動物', '驚訝', '張嘴', 'wow'] },
+      'penguin_9':  { file: 'penguin_9.png',  w: 185, h: 267, tags: ['企鵝', '動物', '吃餅乾', '好吃', '點心', 'yummy'] },
+      'penguin_10': { file: 'penguin_10.png', w: 225, h: 269, tags: ['企鵝', '動物', '生氣', '抱胸', '不爽', 'grumpy'] },
+      'penguin_11': { file: 'penguin_11.png', w: 252, h: 234, tags: ['企鵝', '動物', '躺著', '打滾', '耍賴', '開心'] },
+      'penguin_12': { file: 'penguin_12.png', w: 220, h: 270, tags: ['企鵝', '動物', '比愛心', '手勢', '謝謝', 'thank you'] },
+    },
+  },
+
+  // real:真實照片,整張直接當配件貼(不去背,像梗圖那樣用);id 取主體 WordNet,梗/主題放 tags。
+  real: {
+    label: '真實照片（梗圖）',
+    items: {
+      'chameleon': { file: 'chameleon.jpg', w: 800, h: 450, tags: ['變色龍', '動物', '伸手', '差一點', '搆不到', '距離', '真實照片', '梗圖'] },
+      'cat':       { file: 'cat.jpg',       w: 800, h: 508, tags: ['貓', '動物', '一群', '氣勢', '走過來', '讓開', '團隊', '真實照片', '梗圖'] },
+      'child':     { file: 'child.jpg',     w: 597, h: 399, tags: ['小孩', '拍照', '相機', '擺拍', '把妹', '真實照片', '梗圖'] },
+    },
+  },
 };
 
 // 取某 style 的配件表(未知 style → 預設)。

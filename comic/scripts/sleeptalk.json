@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "title": "說夢話",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "angry" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "neutral" }
+      ],
+      "bubbles": [
+        { "speaker": "bun", "type": "speech", "text": "我先生老是說夢話,煩死了!" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "props": [{ "emoji": "🩺", "pos": { "x": 0.93, "y": 0.28 }, "size": 46 }],
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "neutral" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "neutral" }
+      ],
+      "bubbles": [
+        { "speaker": "longhair", "type": "speech", "text": "我可以開一帖藥,讓他不再說夢話。" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "surprised" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "neutral" }
+      ],
+      "bubbles": [
+        { "speaker": "bun", "type": "speech", "text": "啊,不!醫生。" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "props": [{ "emoji": "💊", "pos": { "x": 0.55, "y": 0.32 }, "size": 44 }],
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "happy" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "surprised" }
+      ],
+      "bubbles": [
+        { "speaker": "bun", "type": "speech", "text": "請開一種讓他說得更清楚的藥!" }
+      ]
+    }
+  ]
+}

@@ -39,7 +39,8 @@ body {
 .catalog .hint { color: var(--muted); font-size: .9rem; }
 .catalog .sec { font-size: 1.05rem; margin: 1.6rem 0 .7rem; padding-bottom: .3rem; border-bottom: 1px solid var(--border-soft); }
 .catalog .sec-note { font-size: .82rem; font-weight: 400; color: var(--muted); }
-.catalog .char-name { font-size: .95rem; margin: 1rem 0 .5rem; color: var(--accent); font-weight: 700; }
+.catalog .char-name { font-size: 1rem; margin: 1.3rem 0 .3rem; color: var(--accent); font-weight: 700; border-bottom: 2px solid var(--accent); display: inline-block; padding-bottom: .15rem; }
+.catalog .pose-label { font-size: .82rem; color: var(--muted); margin: .5rem 0 .4rem; }
 .grid { display: flex; flex-wrap: wrap; gap: 1rem; }
 .cell { margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .6rem; }
 .cell figcaption { font-size: .82rem; color: var(--muted); text-align: center; margin-top: .4rem; }

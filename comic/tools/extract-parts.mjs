@@ -107,6 +107,11 @@ if (!emitName) process.exit(0);
 let groups;
 if (groupsFile) {
   groups = JSON.parse(readFileSync(groupsFile, 'utf8'));
+  // 沒指定 base 時自動補:除了 blush/drop/patch/magenta 之外全歸 base(免手列幾十個索引)
+  if (!groups.base) {
+    const excl = new Set([...(groups.blush || []), ...(groups.drop || []), ...(groups.patch || [])]);
+    groups.base = paths.filter((p) => !excl.has(p.idx) && colorClass(p.fill) !== 'magenta').map((p) => p.idx);
+  }
 } else {
   groups = { base: byG('base'), blush: byG('blush'), drop: byG('drop').concat(byG('bg')) };
 }

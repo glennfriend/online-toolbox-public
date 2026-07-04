@@ -17,6 +17,7 @@ export const STYLE = {
 
 import { TRACED_BUN } from './bun-traced-parts.js';
 import { TRACED_LONGHAIR } from './longhair-traced-parts.js';
+import { TRACED_BUN_STUDY } from './bun-study-parts.js';
 
 export const EMOTIONS = ['neutral', 'happy', 'surprised', 'angry', 'sad'];
 
@@ -66,6 +67,7 @@ function facesFor(geom) {
 // 在這裡加一個 entry(base 底圖 + geom 三座標 + 對位 xform)。
 const BUN_XF = 'scale(0.6) translate(-127.5 -195.5)';   // 上半身描線(306x398),眼中點→原點
 const LONG_XF = 'scale(0.6) translate(-233 -147)';   // 上半身描線(320x378),眼中點→原點
+const BUNSTUDY_XF = 'scale(0.6) translate(-100 -185.5)';   // 讀書姿勢(330x358)
 
 export const CHARACTERS = {
   bun: {
@@ -83,5 +85,14 @@ export const CHARACTERS = {
     bustBottom: 139,
     parts: { body: `<g transform="${LONG_XF}">${TRACED_LONGHAIR.base}${TRACED_LONGHAIR.blush}</g>` },
     faces: facesFor({ eyeL: [199, 154], eyeR: [267, 140], mouth: [241, 182], xform: LONG_XF }),
+  },
+  'bun-study': {
+    name: '丸子頭·讀書',
+    desc: '讀書姿勢(米色開襟衫)',
+    person: 'bun',
+    headTop: -111,
+    bustBottom: 104,
+    parts: { body: `<g transform="${BUNSTUDY_XF}">${TRACED_BUN_STUDY.base}${TRACED_BUN_STUDY.blush}</g>` },
+    faces: facesFor({ eyeL: [79, 188], eyeR: [121, 183], mouth: [100, 212], xform: BUNSTUDY_XF }),
   },
 };

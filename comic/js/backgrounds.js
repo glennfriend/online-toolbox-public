@@ -39,9 +39,6 @@ export const BACKGROUNDS_BY_STYLE = {
     'sky-blue':      { file: 'sky_blue.jpg', tags: ['天空', '藍天', '雲', '白天', '戶外'] },
     'horizon-field': { file: 'bg_chiheisen_green.jpg', tags: ['地平線', '草地', '天空', '戶外', '白天', '空曠'] },
     'night-moon':    { file: 'bg_moon_sky_mikaduki.jpg', tags: ['夜晚', '天空', '月亮', '星空', '戶外'] },
-
-    // 特效
-    'effect-lines':  { file: 'effectlines_color.jpg', tags: ['效果線', '爆炸', '速度', '動作', '強調'] },
   },
 
   // 寫實黑白素描畫風:尚無背景(需另備寫實/黑白底圖)。

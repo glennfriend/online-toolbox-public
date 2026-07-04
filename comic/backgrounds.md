@@ -31,7 +31,6 @@
 | sky-blue | sky_blue.jpg | 藍天白雲 | 天空 · 藍天 · 雲 · 白天 · 戶外 |
 | horizon-field | bg_chiheisen_green.jpg | 草原地平線 | 地平線 · 草地 · 天空 · 戶外 · 白天 · 空曠 |
 | night-moon | bg_moon_sky_mikaduki.jpg | 夜空月亮 | 夜晚 · 天空 · 月亮 · 星空 · 戶外 |
-| effect-lines | effectlines_color.jpg | 效果線(強調/爆發) | 效果線 · 爆炸 · 速度 · 動作 · 強調 |
 
 ## sketch(寫實黑白素描)
 

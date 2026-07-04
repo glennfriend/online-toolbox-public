@@ -5,7 +5,7 @@
   "layout": "grid-2x2",
   "panels": [
     {
-      "bg": "effect-lines",
+      "bg": "plain",
       "items": [{ "item": "adult_female_2", "pos": { "x": 0.5, "y": 0.62 }, "scale": 0.82 }],
       "texts": [{ "text": "一位病人從手術室 B 衝了出來,神色慌張!", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.62 }]
     },

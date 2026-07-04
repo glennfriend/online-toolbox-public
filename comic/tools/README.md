@@ -39,8 +39,8 @@ Add-Type -Path ItemCut.cs -ReferencedAssemblies System.Drawing
 
 | 收件匣 | 放什麼 | 工具 |
 |--------|--------|------|
-| `raw/items_before_clean/` | 主體 + 乾淨白底 | `Cut`,thr 232 |
-| `raw/items_before_noisy/` | 主體附近有雜質 | `CutNoisy`,thr ~212 |
+| `raw/style/<style>/items_before_clean/` | 主體 + 乾淨白底 | `Cut`,thr 232(人像加 `,6,$false`) |
+| `raw/style/<style>/items_before_noisy/` | 主體附近有雜質 | `CutNoisy`,thr ~212 |
 
 流程:逐張看圖 → 依 WordNet 決定 id → 去背到 `raw/items/<id>.png` → 登記 `js/items.js` + `items.md`
 → 刪收件匣原檔 → 素材頁(catalog.html)棋盤格檢查。原檔刪後若要用更好演算法重跑,需重新提供原圖。

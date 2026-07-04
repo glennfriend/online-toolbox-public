@@ -14,8 +14,12 @@ using System.Collections.Generic;
 // FillHoles():就地修已處理過的 PNG(沒有原圖時的搶救),封閉/細縫破洞 → 填白不透明。
 public static class ItemCut
 {
+    static bool[] TrueExterior(bool[] cand, int w, int h, int R) { return TrueExterior(cand, w, h, R, true); }
+
     // 由「候選外部遮罩 cand」算出「真正外部」:侵蝕 R → 保留與邊緣相連 → 膨脹 R。
-    static bool[] TrueExterior(bool[] cand, int w, int h, int R)
+    // seedBottom=false:不從「下緣」當外部種子 —— 適合上半身人像(身體被畫面下緣切掉,下緣是主體不是背景),
+    //   否則貼著下緣的白衣服會被當背景吃掉變透明。
+    static bool[] TrueExterior(bool[] cand, int w, int h, int R, bool seedBottom)
     {
         int n = w * h;
         bool[] e = new bool[n];
@@ -36,7 +40,7 @@ public static class ItemCut
         bool[] core = new bool[n];
         var q = new Queue<int>();
         Action<int> seed = (i) => { if (e[i] && !core[i]) { core[i] = true; q.Enqueue(i); } };
-        for (int x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
+        for (int x = 0; x < w; x++) { seed(x); if (seedBottom) seed((h - 1) * w + x); }   // 上緣一定;下緣可選
         for (int y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
         while (q.Count > 0)
         {
@@ -60,9 +64,11 @@ public static class ItemCut
         return ext;
     }
 
-    public static void Cut(string inPath, string outPath, int thr) { Cut(inPath, outPath, thr, 6); }
+    public static void Cut(string inPath, string outPath, int thr) { Cut(inPath, outPath, thr, 6, true); }
+    public static void Cut(string inPath, string outPath, int thr, int R) { Cut(inPath, outPath, thr, R, true); }
 
-    public static void Cut(string inPath, string outPath, int thr, int R)
+    // seedBottom=false:上半身人像(身體被下緣切掉)—— 貼著下緣的白衣服會保留成主體,不被當背景吃掉。
+    public static void Cut(string inPath, string outPath, int thr, int R, bool seedBottom)
     {
         using (var src = new Bitmap(inPath))
         {
@@ -70,7 +76,7 @@ public static class ItemCut
             var bmp = new Bitmap(w, h, PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(bmp)) g.DrawImage(src, 0, 0, w, h);
 
-            // 1) 四邊泛洪近白 = 候選外部
+            // 1) 四邊(人像不含下緣)泛洪近白 = 候選外部
             bool[] cand = new bool[n]; bool[] seen = new bool[n];
             var q = new Queue<int>();
             Action<int, int> push = (x, y) => {
@@ -79,12 +85,12 @@ public static class ItemCut
                 Color c = bmp.GetPixel(x, y);
                 if (c.R >= thr && c.G >= thr && c.B >= thr) { cand[idx] = true; q.Enqueue(idx); }
             };
-            for (int x = 0; x < w; x++) { push(x, 0); push(x, h - 1); }
+            for (int x = 0; x < w; x++) { push(x, 0); if (seedBottom) push(x, h - 1); }
             for (int y = 0; y < h; y++) { push(0, y); push(w - 1, y); }
             while (q.Count > 0) { int i = q.Dequeue(); int x = i % w, y = i / w; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1); }
 
             // 2) 真正外部(細縫漏入的內部白會被排除)
-            bool[] ext = TrueExterior(cand, w, h, R);
+            bool[] ext = TrueExterior(cand, w, h, R, seedBottom);
 
             // 3) 外部 → 透明;其餘(含被漏挖的內部白)→ 保留原色不透明。順便算主體外框。
             int minX = w, minY = h, maxX = -1, maxY = -1;
@@ -176,13 +182,18 @@ public static class ItemCut
     }
 
     // 搶救:已處理過、沒有原圖時,把「封閉或細縫相連」的透明破洞填成不透明白;寬空隙(如狗腿間)保留透明。
-    public static void FillHoles(string path, int R)
+    public static void FillHoles(string path, int R) { FillHoles(path, R, true); }
+
+    // seedBottom=false:上半身人像用 —— 身體被畫面下緣切掉,把貼著下緣的白衣服補回不透明(不當背景)。
+    public static void FillHoles(string path, int R, bool seedBottom)
     {
         int w, h;
         using (var s = new Bitmap(path)) { w = s.Width; h = s.Height; }
-        // 已裁切的圖外圍透明邊太薄(比侵蝕半徑還小),外部連通會被侵蝕掉 → 先加一圈透明邊 M。
+        // 已裁切的圖外圍透明邊太薄(比侵蝕半徑還小),外部連通會被侵蝕掉 → 先加透明邊 M。
+        // 人像(seedBottom=false)下緣是主體,不加下邊(否則下邊 padding 會沿環繞與側邊相連,使身體又被判成外部)。
         int M = R + 2;
-        int W = w + 2 * M, H = h + 2 * M, N = W * H;
+        int padB = seedBottom ? M : 0;
+        int W = w + 2 * M, H = h + M + padB, N = W * H;
         var big = new Bitmap(W, H, PixelFormat.Format32bppArgb);
         using (var g = Graphics.FromImage(big))
         {
@@ -195,7 +206,7 @@ public static class ItemCut
             for (int x = 0; x < W; x++)
                 if (big.GetPixel(x, y).A <= 20) trans[y * W + x] = true;
 
-        bool[] ext = TrueExterior(trans, W, H, R);
+        bool[] ext = TrueExterior(trans, W, H, R, seedBottom);
         int filled = 0;
         for (int y = 0; y < H; y++)
             for (int x = 0; x < W; x++)

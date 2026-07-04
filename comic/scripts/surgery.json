@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "title": "動手術",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.5, "y": 0.64 }, "scale": 0.78 }
+      ],
+      "texts": [
+        { "text": "旁白:「一位病人從手術室 B 衝了出來,神色慌張!」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.6, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.64 }, "scale": 0.68 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [
+        { "text": "院長:「您能告訴我發生什麼事嗎?」", "pos": { "x": 0.38, "y": 0.05 }, "w": 0.58, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.64 }, "scale": 0.68 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [
+        { "text": "病人:「護士小姐說『勇敢些,闌尾手術很簡單』…」", "pos": { "x": 0.03, "y": 0.04 }, "w": 0.56, "align": "left" },
+        { "text": "院長:「他沒說錯,事實就是這樣啊。」", "pos": { "x": 0.42, "y": 0.72 }, "w": 0.54, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.34, "y": 0.64 }, "scale": 0.72 }
+      ],
+      "texts": [
+        { "text": "病人:「唉——!那句話,是對那位準備幫我開刀的『醫生』說的啊!」", "pos": { "x": 0.33, "y": 0.05 }, "w": 0.64, "align": "left" }
+      ]
+    }
+  ]
+}

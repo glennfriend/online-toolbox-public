@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "title": "都是豬",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "classroom",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 },
+        { "item": "girl_2/main", "pos": { "x": 0.74, "y": 0.64 }, "scale": 0.62, "flip": true }
+      ],
+      "texts": [
+        { "text": "旁白:「今早,小芬和小文在吵架…」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.56, "align": "left" }
+      ]
+    },
+    {
+      "bg": "classroom",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.32, "y": 0.66 }, "scale": 0.64 }
+      ],
+      "texts": [
+        { "text": "小芬:「你這隻豬!」", "pos": { "x": 0.42, "y": 0.06 }, "w": 0.46, "align": "left" }
+      ]
+    },
+    {
+      "bg": "classroom",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.66, "y": 0.64 }, "scale": 0.68, "flip": true }
+      ],
+      "texts": [
+        { "text": "小文:「哼!你才是豬咧!」", "pos": { "x": 0.04, "y": 0.06 }, "w": 0.5, "align": "left" }
+      ]
+    },
+    {
+      "bg": "classroom",
+      "items": [
+        { "item": "old_man/main", "pos": { "x": 0.4, "y": 0.66 }, "scale": 0.64 }
+      ],
+      "texts": [
+        { "text": "看不下去的老師:「既然都是豬,就該和平相處。」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.62, "align": "left" }
+      ]
+    }
+  ]
+}

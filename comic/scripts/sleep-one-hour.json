@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "title": "只睡一個小時",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.5, "y": 0.66 }, "scale": 0.76 }
+      ],
+      "texts": [
+        { "text": "旁白:「某女星接受採訪。」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.5, "align": "left" },
+        { "text": "女星:「你相信我一天只睡一個小時嗎?」", "pos": { "x": 0.38, "y": 0.72 }, "w": 0.58, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [
+        { "text": "記者:「那妳其他二十三個小時在做什麼?」", "pos": { "x": 0.36, "y": 0.05 }, "w": 0.6, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.66 }
+      ],
+      "texts": [
+        { "text": "女星(害羞):「……打瞌睡。」", "pos": { "x": 0.34, "y": 0.06 }, "w": 0.54, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "old_man/main", "pos": { "x": 0.66, "y": 0.66 }, "scale": 0.64, "flip": true }
+      ],
+      "texts": [
+        { "text": "記者:「(所以……還是睡了一整天嘛。)」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.58, "align": "left" }
+      ]
+    }
+  ]
+}

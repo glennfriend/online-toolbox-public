@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "title": "電腦病毒",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "room-wood",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [
+        { "text": "表妹:「表哥,我去年買了一台電腦!」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.56, "align": "left" }
+      ]
+    },
+    {
+      "bg": "room-wood",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [
+        { "text": "表哥:「咦?怎麼都沒看你用過?」", "pos": { "x": 0.4, "y": 0.05 }, "w": 0.56, "align": "left" }
+      ]
+    },
+    {
+      "bg": "room-wood",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.62 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [
+        { "text": "表妹:「剛買就中毒了,電腦病毒啦!」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.58, "align": "left" }
+      ]
+    },
+    {
+      "bg": "room-wood",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.32, "y": 0.66 }, "scale": 0.64 }
+      ],
+      "texts": [
+        { "text": "表妹:「所以我一整年都不開機,想把病毒餓死!」", "pos": { "x": 0.34, "y": 0.06 }, "w": 0.62, "align": "left" }
+      ]
+    }
+  ]
+}

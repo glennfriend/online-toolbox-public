@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "title": "哪兒賣的",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "dog/sit", "pos": { "x": 0.74, "y": 0.68 }, "scale": 0.5, "flip": true },
+        { "item": "penguin/yummy", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 }
+      ],
+      "texts": [
+        { "text": "旁白:「逛到百貨地下街,發現一家麻糬店,每種都好美味!」", "pos": { "x": 0.03, "y": 0.04 }, "w": 0.64, "align": "left" },
+        { "text": "我:「請問這個有單賣的嗎?」", "pos": { "x": 0.02, "y": 0.74 }, "w": 0.52, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "penguin/gugu", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 },
+        { "item": "dog/sit", "pos": { "x": 0.74, "y": 0.68 }, "scale": 0.5, "flip": true }
+      ],
+      "texts": [
+        { "text": "店員:「沒有,這都是日本的。」", "pos": { "x": 0.4, "y": 0.05 }, "w": 0.56, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "penguin/gugu", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.62 }
+      ],
+      "texts": [
+        { "text": "我:「………」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.42, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "penguin/wow", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.66 }
+      ],
+      "texts": [
+        { "text": "我:「(所以……單賣的是日本?)」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.58, "align": "left" }
+      ]
+    }
+  ]
+}

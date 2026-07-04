@@ -37,6 +37,7 @@
 | girl_2 | 女生(卡通黑髮瀏海) | main |
 | old_man | 老先生(卡通) | main |
 | woman_bw | 女生(寫實黑白素描) | 1, 2, 3 |
+| man_bw | 男生(寫實黑白素描,年輕) | main |
 | chameleon | 變色龍(真實照片) | main |
 | cat | 貓群(真實照片) | main |
 | child | 小孩拍照(真實照片) | main |

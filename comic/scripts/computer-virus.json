@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "title": "電腦病毒",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "room-wood",
+      "props": [{ "prop": "laptop", "pos": { "x": 0.5, "y": 0.86 }, "scale": 0.42 }],
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "happy" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "neutral" }
+      ],
+      "bubbles": [
+        { "speaker": "bun", "type": "narration", "text": "表妹和表哥聊天,聊到了電腦。" },
+        { "speaker": "bun", "type": "speech", "text": "表哥,去年我買了一台電腦!" }
+      ]
+    },
+    {
+      "bg": "room-wood",
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "neutral" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "neutral" }
+      ],
+      "bubbles": [
+        { "speaker": "longhair", "type": "speech", "text": "怎麼都沒看你用過?" }
+      ]
+    },
+    {
+      "bg": "room-wood",
+      "props": [{ "emoji": "🦠", "pos": { "x": 0.5, "y": 0.24 }, "size": 60 }],
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "sad" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "surprised" }
+      ],
+      "bubbles": [
+        { "speaker": "bun", "type": "speech", "text": "剛買就中毒了…電腦病毒啦!" }
+      ]
+    },
+    {
+      "bg": "room-wood",
+      "cast": [
+        { "char": "bun", "pos": "left", "face": "right", "emotion": "happy" },
+        { "char": "longhair", "pos": "right", "face": "left", "emotion": "surprised" }
+      ],
+      "bubbles": [
+        { "speaker": "bun", "type": "speech", "text": "我想說一年都不開機,把病毒餓死!" }
+      ]
+    }
+  ]
+}

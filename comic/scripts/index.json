@@ -1,4 +1,5 @@
 [
+  { "id": "computer-virus", "name": "電腦病毒 2026-07-04", "file": "computer-virus.json" },
   { "id": "sleeptalk", "name": "說夢話 2026-07-04", "file": "sleeptalk.json" },
   { "id": "archery", "name": "射箭比賽 2026-07-04", "file": "archery.json" }
 ]

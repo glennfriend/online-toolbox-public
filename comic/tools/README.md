@@ -7,20 +7,30 @@
 - **vtracer.exe**(不進 repo,見 .gitignore):點陣 → 向量描線。
   下載:<https://github.com/visioncortex/vtracer/releases>(Windows 版 `vtracer-x86_64-pc-windows-msvc.zip`,解壓後放這裡)
 - **Node.js**(extract-parts.mjs 用)
-- 量化:內嵌在下方 PowerShell(System.Drawing),無需安裝
+- **QFlood.cs**(量化 + 去背,PowerShell `Add-Type -Path` 載入;C# 5 語法以相容 Win PowerShell 5.1)
 
 ## 管線(單一角色)
 
 ```
-# 1. 裁出頭部(依參考圖構圖,PowerShell System.Drawing Clone)
-# 2. 量化成固定調色盤(消除 JPEG 噪點 —— 不量化會描出上百條垃圾 path)
-#    黑→#1C1C1C(髮/線)、腮紅色系→#F0D6C6、其餘→白;衣服若要保留改加第 4 色
-# 3. 描向量
-vtracer.exe --input head-q.png --output head-q.svg --colormode color --mode spline --filter_speckle 6 --color_precision 8
-# 4. 分析 + 拆零件(先看表,複核後再 emit)
+# 1. 裁出頭部(PowerShell System.Drawing Clone;避開安全帶/方向盤/背包等雜物)
+
+# 2. 量化 3 色 + flood-fill 去背(QFlood.cs)
+#    量化:黑→#1C1C1C(髮/線)、腮紅→#F0D6C6、其餘→白(消除 JPEG 噪點,否則描出上百條垃圾)
+#    去背:從四角沿白色外擴填成 magenta sentinel;被髮/輪廓包住的白(膚)保留
+Add-Type -Path QFlood.cs -ReferencedAssemblies System.Drawing
+[QFlood]::Run('head.png','head-q.png')
+
+# 3. 描向量 —— 必須 --hierarchical cutout(非堆疊):各區不重疊,髮才是獨立形狀,
+#    背景 magenta 才能整塊丟掉(堆疊模式底層會鋪滿,丟了會露出下層)
+vtracer.exe --input head-q.png --output head-q.svg --colormode color --hierarchical cutout --mode spline --filter_speckle 6 --color_precision 8
+
+# 4. 分析 + 拆零件(先看表,複核後寫 groups.json 再 emit)
 node extract-parts.mjs head-q.svg                          # 只印分類表
-node extract-parts.mjs head-q.svg --emit TRACED_X --out ../js/x-traced-parts.js
+node extract-parts.mjs head-q.svg --emit TRACED_X --groups g.json --skin '#FCFCFC' --out ../js/x-traced-parts.js
 ```
+
+groups.json 四組:`base`(髮+臉+耳+頸肩)、`blush`(腮紅)、`drop`(magenta 背景→留透明)、
+`patch`(臉內五官洞→填膚色補平成空白臉,再由手寫表情覆蓋)。
 
 ## extract-parts.mjs 做什麼
 

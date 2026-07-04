@@ -20,6 +20,7 @@ export const STYLE = {
 };
 
 import { TRACED_BUN } from './bun-traced-parts.js';
+import { TRACED_LONGHAIR } from './longhair-traced-parts.js';
 
 const L = STYLE;
 const SW = 3; // 統一線寬
@@ -147,9 +148,50 @@ const bun2Faces = {
     <path d="M 120 221 Q 128 214 136 221" stroke="${TB_INK}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`),
 };
 
+// ── 角色:longhair2(長髮・描線版)───────────────────────
+// 零件來自 vtracer 管線(raw/head-long-q.svg → longhair-traced-parts.js)。
+// 描線原始座標 324x256;臉略右偏、微傾(右眼比左眼高 ~14px),手寫表情跟著傾。
+//   眼:左(184,159) 右(252,145);嘴中心 ~(219,181)。
+//   對位:眼中點 (218,152) → 原點、縮放 0.62。
+const T_LONG = 'scale(0.62) translate(-218 -152)';
+const tl = (inner) => `<g transform="${T_LONG}">${inner}</g>`;
+const LG_INK = '#1C1C1C';
+
+const longhair2Faces = {
+  neutral: tl(`
+    <path d="M 170 151 Q 184 146 197 151 M 239 137 Q 252 132 265 137" stroke="${LG_INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="184" cy="159" r="5.5" fill="#2E2E2E"/><circle cx="252" cy="145" r="5.5" fill="#2E2E2E"/>
+    <path d="M 208 180 Q 219 186 231 177" stroke="${LG_INK}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`),
+  happy: tl(`
+    <path d="M 170 148 Q 184 143 197 148 M 239 134 Q 252 129 265 134" stroke="${LG_INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M 175 160 Q 184 150 193 160 M 243 146 Q 252 136 261 146" stroke="${LG_INK}" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+    <path d="M 205 178 Q 219 191 233 174" stroke="${LG_INK}" stroke-width="3.4" fill="none" stroke-linecap="round"/>`),
+  surprised: tl(`
+    <path d="M 170 146 Q 184 140 197 146 M 239 132 Q 252 126 265 132" stroke="${LG_INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="184" cy="159" r="7" fill="#2E2E2E"/><circle cx="252" cy="145" r="7" fill="#2E2E2E"/>
+    <circle cx="182" cy="157" r="2" fill="#FFF"/><circle cx="250" cy="143" r="2" fill="#FFF"/>
+    <ellipse cx="220" cy="182" rx="5.5" ry="7.5" fill="#FFF" stroke="${LG_INK}" stroke-width="3"/>`),
+  angry: tl(`
+    <path d="M 170 147 L 197 156 M 265 133 L 239 142" stroke="${LG_INK}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <circle cx="184" cy="160" r="5.5" fill="#2E2E2E"/><circle cx="252" cy="146" r="5.5" fill="#2E2E2E"/>
+    <path d="M 208 182 Q 219 178 231 181" stroke="${LG_INK}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`),
+  sad: tl(`
+    <path d="M 170 156 L 197 149 M 265 142 L 239 135" stroke="${LG_INK}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <circle cx="184" cy="160" r="5.5" fill="#2E2E2E"/><circle cx="252" cy="146" r="5.5" fill="#2E2E2E"/>
+    <path d="M 208 179 Q 219 186 231 177" stroke="${LG_INK}" stroke-width="3.2" fill="none" stroke-linecap="round" transform="rotate(180 219.5 181)"/>`),
+};
+
 // ── 角色總表 ──────────────────────────────────────────
 // 新增角色 = 加一個 entry。parts 依序輸出:back → neck → body → head → face → hair。
 export const CHARACTERS = {
+  longhair2: {
+    name: '長髮(描線版)',
+    desc: '參考圖 vtracer 描線;空白臉 + 手寫表情',
+    headTop: -94,
+    bustBottom: 64,
+    parts: { body: tl(TRACED_LONGHAIR.base + TRACED_LONGHAIR.blush) },
+    faces: longhair2Faces,
+  },
   bun2: {
     name: '丸子頭(描線版)',
     desc: '參考圖 vtracer 描線而來;手繪感基準',

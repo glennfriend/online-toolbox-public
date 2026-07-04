@@ -15,7 +15,11 @@
 //   node extract-parts.mjs <svg> --emit <NAME> [--out f.js] [--groups g.json]
 //        → 產出零件模組(base 一層)。groups 省略時用自動猜測的 base。
 //
-// groups.json(可選,複核後覆寫自動猜測):{ "base":[1,2,..], "blush":[10,12], "drop":[0,16,17,22] }
+// groups.json(可選,複核後覆寫自動猜測):
+//   { "base":[..], "blush":[..], "drop":[bg magenta 索引], "patch":[臉內五官索引] }
+//   drop  = 真的丟掉(背景 → 留透明)。
+//   patch = 五官區:cutout 模式下臉上這些區是「洞」,直接丟會透出背景;
+//           故改填膚色補平,得到「空白臉」,再由手寫表情覆蓋。
 
 import { readFileSync, writeFileSync } from 'node:fs';
 
@@ -59,6 +63,7 @@ function colorClass(fill) {
   if (hx.length < 6) return 'other';
   const r = parseInt(hx.slice(0, 2), 16), g = parseInt(hx.slice(2, 4), 16), b = parseInt(hx.slice(4, 6), 16);
   const lum = (r * 299 + g * 587 + b * 114) / 1000;
+  if (r > 180 && b > 180 && g < 80) return 'magenta';   // flood-fill 背景 sentinel(含 vtracer 量化偏移)
   if (r > b + 12 && r > 180 && lum < 245) return 'pink';
   if (lum < 90) return 'dark';
   if (lum > 235) return 'white';
@@ -71,7 +76,8 @@ function colorClass(fill) {
 const faceBox = { x0: W * 0.30, x1: W * 0.72, y0: H * 0.55, y1: H * 0.88 };
 function guess(p) {
   const cc = colorClass(p.fill);
-  if (p.areaPct > 70) return 'bg';
+  if (cc === 'magenta') return 'drop';             // flood-fill 標記的背景 → 丟(留透明)
+  if (p.areaPct > 70 && cc !== 'dark') return 'bg';
   if (cc === 'pink') return 'blush';
   const inFace = p.cx > faceBox.x0 && p.cx < faceBox.x1 && p.cy > faceBox.y0 && p.cy < faceBox.y1;
   if (cc === 'dark' && inFace && p.areaPct < 3) return 'drop';   // 臉內小暗塊 = 眼/嘴/鼻 → 手寫
@@ -104,13 +110,17 @@ if (groupsFile) {
 } else {
   groups = { base: byG('base'), blush: byG('blush'), drop: byG('drop').concat(byG('bg')) };
 }
+const SKIN = flag('--skin') || '#FFFFFF';
 const pick = (list) => (list || []).map((i) => paths[i].raw).join('\n  ');
+// patch:把五官洞填成膚色(換掉 fill),補平臉;附在 base 最後(在髮之上、表情之下)
+const pickPatched = (list) => (list || []).map((i) => paths[i].raw.replace(/fill="[^"]*"/, `fill="${SKIN}"`)).join('\n  ');
 const module = `// ${emitName}-traced-parts.js — 由 tools/extract-parts.mjs 從 vtracer SVG 自動抽取。
 // 來源:${svgPath}。座標系 = 描線原始像素(${W}x${H}),由 assets.js 以 transform 對位。
 // 此檔為產物,勿手改;重產請跑 extract-parts.mjs。
 // 分組:base=[${groups.base}]  blush=[${groups.blush}]  drop(手寫表情取代)=[${groups.drop || []}]
 export const ${emitName} = {
-  base: \`${pick(groups.base)}\`,
+  base: \`${pick(groups.base)}
+  ${pickPatched(groups.patch)}\`,
   blush: \`${pick(groups.blush)}\`,
 };
 `;

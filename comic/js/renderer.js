@@ -138,17 +138,31 @@ function renderPanel(panel, warnings) {
     ${bubbles}`;
 }
 
+// 版型:格子欄列數
+const LAYOUTS = {
+  'single': { cols: 1, rows: 1 },
+  'grid-2x2': { cols: 2, rows: 2 },
+  'strip-1x4': { cols: 1, rows: 4 },
+  'grid-2x3': { cols: 2, rows: 3 },
+};
+
 // 主入口:劇本 → { svg, warnings }
 export function renderComic(script) {
   const warnings = [];
-  const layout = script.layout || 'single';
-  if (layout !== 'single') warnings.push(`版型「${layout}」Phase 1 尚未實作,先渲染第一格`);
+  let layout = script.layout || 'single';
+  if (!LAYOUTS[layout]) { warnings.push(`未知版型「${layout}」,改用 grid-2x2`); layout = 'grid-2x2'; }
+  const { cols, rows } = LAYOUTS[layout];
+  const cap = cols * rows;
   const panels = Array.isArray(script.panels) && script.panels.length
     ? script.panels : (warnings.push('劇本沒有 panels,輸出空格子'), [{}]);
+  if (panels.length > cap) warnings.push(`版型 ${layout} 只有 ${cap} 格,多出的 ${panels.length - cap} 格未顯示`);
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${PANEL_W} ${PANEL_H}"
-                    width="${PANEL_W}" height="${PANEL_H}">
-    ${renderPanel(panels[0], warnings)}
-  </svg>`;
+  const W = cols * PANEL_W, H = rows * PANEL_H;
+  const cells = panels.slice(0, cap).map((p, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    return `<g transform="translate(${col * PANEL_W} ${row * PANEL_H})">${renderPanel(p, warnings)}</g>`;
+  }).join('');
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${cells}</svg>`;
   return { svg, warnings };
 }

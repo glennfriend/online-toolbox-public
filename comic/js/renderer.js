@@ -47,7 +47,7 @@ function renderCharacter(entry, warnings) {
   }
   const emotion = entry.emotion || 'neutral';
   let face = def.faces[emotion];
-  if (!face) {
+  if (face === undefined) {   // '' 是固定表情角色(臉烘進 base),不算缺表情
     warnings.push(`角色「${entry.char}」沒有表情「${emotion}」,改用 neutral(可用:${Object.keys(def.faces).join(', ')})`);
     face = def.faces.neutral;
   }

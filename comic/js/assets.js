@@ -19,6 +19,7 @@ import { TRACED_BUN } from './bun-traced-parts.js';
 import { TRACED_LONGHAIR } from './longhair-traced-parts.js';
 import { TRACED_BUN_STUDY } from './bun-study-parts.js';
 import { TRACED_MAN } from './man-parts.js';
+import { TRACED_OLDMAN } from './oldman-parts.js';
 
 export const EMOTIONS = ['neutral', 'happy', 'surprised', 'angry', 'sad'];
 
@@ -70,6 +71,8 @@ const BUN_XF = 'scale(0.6) translate(-127.5 -195.5)';   // 上半身描線(306x3
 const LONG_XF = 'scale(0.6) translate(-233 -147)';   // 上半身描線(320x378),眼中點→原點
 const BUNSTUDY_XF = 'scale(0.6) translate(-100 -185.5)';   // 讀書姿勢(330x358)
 const MAN_XF = 'scale(0.5) translate(-233 -267.5)';   // 男生上半身(470x372),眼中點→原點
+const OLDMAN_XF = 'scale(0.41) translate(-270 -295)';   // 老先生(彩色保留,固定表情;base 540x604,臉中~270,295)
+const NO_FACE = { neutral: '', happy: '', surprised: '', angry: '', sad: '' };   // 固定表情角色(臉已烘進 base)
 
 export const CHARACTERS = {
   bun: {
@@ -104,5 +107,14 @@ export const CHARACTERS = {
     bustBottom: 52,
     parts: { body: `<g transform="${MAN_XF}">${TRACED_MAN.base}</g>` },
     faces: facesFor({ eyeL: [187, 272], eyeR: [279, 263], mouth: [247, 315], xform: MAN_XF }),
+  },
+  oldman: {
+    name: '老先生',
+    desc: '灰髮眼鏡、米色開襟衫(彩色保留,固定表情)',
+    fixedFace: true,
+    headTop: -104,
+    bustBottom: 136,
+    parts: { body: `<g transform="${OLDMAN_XF}">${TRACED_OLDMAN.base}</g>` },
+    faces: NO_FACE,
   },
 };

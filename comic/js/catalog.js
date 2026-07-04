@@ -23,9 +23,10 @@ for (const [person, entries] of Object.entries(byPerson)) {
     charSections.appendChild(label);
     const grid = document.createElement('div');
     grid.className = 'grid';
-    for (const emotion of EMOTIONS) {
+    const emos = def.fixedFace ? ['neutral'] : EMOTIONS;   // 固定表情角色只顯示一格
+    for (const emotion of emos) {
       const face = def.faces[emotion];
-      if (!face) continue;
+      if (face === undefined) continue;
       const p = def.parts;
       const cell = document.createElement('figure');
       cell.className = 'cell';

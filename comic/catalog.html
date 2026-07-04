@@ -17,13 +17,9 @@
     <a class="btn" href="index.html">編輯器</a>
   </header>
   <main class="catalog">
-    <p class="hint">素材都是點陣圖。<b>配件</b>依<b>畫風(style)</b>分層(同一 id 在不同畫風是不同圖,畫風不混),已去背(週圍透明)。<b>背景</b>不透明、鋪滿整格、所有畫風共用。故事用 <code>style</code> 選畫風、<code>items[].item</code> 選配件、<code>bg</code> 選背景。定義見 <code>items.md</code>、<code>backgrounds.md</code>。</p>
+    <p class="hint">素材都是點陣圖,依<b>畫風(style)</b>分層 —— 配件與背景都分畫風,同一 id 在不同畫風是不同圖,畫風不混。<b>配件</b>已去背(週圍透明)、<b>背景</b>不透明鋪滿整格。故事用 <code>style</code> 選畫風、<code>items[].item</code> 選配件、<code>bg</code> 選背景。定義見 <code>items.md</code>、<code>backgrounds.md</code>。</p>
 
-    <h2 class="sec">配件 <span class="sec-note">依畫風分層,去背週圍透明</span></h2>
-    <div id="item-sections"></div>
-
-    <h2 class="sec">背景 <span class="sec-note">不透明,鋪滿整格,共用</span></h2>
-    <div id="bg-grid" class="grid"></div>
+    <div id="sections"></div>
   </main>
   <script type="module" src="js/catalog.js"></script>
 </body>

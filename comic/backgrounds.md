@@ -1,10 +1,14 @@
 # 背景圖庫(backgrounds)
 
-背景 = **完全不透明**的整格底圖,鋪滿一格(cover 裁切)。圖檔放 `raw/backgrounds/`,
-執行期由 `js/backgrounds.js` 索引,講故事時用 `id` 引用(story 的 `panel.bg`)。
-配件(items)去背後疊在背景上。
+背景 = **完全不透明**的整格底圖,鋪滿一格(cover 裁切)。**跟配件一樣依畫風(style)分層**:
+圖檔放 `raw/style/<style>/backgrounds/`,執行期由 `js/backgrounds.js` 的 `BACKGROUNDS_BY_STYLE[<style>]`
+索引,故事用 `panel.bg` 引用(在該故事的 `style` 底下解析)。配件去背後疊在背景上。
+卡通故事用卡通背景、寫實故事用寫實背景 → 畫風不混。
 
+新增背景 = 丟圖進 `raw/style/<style>/backgrounds/` + 在 `js/backgrounds.js` 對應 style 加一筆 + 更新本檔。
 來源:いらすとや(irasutoya,免費;同一作品用超過 20 張需付費授權)。
+
+## default(手繪卡通)
 
 | id | 檔案 | 意義 | tags |
 |----|------|------|------|
@@ -28,3 +32,7 @@
 | horizon-field | bg_chiheisen_green.jpg | 草原地平線 | 地平線 · 草地 · 天空 · 戶外 · 白天 · 空曠 |
 | night-moon | bg_moon_sky_mikaduki.jpg | 夜空月亮 | 夜晚 · 天空 · 月亮 · 星空 · 戶外 |
 | effect-lines | effectlines_color.jpg | 效果線(強調/爆發) | 效果線 · 爆炸 · 速度 · 動作 · 強調 |
+
+## sketch(寫實黑白素描)
+
+尚無背景(需另備寫實/黑白底圖)。

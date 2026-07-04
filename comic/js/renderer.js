@@ -6,7 +6,7 @@
 // 錯誤容忍原則:缺欄位用預設值、未知值 fallback,全部收進 warnings 回報(絕不無聲)。
 
 import { STYLES, STYLE_DIR, DEFAULT_STYLE, itemsOf } from './items.js';
-import { BACKGROUNDS, BG_DIR } from './backgrounds.js';
+import { bgOf, bgPath } from './backgrounds.js';
 
 const PANEL_W = 800;
 const PANEL_H = 560;
@@ -90,11 +90,12 @@ function renderPanel(panel, style, warnings, idx = 0) {
   const bg = panel.bg || 'plain';
   let bgLayer = `<rect x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" fill="${PAPER}"/>`;
   if (bg !== 'plain') {
-    const def = BACKGROUNDS[bg];
+    const bgs = bgOf(style);
+    const def = bgs[bg];
     if (def) {
-      bgLayer = `<image href="${BG_DIR}${def.file}" x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" preserveAspectRatio="xMidYMid slice"/>`;
+      bgLayer = `<image href="${bgPath(style, def.file)}" x="0" y="0" width="${PANEL_W}" height="${PANEL_H}" preserveAspectRatio="xMidYMid slice"/>`;
     } else {
-      warnings.push(`未知背景「${bg}」,改用 plain(可用:${Object.keys(BACKGROUNDS).join(', ')})`);
+      warnings.push(`畫風「${style}」沒有背景「${bg}」,改用 plain(可用:${Object.keys(bgs).join(', ') || '(此畫風尚無背景)'})`);
     }
   }
 

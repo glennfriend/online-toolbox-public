@@ -90,21 +90,34 @@ async function loadScriptList() {
   }
 }
 
+// 型錄下拉:選了就跳頁
+$('#catalogs').addEventListener('change', (e) => {
+  if (e.target.value) location.href = e.target.value;
+});
+
 $('#copy-link').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(location.href); showToast('已複製連結'); }
   catch { showToast('複製失敗,請手動複製網址'); }
 });
 
-$('#dl-svg').addEventListener('click', () => {
+// 下載下拉:選 SVG / PNG 即下載,之後重置回 "Download"
+$('#download').addEventListener('change', (e) => {
+  const kind = e.target.value;
+  e.target.value = '';
+  if (kind === 'svg') downloadSvg();
+  else if (kind === 'png') downloadPng();
+});
+
+function downloadSvg() {
   if (!lastSvg) return;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([lastSvg], { type: 'image/svg+xml;charset=utf-8' }));
   a.download = 'comic.svg';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-});
+}
 
-$('#dl-png').addEventListener('click', () => {
+function downloadPng() {
   if (!lastSvg) return;
   const img = new Image();
   img.onload = () => {
@@ -123,7 +136,7 @@ $('#dl-png').addEventListener('click', () => {
   };
   img.onerror = () => showToast('PNG 轉檔失敗');
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(lastSvg);
-});
+}
 
 // ── 啟動 ──
 (function init() {

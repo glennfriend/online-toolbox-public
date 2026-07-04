@@ -28,12 +28,18 @@
       </span>
     </span>
     <span class="spacer"></span>
-    <a class="btn" href="catalog.html">角色型錄</a>
-    <a class="btn" href="props.html">道具型錄</a>
-    <select id="scripts" class="btn" title="載入版本控管裡存好的劇本"><option value="">劇本…</option></select>
+    <select id="catalogs" class="btn" title="型錄">
+      <option value="">型錄</option>
+      <option value="catalog.html">角色型錄</option>
+      <option value="props.html">道具型錄</option>
+    </select>
+    <select id="scripts" class="btn" title="載入版本控管裡存好的劇本"><option value="">劇本</option></select>
     <button id="copy-link" class="btn" type="button">複製連結</button>
-    <button id="dl-svg" class="btn" type="button">下載 SVG</button>
-    <button id="dl-png" class="btn" type="button">下載 PNG</button>
+    <select id="download" class="btn" title="下載">
+      <option value="">Download</option>
+      <option value="svg">SVG</option>
+      <option value="png">PNG</option>
+    </select>
   </header>
 
   <main class="workspace">

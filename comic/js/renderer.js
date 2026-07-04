@@ -69,17 +69,20 @@ function renderCharacter(entry, warnings) {
 const BUBBLE_INK = '#1A1A1A', BW_STROKE = 4;
 const FONT = `-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif`;
 
-// 尖尾(短 stub,朝說話者頭頂,任意角度都行)。回傳三角形 path 的 d。
+// 彎曲短尾(朝說話者頭頂,任意角度都行)。兩側用二次曲線收向尖端,像參考圖那種有機的尾巴。
 function tailPath(bx, by, bw, bh, speaker) {
   const cxB = bx + bw / 2, cyB = by + bh;              // 從氣泡底邊中點附近長出
   let vx = speaker.x - cxB, vy = speaker.headTopY - cyB;
   const len = Math.hypot(vx, vy) || 1; vx /= len; vy /= len;
-  const stub = 34;                                     // 固定短長度,不隨距離拉長(像參考圖的短尾)
+  const stub = 40;                                     // 固定短長度,不隨距離拉長
+  const f = (n) => n.toFixed(1);
   const tipX = cxB + vx * stub, tipY = cyB + vy * stub;
-  const px = -vy, py = vx, half = 13;                  // 底邊沿垂直方向張開
+  const px = -vy, py = vx, half = 15;                  // 底邊沿垂直方向張開
   const b1x = clamp(cxB + px * half, bx + 8, bx + bw - 8), b1y = cyB + py * half;
   const b2x = clamp(cxB - px * half, bx + 8, bx + bw - 8), b2y = cyB - py * half;
-  return `M ${b1x.toFixed(1)} ${b1y.toFixed(1)} L ${tipX.toFixed(1)} ${tipY.toFixed(1)} L ${b2x.toFixed(1)} ${b2y.toFixed(1)} Z`;
+  const c1x = b1x + vx * stub * 0.45, c1y = b1y + vy * stub * 0.45;   // 兩側控制點不對稱 → 尾巴微鉤,較自然
+  const c2x = b2x + vx * stub * 0.6, c2y = b2y + vy * stub * 0.6;
+  return `M ${f(b1x)} ${f(b1y)} Q ${f(c1x)} ${f(c1y)} ${f(tipX)} ${f(tipY)} Q ${f(c2x)} ${f(c2y)} ${f(b2x)} ${f(b2y)} Z`;
 }
 
 // 爆炸鋸齒外框(shout)
@@ -134,7 +137,7 @@ function renderBubble(bubble, castPlaced, cursorY, warnings) {
   if (type === 'shout') {
     box = `<path d="${spikyPath(bx + bw / 2, by + bh / 2, bw / 2 + 6, bh / 2 + 6)}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}" stroke-linejoin="round"/>`;
   } else {
-    const rx = type === 'thought' ? 26 : 20;
+    const rx = type === 'thought' ? 26 : Math.min(bh / 2, 32);   // speech 較圓,接近上傳的參考氣泡
     box = `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${rx}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}"/>`;
   }
   // 尾巴先畫,外框蓋在上面(遮住接縫),文字最後

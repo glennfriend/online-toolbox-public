@@ -29,12 +29,21 @@ const isMagenta = (fill) => {
   // 純 magenta 及其被 vtracer 混色後的紫色殘邊(R、B 高、G 明顯低);膚色/腮紅 G 接近 R 不會中
   return r > 150 && bb > 150 && g < Math.min(r, bb) - 45;
 };
+const isDark = (fill) => {
+  const h = fill.replace('#', ''); if (h.length < 6) return false;
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), bb = parseInt(h.slice(4, 6), 16);
+  return (r * 299 + g * 587 + bb * 114) / 1000 < 100;
+};
+// 線稿類(如狗):只留黑線,白底/白內部全丟 → 透明內部的純線稿。以檔名字首判斷(不必去背/量化)。
+const isLineArt = (name) => name.startsWith('dog');
 
 const props = {};
 for (const file of svgs) {
   const svg = readFileSync(file, 'utf8');
   const dim = svg.match(/<svg[^>]*width="(\d+)"[^>]*height="(\d+)"/);
   const W = dim ? +dim[1] : 0, H = dim ? +dim[2] : 0, canvasArea = W * H;
+  const name = basename(file, extname(file));
+  const lineart = isLineArt(name);
   const re = /<path\s+d="([^"]*)"\s+fill="([^"]*)"(?:\s+transform="translate\(([^)]*)\)")?\s*\/>/g;
   let m; const keep = [];
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -43,13 +52,16 @@ for (const file of svgs) {
     const [tx, ty] = (m[3] || '0,0').split(/[, ]+/).map(Number);
     const bb = bboxOf(m[1], tx, ty);
     const area = (bb.maxX - bb.minX) * (bb.maxY - bb.minY);
-    if (isMagenta(fill)) continue;                       // 背景 sentinel
-    if (canvasArea && area > canvasArea * 0.92) continue; // 殘留滿版背景
+    if (lineart) {
+      if (!isDark(fill)) continue;                       // 線稿:只留黑線
+    } else {
+      if (isMagenta(fill)) continue;                     // 背景 sentinel
+      if (canvasArea && area > canvasArea * 0.92) continue; // 殘留滿版背景
+    }
     keep.push(m[0]);
     if (bb.minX < minX) minX = bb.minX; if (bb.minY < minY) minY = bb.minY;
     if (bb.maxX > maxX) maxX = bb.maxX; if (bb.maxY > maxY) maxY = bb.maxY;
   }
-  const name = basename(file, extname(file));
   const w = Math.ceil(maxX - minX), h = Math.ceil(maxY - minY);
   const inner = keep.join('').replace(/\s+/g, ' ');
   props[name] = { w, h, svg: `<g transform="translate(${-Math.round(minX)} ${-Math.round(minY)})">${inner}</g>` };

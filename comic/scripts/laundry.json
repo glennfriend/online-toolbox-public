@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "title": "洗衣店",
+  "style": "3d",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "penguin", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.62 },
+        { "item": "penguin_2", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.62, "flip": true }
+      ],
+      "texts": [{ "text": "老張:「老李的洗衣店要開張了,送什麼好?」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.66 }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "penguin_2", "pos": { "x": 0.68, "y": 0.66 }, "scale": 0.74, "flip": true }],
+      "texts": [{ "text": "老王:「送個匾額好了?」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.5 }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "penguin", "pos": { "x": 0.32, "y": 0.66 }, "scale": 0.74 }],
+      "texts": [{ "text": "老張:「上面要寫些什麼好呢?」", "pos": { "x": 0.42, "y": 0.05 }, "w": 0.55 }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "penguin_4", "pos": { "x": 0.68, "y": 0.66 }, "scale": 0.76, "flip": true }],
+      "texts": [{ "text": "老王:「就寫『還我清白』!」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.54 }]
+    }
+  ]
+}

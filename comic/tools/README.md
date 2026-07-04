@@ -7,51 +7,53 @@
 
 ## ItemCut.cs —— 配件去背
 
-把一張「主體 + 白底」的圖去背成「主體不透明、週圍透明」的 PNG,並裁切到主體外框。
-從四邊泛洪清掉**與邊緣相連**的近白像素 → 透明;主體內部的白(白外套、白狗身)因為被輪廓
-包住、不與邊緣相連,會保留 → 不會挖穿主體。
-
-需要:Windows PowerShell(System.Drawing)。
+把一張圖去背成「主體不透明、週圍透明」的 PNG,並裁切到主體外框。需要 Windows PowerShell(System.Drawing)。
 
 ```powershell
 Add-Type -Path ItemCut.cs -ReferencedAssemblies System.Drawing
-# Cut(輸入, 輸出, 近白門檻)  門檻 232:R/G/B 皆 ≥ 232 才算背景白
-[ItemCut]::Cut("raw\items_before\xxx.png", "raw\items\my-item.png", 232)
+[ItemCut]::Cut("raw\items_before_clean\xxx.png", "raw\items\my_item.png", 232)        # 乾淨白底
+[ItemCut]::CutNoisy("raw\items_before_noisy\yyy.png", "raw\items\my_item.png", 212)   # 附近有雜質
+[ItemCut]::FillHoles("raw\items\my_item.png", 6)                                       # 搶救:補內部破洞
 ```
 
-## items_before → items(收件匣,用完即空)
+**演算法(去背怎麼保住主體內部的白)**:單純「四邊泛洪清近白 → 透明」會從細縫漏進主體,把該有的白
+(白襯衫、白雲)也挖成透明破洞;但主體之間的**寬**空隙(狗四腿間)又必須透明。故先算「真正的外部」=
+把泛洪的近白區**侵蝕 R 像素**(細縫被切斷)、只留**仍與邊緣相連**的部分、再**膨脹 R 像素**還原邊界。
+於是:細縫相連的內部白 → 判為主體(不透明,還原原色);寬空隙 → 仍是外部(透明)。R 預設 6。
 
-`raw/items_before/` 是**收件匣**。**規則:只要裡面有可轉換的檔案,就全部轉換到 `raw/items/`,
-轉換完成後把 `items_before/` 裡的原檔刪除**(正常情況下收件匣是空的,只留 README)。
-
-命名用 **WordNet**(ImageNet 的詞彙階層):id = 該物的 WordNet 詞位(小寫底線),同類多張加 `_2`、`_3`。
-細節(姿勢/顏色/白天夜晚/畫風)放 tags,不進檔名。
-
-流程:
-
-1. 逐張看 `items_before/` 的圖,依 WordNet 決定 id(同類接續編號)。
-2. 去背 + 裁切到 `raw/items/<id>.png`(見下,`convert-items.ps1` 或直接叫 `ItemCut`)。
-3. 在 `js/items.js` 與 `items.md` 各加一筆 `id → { file, w, h, tags }`。
-4. **刪除** `items_before/` 裡已轉換的原檔。
-5. 到「素材」頁(catalog.html)用棋盤格底檢查去背是否乾淨。
+- `Cut(in,out,thr[,R])`:乾淨圖去背 + 裁切,內部漏白還原成原色。
+- `CutNoisy(in,out,thr[,R])`:去背後**只保留最大連通塊**=主體,其餘小塊(散點/網點/殘框/殘字)清成透明。
+  注意:與主體相連的雜質(如貼著頭髮的分鏡外框)會被留下 → 先手動裁掉明顯外框再處理。
+- `FillHoles(path,R)`:沒有原圖時的就地搶救,把封閉/細縫相連的透明破洞填成不透明白(寬空隙保留)。
 
 ### 門檻(thr)
 
-`ItemCut` 第三參數 = 近白門檻(R/G/B 皆 ≥ 此值才算背景)。
+近白門檻(R/G/B 皆 ≥ 此值才算背景):白底卡通/線稿用 `232`(預設);寫實黑白素描等**背景有灰階**的
+降到 `~212` 才吃得掉灰霧。去背後到素材頁(棋盤格底)看,有殘留灰邊就把 thr 再調低一點重跑。
 
-- 白底卡通/線稿:`232`(預設)。
-- 寫實黑白素描等**背景有灰階陰影**的圖:降到 `~212`,才能把灰霧也清掉(主體被輪廓包住不受影響)。
-  去背後到素材頁看,有殘留灰邊就把 thr 再調低一點重跑。
+## 收件匣 → items(用完即空)
+
+兩個收件匣,依主體週圍乾不乾淨分。**規則:只要收件匣有可轉換的檔案就全部轉換到 `raw/items/`,轉換後刪原檔**
+(正常情況收件匣是空的,只留 README)。命名用 **WordNet**(ImageNet 的詞彙階層):id = 該物的 WordNet
+詞位(小寫底線),同類多張加 `_2`、`_3`;細節(姿勢/顏色/畫風)放 tags,不進檔名。
+
+| 收件匣 | 放什麼 | 工具 |
+|--------|--------|------|
+| `raw/items_before_clean/` | 主體 + 乾淨白底 | `Cut`,thr 232 |
+| `raw/items_before_noisy/` | 主體附近有雜質 | `CutNoisy`,thr ~212 |
+
+流程:逐張看圖 → 依 WordNet 決定 id → 去背到 `raw/items/<id>.png` → 登記 `js/items.js` + `items.md`
+→ 刪收件匣原檔 → 素材頁(catalog.html)棋盤格檢查。原檔刪後若要用更好演算法重跑,需重新提供原圖。
 
 ### convert-items.ps1
 
-把「批次轉換 + 刪原檔」包成一支。編輯檔頭的 `$map`(原檔名→id[,thr])後執行:
+把「批次轉換 + 刪原檔」包成一支(乾淨圖用)。編輯檔頭 `$map`(原檔名→id[,thr])後執行:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools\convert-items.ps1
 ```
 
-不在 `$map` 裡的檔案會被略過並列出(提醒你還沒分類),不會誤刪。
+不在 `$map` 裡的檔案會被略過並列出(提醒尚未分類),不會誤刪。
 
 ## 背景
 

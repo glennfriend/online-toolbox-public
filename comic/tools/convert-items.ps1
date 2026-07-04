@@ -7,7 +7,7 @@
 
 $ErrorActionPreference = 'Stop'
 $root   = Split-Path -Parent $PSScriptRoot          # comic/
-$inDir  = Join-Path $root 'raw\items_before'
+$inDir  = Join-Path $root 'raw\items_before_clean'  # 乾淨白底收件匣;髒圖(有雜質)用 CutNoisy,見 tools/README
 $outDir = Join-Path $root 'raw\items'
 Add-Type -Path (Join-Path $PSScriptRoot 'ItemCut.cs') -ReferencedAssemblies System.Drawing
 

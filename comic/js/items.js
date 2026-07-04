@@ -18,6 +18,8 @@ export const ITEMS = {
   'adult_female_2': { file: 'adult_female_2.png', w: 254, h: 302, tags: ['女生', '女性', '人物', '丸子頭', '開襟衫', '微笑', '卡通', '上半身'] },
   'adult_female_3': { file: 'adult_female_3.png', w: 177, h: 276, tags: ['女生', '女性', '人物', '黑髮', '髮夾', '寫實', '黑白', '素描', '正面', '氣質'] },
   'adult_female_4': { file: 'adult_female_4.png', w: 221, h: 260, tags: ['女生', '女性', '人物', '黑髮', '髮夾', '寫實', '黑白', '素描', '側面'] },
+  'adult_female_5': { file: 'adult_female_5.png', w: 271, h: 236, tags: ['女生', '女性', '人物', '黑髮', '長髮', '捲髮', '寫實', '黑白', '素描', '無奈'] },
+  'adult_female_6': { file: 'adult_female_6.png', w: 113, h: 198, tags: ['女生', '女性', '人物', '黑髮', '長髮', '瀏海', '寫實', '黑白', '素描', '冷淡'] },
 
   // person → adult → man → old man(WordNet: old_man)
   'old_man': { file: 'old_man.png', w: 205, h: 225, tags: ['男生', '男性', '長者', '老人', '灰髮', '眼鏡', '開襟衫', '微笑', '卡通', '上半身'] },

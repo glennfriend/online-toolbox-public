@@ -11,20 +11,26 @@
 - 人 → adult → woman → **`adult_female`**(第二張 `adult_female_2`)
 - 動物 → **`dog`**、**`bird`**;自然 → **`cloud`**;器物 → **`clock`**、**`window`**、**`potted_plant`**;符號 → **`heart`**
 
-## items_before → items 轉換(每次都做)
+## 收件匣 → items 轉換(每次都做)
 
-`raw/items_before/` 是**收件匣**:未去背的原圖(週圍不透明)丟這裡。
+原圖放兩個**收件匣**之一,依「主體週圍乾不乾淨」分:
 
-**規則:只要 `items_before/` 裡有可轉換的檔案,就全部轉換;轉換完成後,把 `items_before/` 裡那些原檔刪除**
-(收件匣用完即空)。步驟:
+| 收件匣 | 放什麼 | 處理方式 |
+|--------|--------|----------|
+| `raw/items_before_clean/` | 主體 + 乾淨白底,週圍無雜質 | 單純去背 `ItemCut.Cut` |
+| `raw/items_before_noisy/` | 主體附近有雜質(散點/網點/分鏡殘框/殘字) | 去背 + 只留最大連通塊 `ItemCut.CutNoisy` |
+
+**規則:只要收件匣裡有可轉換的檔案,就全部轉換到 `raw/items/`;轉換完成後把收件匣裡的原檔刪除**
+(收件匣用完即空,只留各自的 README)。步驟:
 
 1. 逐張看圖,依 WordNet 決定 id(同類接續編號)。
-2. `[ItemCut]::Cut("raw/items_before/原檔","raw/items/<id>.png",232)` 去背 + 裁切。
+2. 去背:乾淨圖 `[ItemCut]::Cut(原檔, raw/items/<id>.png, 232)`;
+   髒圖 `[ItemCut]::CutNoisy(原檔, raw/items/<id>.png, 212)`。
 3. 在 `js/items.js` 與本檔各加一筆。
-4. **刪除** `raw/items_before/` 裡已轉換的原檔。
-5. 到「素材」頁(catalog.html)用棋盤格底檢查去背是否乾淨。
+4. **刪除**收件匣裡已轉換的原檔。
+5. 到「素材」頁(catalog.html)用棋盤格底檢查去背是否乾淨、內部白有沒有補回。
 
-指令細節見 `tools/README.md`。
+指令細節見 `tools/README.md`。原檔刪除後若日後要用更好的演算法重跑,需重新提供原圖(git 只留曾 commit 過的)。
 
 ## 現有配件
 
@@ -34,6 +40,8 @@
 | adult_female_2 | adult_female_2.png | 254×302 | 丸子頭女生、米色開襟衫,微笑上半身(卡通) | 女生 · 女性 · 人物 · 丸子頭 · 開襟衫 · 微笑 · 卡通 · 上半身 |
 | adult_female_3 | adult_female_3.png | 177×276 | 黑髮女生、髮夾,寫實黑白素描(正面/氣質) | 女生 · 女性 · 人物 · 黑髮 · 髮夾 · 寫實 · 黑白 · 素描 · 正面 · 氣質 |
 | adult_female_4 | adult_female_4.png | 221×260 | 黑髮女生、髮夾,寫實黑白素描(側面) | 女生 · 女性 · 人物 · 黑髮 · 髮夾 · 寫實 · 黑白 · 素描 · 側面 |
+| adult_female_5 | adult_female_5.png | 271×236 | 黑長捲髮女生,寫實黑白素描(無奈表情;來自髒圖去雜質) | 女生 · 女性 · 人物 · 黑髮 · 長髮 · 捲髮 · 寫實 · 黑白 · 素描 · 無奈 |
+| adult_female_6 | adult_female_6.png | 113×198 | 黑長直髮瀏海女生,寫實黑白素描(冷淡表情) | 女生 · 女性 · 人物 · 黑髮 · 長髮 · 瀏海 · 寫實 · 黑白 · 素描 · 冷淡 |
 | old_man | old_man.png | 205×225 | 灰髮眼鏡老先生、米色開襟衫,微笑(卡通) | 男生 · 男性 · 長者 · 老人 · 灰髮 · 眼鏡 · 開襟衫 · 微笑 · 卡通 · 上半身 |
 | dog | dog.png | 264×187 | 奔跑中的狗(側面) | 狗 · 動物 · 奔跑 · 側面 |
 | dog_2 | dog_2.png | 292×169 | 小跑步的狗(側面) | 狗 · 動物 · 小跑 · 側面 |

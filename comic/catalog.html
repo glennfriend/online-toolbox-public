@@ -4,20 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="Comic 角色型錄:所有角色 × 所有表情,供核對畫風。">
-  <title>Comic 角色型錄</title>
+  <meta name="description" content="Comic 畫風:這個畫風的角色與道具。">
+  <title>Comic 畫風</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <span class="brand">Comic 角色型錄</span>
+    <span class="brand">Comic</span>
     <span class="spacer"></span>
-    <a class="btn" href="index.html">回編輯器</a>
+    <span class="btn" aria-current="page" style="background:var(--bg-code)">畫風</span>
+    <a class="btn" href="index.html">編輯器</a>
   </header>
   <main class="catalog">
-    <p class="hint">畫風核對頁:每個角色 × 每種表情一格。看哪裡不對(眼距、髮型、比例…)直接說,改 assets.js 即全站生效。</p>
-    <div id="grid" class="grid"></div>
+    <p class="hint">目前只有一種畫風(韓系手繪日記)。之後每多一種畫風,就在這裡多一個區塊。看哪裡不對直接說,改 <code>js/assets.js</code>(角色)或重跑道具管線即全站生效。</p>
+
+    <h2 class="sec">角色 <span class="sec-note">× 5 表情</span></h2>
+    <div id="char-grid" class="grid"></div>
+
+    <h2 class="sec">道具</h2>
+    <div id="prop-grid" class="grid"></div>
   </main>
   <script type="module" src="js/catalog.js"></script>
 </body>

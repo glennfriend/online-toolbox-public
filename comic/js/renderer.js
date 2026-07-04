@@ -85,12 +85,14 @@ function tailPath(bx, by, bw, bh, speaker) {
   return `M ${f(b1x)} ${f(b1y)} Q ${f(c1x)} ${f(c1y)} ${f(tipX)} ${f(tipY)} Q ${f(c2x)} ${f(c2y)} ${f(b2x)} ${f(b2y)} Z`;
 }
 
-// 爆炸鋸齒外框(shout)
+// 爆炸鋸齒外框(shout):rx/ry = 貼著文字的內圈(凹槽落在這),尖刺往外爆出、長短不一 → 強烈的「碰!」框。
 function spikyPath(cx, cy, rx, ry) {
-  const n = 18, pts = [];
-  for (let i = 0; i < n * 2; i++) {
-    const a = Math.PI * i / n, r = i % 2 ? 0.78 : 1;
-    pts.push(`${(cx + Math.cos(a) * rx * r).toFixed(1)} ${(cy + Math.sin(a) * ry * r).toFixed(1)}`);
+  const OUT = [1.34, 1.52, 1.28, 1.46, 1.36, 1.54, 1.26, 1.48, 1.32, 1.5, 1.3, 1.44]; // 每根尖刺外伸倍率
+  const n = OUT.length, pts = [];
+  for (let i = 0; i < n; i++) {
+    const ao = 2 * Math.PI * i / n, ai = 2 * Math.PI * (i + 0.5) / n;
+    pts.push(`${(cx + Math.cos(ao) * rx * OUT[i]).toFixed(1)} ${(cy + Math.sin(ao) * ry * OUT[i]).toFixed(1)}`);   // 尖端(外伸)
+    pts.push(`${(cx + Math.cos(ai) * rx).toFixed(1)} ${(cy + Math.sin(ai) * ry).toFixed(1)}`);                     // 凹槽(貼文字)
   }
   return `M ${pts.join(' L ')} Z`;
 }
@@ -135,7 +137,7 @@ function renderBubble(bubble, castPlaced, cursorY, warnings) {
 
   let box;
   if (type === 'shout') {
-    box = `<path d="${spikyPath(bx + bw / 2, by + bh / 2, bw / 2 + 6, bh / 2 + 6)}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}" stroke-linejoin="round"/>`;
+    box = `<path d="${spikyPath(bx + bw / 2, by + bh / 2, bw / 2 + 16, bh / 2 + 12)}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="4.5" stroke-linejoin="miter"/>`;
   } else {
     const rx = type === 'thought' ? 26 : Math.min(bh / 2, 32);   // speech 較圓,接近上傳的參考氣泡
     box = `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${rx}" fill="#FFF" stroke="${BUBBLE_INK}" stroke-width="${BW_STROKE}"/>`;

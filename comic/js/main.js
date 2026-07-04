@@ -90,11 +90,6 @@ async function loadScriptList() {
   }
 }
 
-// 型錄下拉:選了就跳頁
-$('#catalogs').addEventListener('change', (e) => {
-  if (e.target.value) location.href = e.target.value;
-});
-
 $('#copy-link').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(location.href); showToast('已複製連結'); }
   catch { showToast('複製失敗,請手動複製網址'); }

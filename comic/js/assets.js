@@ -64,24 +64,24 @@ function facesFor(geom) {
 // ── 角色總表 ──────────────────────────────────────────
 // 全部角色 = vtracer 描線的空白臉底圖 + 共用表情。新增角色 = 跑管線產 *-traced-parts.js,
 // 在這裡加一個 entry(base 底圖 + geom 三座標 + 對位 xform)。
-const BUN_XF = 'scale(0.72) translate(-123 -197)';
-const LONG_XF = 'scale(0.62) translate(-218 -152)';
+const BUN_XF = 'scale(0.6) translate(-127.5 -195.5)';   // 上半身描線(306x398),眼中點→原點
+const LONG_XF = 'scale(0.6) translate(-233 -147)';   // 上半身描線(320x378),眼中點→原點
 
 export const CHARACTERS = {
   bun: {
     name: '丸子頭',
-    desc: '黑髮丸子頭、米白開襟衫',
-    headTop: -88,
-    bustBottom: 64,
+    desc: '黑髮丸子頭、米白開襟衫(上半身)',
+    headTop: -117,
+    bustBottom: 122,
     parts: { body: `<g transform="${BUN_XF}">${TRACED_BUN.base}${TRACED_BUN.blush}</g>` },
-    faces: facesFor({ eyeL: [105.5, 202.5], eyeR: [141, 192.5], mouth: [128, 216], xform: BUN_XF }),
+    faces: facesFor({ eyeL: [110, 200], eyeR: [145, 191], mouth: [128, 218], xform: BUN_XF }),
   },
   longhair: {
     name: '長髮',
-    desc: '黑長直髮',
-    headTop: -94,
-    bustBottom: 64,
+    desc: '黑長直髮、米色開襟衫(上半身)',
+    headTop: -88,
+    bustBottom: 139,
     parts: { body: `<g transform="${LONG_XF}">${TRACED_LONGHAIR.base}${TRACED_LONGHAIR.blush}</g>` },
-    faces: facesFor({ eyeL: [184, 159], eyeR: [252, 145], mouth: [219, 181], xform: LONG_XF }),
+    faces: facesFor({ eyeL: [199, 154], eyeR: [267, 140], mouth: [241, 182], xform: LONG_XF }),
   },
 };

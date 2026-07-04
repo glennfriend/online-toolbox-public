@@ -7,7 +7,7 @@ import { STYLE, CHARACTERS } from './assets.js';
 import { PROPS } from './props.js';
 
 const PANEL_W = 800;
-const PANEL_H = 600;
+const PANEL_H = 500;             // 較矮的格子 → 少空白、更緊湊(不影響 token)
 const CHAR_SCALE = 1.5;          // 角色本地座標 → 畫布 px
 const FONT_SIZE = 26;            // 氣泡文字字級(CJK 一字寬 ≈ 字級)
 const LINE_H = FONT_SIZE * 1.35;
@@ -187,7 +187,7 @@ function renderPanel(panel, warnings) {
   if (panel.effects?.length) warnings.push('effects Phase 1 尚未實作,已略過');
 
   return `
-    <rect x="6" y="6" width="${PANEL_W - 12}" height="${PANEL_H - 12}" rx="16"
+    <rect x="4" y="4" width="${PANEL_W - 8}" height="${PANEL_H - 8}" rx="12"
           fill="${STYLE.paper}" stroke="${STYLE.line}" stroke-width="3"/>
     ${propsSvg}
     ${castPlaced.map((c) => c.svg).join('')}

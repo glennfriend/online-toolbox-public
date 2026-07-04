@@ -41,8 +41,10 @@ export const BACKGROUNDS_BY_STYLE = {
     'night-moon':    { file: 'bg_moon_sky_mikaduki.jpg', tags: ['夜晚', '天空', '月亮', '星空', '戶外'] },
   },
 
-  // 寫實黑白素描畫風:尚無背景(需另備寫實/黑白底圖)。
-  sketch: {},
+  sketch: {
+    'bedroom':       { file: 'bedroom.webp', tags: ['臥室', '房間', '室內', '床', '窗戶', '暖色', '插畫', '白天'] },
+    'bedroom-night': { file: 'bedroom-night.webp', tags: ['臥室', '房間', '室內', '床', '窗戶', '夜晚', '傍晚', 'lofi', '粉紫'] },
+  },
 
   // 3D 黏土企鵝:尚無背景(先用 plain 或之後備黏土風底圖)。
   '3d': {},

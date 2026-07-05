@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "title": "諾貝爾頒獎",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "items": [{ "item": "girl/1", "pos": { "x": 0.5, "y": 0.66 }, "scale": 0.74 }],
+      "texts": [{ "text": "旁白:「如果有人發現並證明了『鬼』真的存在…」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.62, "align": "left" }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "girl/1", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.7 }],
+      "texts": [{ "text": "女子:「可以拿諾貝爾獎嗎?那該發什麼獎?」", "pos": { "x": 0.36, "y": 0.05 }, "w": 0.6, "align": "left" }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "old_man/main", "pos": { "x": 0.5, "y": 0.66 }, "scale": 0.76 }],
+      "texts": [{ "text": "「由諾貝爾……親自頒獎。」", "pos": { "x": 0.06, "y": 0.05 }, "w": 0.54, "align": "left" }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "girl/1", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.68 }],
+      "texts": [{ "text": "女子:「(等等……那不就得先變成鬼才拿得到?!)」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.62, "align": "left" }]
+    }
+  ]
+}

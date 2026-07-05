@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "title": "計程車闖紅燈",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "road",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.68 }, "scale": 0.6 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.68 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [{ "text": "旁白:「計程車闖紅燈,乘客倒抽一口氣。」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.6, "align": "left" }]
+    },
+    {
+      "bg": "road",
+      "items": [{ "item": "old_man/main", "pos": { "x": 0.66, "y": 0.68 }, "scale": 0.66, "flip": true }],
+      "texts": [{ "text": "司機:「別擔心,我哥哥總是這樣。」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.56, "align": "left" }]
+    },
+    {
+      "bg": "road",
+      "items": [
+        { "item": "girl_2/main", "pos": { "x": 0.27, "y": 0.68 }, "scale": 0.6 },
+        { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.68 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [{ "text": "綠燈了,車卻停住。乘客:「怎麼又停了?」", "pos": { "x": 0.03, "y": 0.05 }, "w": 0.62, "align": "left" }]
+    },
+    {
+      "bg": "road",
+      "items": [{ "item": "old_man/main", "pos": { "x": 0.34, "y": 0.68 }, "scale": 0.66 }],
+      "texts": [{ "text": "司機:「我哥哥可能從對面開過來!」", "pos": { "x": 0.36, "y": 0.05 }, "w": 0.58, "align": "left" }]
+    }
+  ]
+}

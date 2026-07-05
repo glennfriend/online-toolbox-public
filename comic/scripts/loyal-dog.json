@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "title": "忠心的狗",
+  "layout": "grid-2x2",
+  "panels": [
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "girl/1", "pos": { "x": 0.28, "y": 0.66 }, "scale": 0.6 },
+        { "item": "dog/sit", "pos": { "x": 0.72, "y": 0.74 }, "scale": 0.42, "flip": true }
+      ],
+      "texts": [{ "text": "客人:「請問有德國短毛獵犬嗎?我想買一頭。」", "pos": { "x": 0.03, "y": 0.05 }, "w": 0.62, "align": "left" }]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "dog/sit", "pos": { "x": 0.26, "y": 0.74 }, "scale": 0.42 },
+        { "item": "old_man/main", "pos": { "x": 0.72, "y": 0.66 }, "scale": 0.6, "flip": true }
+      ],
+      "texts": [{ "text": "店主:「有,而且好得不得了!」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.52, "align": "left" }]
+    },
+    {
+      "bg": "plain",
+      "items": [{ "item": "girl/1", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.66 }],
+      "texts": [{ "text": "客人:「不過,那頭狗忠心嗎?」", "pos": { "x": 0.38, "y": 0.05 }, "w": 0.54, "align": "left" }]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "old_man/main", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.6 },
+        { "item": "dog/run", "pos": { "x": 0.72, "y": 0.72 }, "scale": 0.42, "flip": true }
+      ],
+      "texts": [{ "text": "店主:「當然!已經賣過牠四次,每次都自己跑回來!」", "pos": { "x": 0.03, "y": 0.05 }, "w": 0.64, "align": "left" }]
+    }
+  ]
+}

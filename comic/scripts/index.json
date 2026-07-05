@@ -2,9 +2,12 @@
   { "id": "computer-virus", "name": "2026-07-04 電腦病毒", "file": "computer-virus.json" },
   { "id": "surgery", "name": "2026-07-04 動手術", "file": "surgery.json" },
   { "id": "sleep-one-hour", "name": "2026-07-04 只睡一個小時", "file": "sleep-one-hour.json" },
-  { "id": "salary", "name": "2026-07-04 年薪多少", "file": "salary.json" },
   { "id": "son-scolded", "name": "2026-07-04 被媽媽罵", "file": "son-scolded.json" },
   { "id": "both-pigs", "name": "2026-07-04 都是豬", "file": "both-pigs.json" },
   { "id": "laundry", "name": "2026-07-04 洗衣店", "file": "laundry.json" },
-  { "id": "mochi", "name": "2026-07-04 哪兒賣的", "file": "mochi.json" }
+  { "id": "nobel", "name": "2026-07-05 諾貝爾頒獎", "file": "nobel.json" },
+  { "id": "emperor-sword", "name": "2026-07-05 取劍", "file": "emperor-sword.json" },
+  { "id": "ears-glasses", "name": "2026-07-05 割耳朵", "file": "ears-glasses.json" },
+  { "id": "taxi-red-light", "name": "2026-07-05 計程車闖紅燈", "file": "taxi-red-light.json" },
+  { "id": "loyal-dog", "name": "2026-07-05 忠心的狗", "file": "loyal-dog.json" }
 ]

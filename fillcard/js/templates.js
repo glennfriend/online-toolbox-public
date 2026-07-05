@@ -290,18 +290,18 @@ function renderYearsBW(data) {
 }
 
 const YEARS_BW_SAMPLE = {
-  title: 'CHRONOLOGY',
-  subtitle: '公司大事記',
-  footer: 'yourcompany.com',
+  title: 'Annual Timeline',
+  subtitle: 'Start',
+  footer: 'Copyright 2026',
   items: [
-    { year: '2023', title: '公司成立', body: '三個朋友在車庫寫下第一行程式,踏出第一步。' },
-    { year: '2024', title: '團隊擴編', body: '夥伴從 3 人成長到 20 人,建立核心團隊。' },
-    { year: '2025', title: '產品上線', body: '第一個正式版本推出,獲得市場好評。' },
-    { year: '2026', title: '獲得投資', body: '完成 A 輪募資,加速產品與市場拓展。' },
-    { year: '2027', title: '拓展海外', body: '進軍東南亞,服務跨出台灣。' },
-    { year: '2028', title: '用戶破百萬', body: '全球活躍用戶正式突破一百萬。' },
-    { year: '2029', title: '獲頒大獎', body: '榮獲年度最佳新創,受到業界肯定。' },
-    { year: '2030', title: '邁向全球', body: '服務覆蓋全球五十國,持續前進。' },
+    { year: '2023', title: '公司成立', body: '在車庫寫下第一行程式,踏出第一步' },
+    { year: '2024', title: '團隊擴編', body: '夥伴從 3 人成長到 20 人,建立核心團隊' },
+    { year: '2025', title: '產品上線', body: '第一個正式版本推出,獲得市場好評' },
+    { year: '2026', title: '獲得投資', body: '完成 A 輪募資,加速產品與市場拓展' },
+    { year: '2027', title: '拓展海外', body: '進軍東南亞,服務跨出台灣' },
+    { year: '2028', title: '用戶破百萬', body: '全球活躍用戶正式突破一百萬' },
+    { year: '2029', title: '獲頒大獎', body: '榮獲年度最佳新創,受到業界肯定' },
+    { year: '2030', title: '邁向全球', body: '服務覆蓋全球五十國,持續前進' },
   ],
 };
 

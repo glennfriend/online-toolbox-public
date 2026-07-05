@@ -194,14 +194,14 @@ const YEAR_CARDS_SAMPLE = {
 
 export const TEMPLATES = {
   'year-timeline': {
-    label: '一年 12 個月時間軸(米底編號牌)',
+    label: '十二個月 米白色',
     desc: '米色底直式時間軸:開口圓環 + 虛線 + 光澤編號牌;英文月份固定,標題與內文可填。',
     w: 900, h: 200 + 12 * 192 + 30,
     defaultData: YEAR_TIMELINE_SAMPLE,
     render: renderYearTimeline,
   },
   'year-cards': {
-    label: '一年 12 個月色塊卡(白底多彩,左右交替)',
+    label: '十二個月 彩色',
     desc: '白底、實心月份圓、淡染色塊,左右交替;Noto Sans TC 字型。標題與內文可填。',
     w: 900, h: 0,
     defaultData: YEAR_CARDS_SAMPLE,

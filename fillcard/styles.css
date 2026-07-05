@@ -16,7 +16,7 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:
 #splitter{cursor:col-resize;margin:0 3px;border-radius:3px;background:var(--border)}
 #splitter:hover,#splitter.dragging{background:var(--accent)}
 .pane-head{padding:6px 10px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
-#input{flex:1;border:0;outline:none;resize:none;padding:10px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+#input{flex:1;border:0;outline:none;resize:none;padding:10px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
 .err{margin:0;padding:8px 10px;color:var(--danger);font-size:12px;background:#fdecea;white-space:pre-wrap}
 .preview{flex:1;overflow:auto;padding:16px;display:flex;justify-content:center;align-items:flex-start;background:var(--bg-code)}
 .preview svg{max-width:100%;height:auto;box-shadow:0 4px 18px rgba(0,0,0,.08);border-radius:26px}

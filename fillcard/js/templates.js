@@ -31,10 +31,21 @@ const COLORS = ['#3E8E9C', '#E0662E', '#2C3038', '#4E86E0', '#C0492E', '#4B8B5A'
 const CREAM = '#F4F1DE';
 
 function renderYearTimeline(data) {
-  const W = 900, headerH = 200, rowH = 192, n = 12, cx = 450;
-  const ringR = 23, badgeR = 42;
-  const H = headerH + n * rowH + 30;
+  const W = 900, headerH = 200, n = 12, cx = 450;
+  const ringR = 23, badgeR = 42, lineH = 22;
   const months = Array.isArray(data.months) ? data.months : [];
+
+  // 逐列動態高度:內文多的列自動變高(不截斷、也不浪費空白)。先算每列的環心 y 與內文行。
+  const rows = [];
+  let cursor = headerH;
+  for (let i = 0; i < n; i++) {
+    const m = months[i] || {};
+    const bodyLines = wrapLines(m.body, 20).slice(0, 14);
+    const ringY = cursor + 34;
+    rows.push({ ringY, bodyLines, m });
+    cursor = ringY + 96 + bodyLines.length * lineH + 24;   // 此列底 = 下一列起點
+  }
+  const H = cursor + 12;
 
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${TC}">`;
   s += `<defs>`;
@@ -47,18 +58,15 @@ function renderYearTimeline(data) {
   s += `<text x="${cx}" y="72" text-anchor="middle" font-size="22" fill="#5B5F66" letter-spacing="3">${esc(data.subtitle)}</text>`;
   s += `<text x="${cx}" y="132" text-anchor="middle" font-family="${DISPLAY}" font-size="52" font-weight="800" fill="#2C3038" letter-spacing="1">${esc(data.title)}</text>`;
 
-  const ringYs = [];
-  for (let i = 0; i < n; i++) ringYs.push(headerH + i * rowH + 44);
-
   // 中央彩色連接線(逐段用該月顏色)
   for (let i = 0; i < n - 1; i++) {
-    s += `<line x1="${cx}" y1="${ringYs[i]}" x2="${cx}" y2="${ringYs[i + 1]}" stroke="${COLORS[i]}" stroke-width="3"/>`;
+    s += `<line x1="${cx}" y1="${rows[i].ringY}" x2="${cx}" y2="${rows[i + 1].ringY}" stroke="${COLORS[i]}" stroke-width="3"/>`;
   }
 
   for (let i = 0; i < n; i++) {
-    const y = ringYs[i];
+    const y = rows[i].ringY;
     const c = COLORS[i];
-    const m = months[i] || {};
+    const m = rows[i].m;
     const right = i % 2 === 0;                 // 一月在右,二月在左,交替
     const badgeX = right ? W - 66 : 66;
     const textX = right ? cx + ringR + 34 : cx - ringR - 34;
@@ -81,9 +89,8 @@ function renderYearTimeline(data) {
     s += `<text x="${textX}" y="${y + 40}" text-anchor="${anchor}" font-family="${DISPLAY}" font-size="30" font-weight="800" fill="${c}" letter-spacing="1">${MONTHS[i]}</text>`;
     const titleLine = wrapLines(m.title, 16)[0] || '';
     s += `<text x="${textX}" y="${y + 72}" text-anchor="${anchor}" font-size="21" font-weight="700" fill="#2C3038">${esc(titleLine)}</text>`;
-    const body = wrapLines(m.body, 20).slice(0, 4);
-    body.forEach((ln, k) => {
-      s += `<text x="${textX}" y="${y + 98 + k * 22}" text-anchor="${anchor}" font-size="15" fill="#565B62">${esc(ln)}</text>`;
+    rows[i].bodyLines.forEach((ln, k) => {
+      s += `<text x="${textX}" y="${y + 98 + k * lineH}" text-anchor="${anchor}" font-size="15" fill="#565B62">${esc(ln)}</text>`;
     });
   }
 

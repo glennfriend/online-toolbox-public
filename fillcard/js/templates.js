@@ -571,11 +571,11 @@ function renderCircleImage(data) {
 }
 
 const CIRCLE_IMAGE_SAMPLE = {
-  script: 'Great sources of',
-  title: 'CALCIUM',
-  source: 'Source | 你的品牌',
+  script: 'Healthy living starts now',
+  title: 'Healthy',
+  source: '2026',
   items: [
-    { title: '蔬菜', body: '青花菜、高麗菜、菠菜、青江菜、地瓜', img: '' },
+    { title: '蔬菜', body: '青花菜、高麗菜、菠菜、青江菜、地瓜', img: 'https://www.google.com/s2/favicons?domain=google.com&sz=128' },
     { title: '魚罐頭', body: '鮪魚、沙丁魚、蝦、鮭魚', img: '' },
     { title: '堅果', body: '巴西堅果、杏仁、榛果、腰果', img: '' },
     { title: '新鮮水果', body: '柳橙、奇異果、杏桃、鳳梨、莓果', img: '' },
@@ -623,7 +623,7 @@ export const TEMPLATES = {
     render: renderChevron,
   },
   'circle-image': {
-    label: '圓圈嵌圖',
+    label: 'Simply circle image',
     desc: '深綠橫條清單:左右交替的圓形圖章(可嵌圖,圖自動裁成圓形)+ 花體小標語 + 粗體大標題。標題/內文/img 可填,項目數不限。img 建議用 data: URI。',
     w: 800, h: 0,
     defaultData: CIRCLE_IMAGE_SAMPLE,

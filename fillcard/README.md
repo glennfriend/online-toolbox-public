@@ -17,7 +17,7 @@
 
 | id | 說明 |
 |----|------|
-| `year-timeline` | 一年 12 個月時間軸(多彩)。英文月份 JAN–DEC 固定;每月的**標題**與**內文**是插槽。760×1636。 |
+| `year-timeline` | 一年 12 個月時間軸(米色底、開口圓環、虛線 + 光澤編號牌)。英文月份 JANUARY–DECEMBER 固定;每月的**標題**與**內文**是插槽。900×2334。 |
 
 ## 新增版型
 
@@ -28,7 +28,8 @@
 
 **版型一律自己畫成 SVG**,不可直接搬 Canva / 稿定 / Freepik 等站的模板(授權不允許再散布其設計)。
 可內嵌的素材只用開源/CC0:
-- 字型:**Noto Sans TC**(Google Fonts,動態子集,見 index.html 的 `<link>`);特色字可用 jf 粉圓、清松手寫(OFL/免費商用,需自行子集化)。
+- 字型:**Noto Sans TC**(中文)+ **Anton**(英文展示字,如月份/大標)—— 皆 OFL 開源,Google Fonts 動態載入(見 index.html 的 `<link>`)。特色字可再加 jf 粉圓、清松手寫(需自行子集化)。
+- 編輯器中間有**可拖曳分隔線**,寬度記在 localStorage(`fillcard.leftPx`,全域共用)。
 - 插圖/圖示:unDraw、SVG Repo(CC0)。
 
 ## 架構

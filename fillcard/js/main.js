@@ -79,5 +79,32 @@ function downloadPng() {
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(lastSvg);
 }
 
+// ── 可拖曳分隔線(記住寬度,全域共用一組)──
+const workspace = $('.workspace');
+const splitter = $('#splitter');
+const SPLIT_KEY = 'fillcard.leftPx';
+const saved = parseInt(localStorage.getItem(SPLIT_KEY), 10);
+if (saved) workspace.style.setProperty('--left', saved + 'px');
+
+let dragging = false;
+splitter.addEventListener('pointerdown', (e) => {
+  dragging = true; splitter.classList.add('dragging'); splitter.setPointerCapture(e.pointerId); e.preventDefault();
+});
+splitter.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const rect = workspace.getBoundingClientRect();
+  const x = Math.max(200, Math.min(rect.width - 320, e.clientX - rect.left));
+  workspace.style.setProperty('--left', Math.round(x) + 'px');
+});
+const endDrag = (e) => {
+  if (!dragging) return;
+  dragging = false; splitter.classList.remove('dragging');
+  try { splitter.releasePointerCapture(e.pointerId); } catch {}
+  const cur = parseInt(workspace.style.getPropertyValue('--left'), 10);
+  if (cur) localStorage.setItem(SPLIT_KEY, cur);
+};
+splitter.addEventListener('pointerup', endDrag);
+splitter.addEventListener('pointercancel', endDrag);
+
 // 啟動
 loadTemplate(currentId);

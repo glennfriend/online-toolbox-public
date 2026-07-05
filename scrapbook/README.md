@@ -17,9 +17,12 @@
   - chip 依分類上色:圖片=淡黃、純文字=淡灰、特殊格式(JSON/Markdown/CSV…)=淡紅。
   - 顯示目前儲存用量百分比。
 - **貼上圖片**:貼上即顯示大小,超過 5MB 不存;按「儲存圖片」才輸入檔名;chip 顯示「檔名 (x.xx MB)」。
-- **複製(保留格式)**:
+- **📋 Memory(複製到剪貼簿,保留格式)**:
   - 文字 → 寫入 `text/html` + `text/plain`,貼到 Teams / Trello / Word 保留排版。
   - 圖片 → 寫入 `image/png` 影像本身,可直接貼成圖片。
+- **📋 data URI(複製為 data: URI)**:
+  - 圖片 → `data:<mime>;base64,…`(保留原始格式),可直接貼進 `<img src>` 或別的工具的圖片欄位。
+  - 文字 → `data:text/html;charset=utf-8;base64,…`(目前顯示的 HTML),可貼進網址列直接開啟。
 - **開啟**:點 chip 把「輸入 + 顯示」一起切到該筆。
 - **暫存區(防遺失、免打擾)**:輸入有未存變動時切去開別筆,會自動把它存成清單第一格的「暫存」(單一、持久化於 IndexedDB,重整後還在),不再跳確認框。點暫存區即可還原(若當下輸入也有未存內容,則兩者交換,兩邊都不丟);被覆蓋時 chip 會閃一下提示。只保護「最近一次」未存的輸入。
 
@@ -40,7 +43,7 @@ scrapbook/
     ├── storage.js          持久層:item CRUD + 用量估計
     ├── lib/                本工具的通用模組(與內容無關的基礎設施)
     │   ├── idb.js          IndexedDB 封裝
-    │   ├── clipboard.js    富文字複製(text/html + text/plain)
+    │   ├── clipboard.js    富文字複製(text/html + text/plain)、純文字複製、Blob → data URI
     │   └── dom.js          escapeHtml + el()
     ├── handlers/           每種「儲存型別」一個 handler(自帶完整行為)
     │   ├── text.js         文字:即時 render、儲存、開啟、富文字複製、chip 分類
@@ -69,8 +72,9 @@ registerHandler({
 });
 ```
 
-`ctx` 提供:`registerHandler / setDisplay / setBadge / setCopyHandler / addItem /
-refreshSaved / showToast / notifyDisplayChanged / onDisplayChanged / markInputSaved` 及 DOM 參照。
+`ctx` 提供:`registerHandler / setDisplay / setBadge / setCopyHandler / setDataUriHandler /
+addItem / refreshSaved / showToast / notifyDisplayChanged / onDisplayChanged / markInputSaved` 及 DOM 參照。
+(`setCopyHandler` 決定「📋 Memory」的行為、`setDataUriHandler` 決定「📋 data URI」的行為,兩者由目前顯示內容的 handler 設定。)
 
 **新增一種儲存型別** = 寫一個 `handlers/xxx.js`(在裡面 `registerHandler`),並在 `main.js` 加一行 `initXxxHandler(ctx)`。
 **新增一種文字子格式**(如 diff)= 在 `detect.js` 加偵測 + `renderers/` 加一個渲染器 + dispatch 一行(不需新 handler)。

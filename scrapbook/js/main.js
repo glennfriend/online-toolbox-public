@@ -14,6 +14,7 @@ const display = qs('#display');
 const badge = qs('#badge');
 const saveBtn = qs('#save');
 const copyBtn = qs('#copy');
+const dataUriBtn = qs('#copyDataUri');
 const displayActions = display.closest('.pane').querySelector('.pane-actions');
 const savedList = qs('#saved');
 const storageStatus = qs('#storage-status');
@@ -21,7 +22,8 @@ const toast = qs('#toast');
 
 // ── handler 登記表 + 顯示版狀態 ──
 const handlers = {};
-let copyHandler = null;             // 複製按鈕實際呼叫的函式(由目前顯示內容的 handler 設定)
+let copyHandler = null;             // 「Memory」按鈕實際呼叫的函式(由目前顯示內容的 handler 設定)
+let dataUriHandler = null;          // 「data URI」按鈕實際呼叫的函式(同上,把目前顯示內容轉 data URI)
 const displayChangeListeners = []; // 顯示版內容換了 → 通知各 handler(收掉自己的控制項等)
 
 // 輸入框「已載入 / 已儲存」的內容快照;與它不同且非空 = 有未存變動(dirty)。
@@ -38,6 +40,7 @@ const ctx = {
   },
   setBadge: (text) => { badge.textContent = text; },
   setCopyHandler: (fn) => { copyHandler = fn; },
+  setDataUriHandler: (fn) => { dataUriHandler = fn; },
   addItem,
   refreshSaved,
   showToast,
@@ -47,12 +50,22 @@ const ctx = {
   markInputSaved: () => { currentBaseline = input.value; },
 };
 
-// ── 複製(實際行為交給目前的 copyHandler) ──
+// ── 複製 Memory(實際行為交給目前的 copyHandler) ──
 copyBtn.addEventListener('click', async () => {
   try {
     if (copyHandler) await copyHandler();
   } catch {
     showToast('複製失敗,請手動選取');
+  }
+});
+
+// ── 複製 data URI(把目前顯示內容轉成 data: URI 放進剪貼簿) ──
+dataUriBtn.addEventListener('click', async () => {
+  try {
+    if (dataUriHandler) await dataUriHandler();
+    else showToast('目前內容無法轉 data URI');
+  } catch {
+    showToast('轉 data URI 失敗');
   }
 });
 

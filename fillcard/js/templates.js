@@ -588,21 +588,21 @@ const CIRCLE_IMAGE_SAMPLE = {
 
 export const TEMPLATES = {
   'year-timeline': {
-    label: '十二個月 米白色',
+    label: '12 Month 米白色',
     desc: '米色底直式時間軸:開口圓環 + 虛線 + 光澤編號牌;英文月份固定,標題與內文可填。',
     w: 900, h: 200 + 12 * 192 + 30,
     defaultData: YEAR_TIMELINE_SAMPLE,
     render: renderYearTimeline,
   },
   'year-cards': {
-    label: '十二個月 彩色',
+    label: '12 Month 彩色',
     desc: '白底、實心月份圓、淡染色塊,左右交替;Noto Sans TC 字型。標題與內文可填。',
     w: 900, h: 0,
     defaultData: YEAR_CARDS_SAMPLE,
     render: renderYearCards,
   },
   'years-bw': {
-    label: '各年度 黑白',
+    label: 'Year 黑白',
     desc: '手繪黑白時間軸:歪斜年份方框 + 灰階圓點(淺到深)+ 虛線箭頭,左右交替。年份/標題/內文可填,項目數不限。',
     w: 800, h: 0,
     defaultData: YEARS_BW_SAMPLE,

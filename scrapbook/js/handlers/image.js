@@ -6,12 +6,13 @@
 // 整包獨立:刪掉本檔 + 拿掉 main.js 的 initImageHandler(ctx) 即移除功能。
 
 import { el } from '../lib/dom.js';
+import { copyPlain, blobToDataURL } from '../lib/clipboard.js';
 
 const MAX_BYTES = 5 * 1024 * 1024; // 圖片大小上限:5MB(要調就改這一行)
 
 export function initImageHandler(ctx) {
   const { input, display, displayActions, setDisplay, setBadge,
-    setCopyHandler, registerHandler, addItem, refreshSaved, showToast, onDisplayChanged } = ctx;
+    setCopyHandler, setDataUriHandler, registerHandler, addItem, refreshSaved, showToast, onDisplayChanged } = ctx;
   let pendingBlob = null; // 待儲存的圖片(貼上後、尚未存)
   let objectUrl = null;   // 目前顯示中的 object URL(用完要回收)
 
@@ -107,9 +108,17 @@ export function initImageHandler(ctx) {
     img.addEventListener('click', () => window.open(URL.createObjectURL(blob), '_blank', 'noopener'));
     figure.append(img);
     setDisplay(figure);
-    // 圖片的「複製」改成複製影像本身(寫入剪貼簿的 image/png)
+    // 圖片的「Memory」改成複製影像本身(寫入剪貼簿的 image/png)
     setCopyHandler(() => copyImage(blob));
+    // 「data URI」複製 data:<mime>;base64,...(保留原始格式)
+    setDataUriHandler(() => copyImageDataUri(blob));
     ctx.notifyDisplayChanged('image');
+  }
+
+  async function copyImageDataUri(blob) {
+    const dataUrl = await blobToDataURL(blob);
+    await copyPlain(dataUrl);
+    showToast(`已複製 data URI(${dataUrl.length.toLocaleString()} 字元)`);
   }
 
   async function copyImage(blob) {

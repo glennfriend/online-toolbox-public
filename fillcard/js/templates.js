@@ -117,12 +117,94 @@ const YEAR_TIMELINE_SAMPLE = {
   ],
 };
 
+// ── 版型 2:一年 12 個月色塊卡(白底、實心月份圓、淡染色塊,左右交替)──────────
+const CARD_COLORS = ['#7C6BD6', '#2FAEC6', '#F2A03D', '#EC6FA6', '#E8564B', '#54B265',
+                     '#4E86E0', '#B36AC9', '#E0B23C', '#E0783C', '#3FC0A3', '#6C7DDA'];
+const ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+function renderYearCards(data) {
+  const W = 900, headerH = 150, n = 12, cx = 450;
+  const circR = 30, boxW = 360, lineH = 20;
+  const months = Array.isArray(data.months) ? data.months : [];
+
+  // 逐列動態高度:色塊高度依內文行數自動撐開(不截斷、不浪費空白)。
+  const rows = [];
+  let cursor = headerH;
+  for (let i = 0; i < n; i++) {
+    const m = months[i] || {};
+    const bodyLines = wrapLines(m.body, 22).slice(0, 10);
+    const boxH = 18 + 26 + bodyLines.length * lineH + 16;
+    const ringY = cursor + boxH / 2;
+    rows.push({ ringY, boxH, bodyLines, m });
+    cursor = cursor + boxH + 26;   // + 列距
+  }
+  const H = cursor + 8;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${TC}">`;
+  s += `<rect x="0" y="0" width="${W}" height="${H}" rx="26" fill="#FFFFFF"/>`;
+  s += `<rect x="0" y="0" width="${W}" height="${H}" rx="26" fill="none" stroke="#EEF1F5" stroke-width="2"/>`;
+
+  // 標題區
+  s += `<text x="${cx}" y="70" text-anchor="middle" font-size="38" font-weight="800" fill="#242830">${esc(data.title)}</text>`;
+  s += `<text x="${cx}" y="106" text-anchor="middle" font-size="17" fill="#8A9099">${esc(data.subtitle)}</text>`;
+  s += `<rect x="${cx - 42}" y="122" width="84" height="4" rx="2" fill="#D3DAE2"/>`;
+
+  // 中央脊線(淡灰)
+  s += `<line x1="${cx}" y1="${rows[0].ringY}" x2="${cx}" y2="${rows[n - 1].ringY}" stroke="#E7EAEF" stroke-width="3"/>`;
+
+  for (let i = 0; i < n; i++) {
+    const { ringY: y, boxH, bodyLines, m } = rows[i];
+    const c = CARD_COLORS[i];
+    const right = i % 2 === 0;                       // 一月右,二月左,交替
+    const boxX = right ? cx + circR + 24 : 36;
+    const boxTop = y - boxH / 2;
+    const near = right ? boxX : boxX + boxW;         // 靠圓那側
+    const circEdge = right ? cx + circR : cx - circR;
+
+    // 連接線 + 色塊 + 靠圓側色條
+    s += `<line x1="${circEdge}" y1="${y}" x2="${near}" y2="${y}" stroke="${c}" stroke-width="2.5"/>`;
+    s += `<rect x="${boxX}" y="${boxTop}" width="${boxW}" height="${boxH}" rx="12" fill="${c}" fill-opacity="0.10"/>`;
+    const barX = right ? boxX : boxX + boxW - 4;
+    s += `<rect x="${barX}" y="${boxTop}" width="4" height="${boxH}" rx="2" fill="${c}"/>`;
+
+    // 標題 + 內文(右側靠左、左側靠右)
+    const anchor = right ? 'start' : 'end';
+    const tx = right ? boxX + 20 : boxX + boxW - 20;
+    const titleLine = wrapLines(m.title, 16)[0] || '';
+    s += `<text x="${tx}" y="${boxTop + 32}" text-anchor="${anchor}" font-size="20" font-weight="700" fill="${c}">${esc(titleLine)}</text>`;
+    bodyLines.forEach((ln, k) => {
+      s += `<text x="${tx}" y="${boxTop + 56 + k * lineH}" text-anchor="${anchor}" font-size="14.5" fill="#4B5158">${esc(ln)}</text>`;
+    });
+
+    // 月份實心圓(白字縮寫)
+    s += `<circle cx="${cx}" cy="${y}" r="${circR}" fill="${c}"/>`;
+    s += `<circle cx="${cx}" cy="${y}" r="${circR}" fill="none" stroke="#FFFFFF" stroke-width="3"/>`;
+    s += `<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="800" fill="#FFFFFF" letter-spacing="0.5">${ABBR[i]}</text>`;
+  }
+
+  s += `</svg>`;
+  return s;
+}
+
+const YEAR_CARDS_SAMPLE = {
+  title: '2026 年度計畫',
+  subtitle: '十二個月,一步一步完成目標',
+  months: YEAR_TIMELINE_SAMPLE.months,
+};
+
 export const TEMPLATES = {
   'year-timeline': {
-    label: '一年 12 個月時間軸(多彩)',
+    label: '一年 12 個月時間軸(米底編號牌)',
     desc: '米色底直式時間軸:開口圓環 + 虛線 + 光澤編號牌;英文月份固定,標題與內文可填。',
     w: 900, h: 200 + 12 * 192 + 30,
     defaultData: YEAR_TIMELINE_SAMPLE,
     render: renderYearTimeline,
+  },
+  'year-cards': {
+    label: '一年 12 個月色塊卡(白底多彩,左右交替)',
+    desc: '白底、實心月份圓、淡染色塊,左右交替;Noto Sans TC 字型。標題與內文可填。',
+    w: 900, h: 0,
+    defaultData: YEAR_CARDS_SAMPLE,
+    render: renderYearCards,
   },
 };

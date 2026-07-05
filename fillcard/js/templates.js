@@ -192,6 +192,119 @@ const YEAR_CARDS_SAMPLE = {
   months: YEAR_TIMELINE_SAMPLE.months,
 };
 
+// ── 版型 3:各年度 黑白(手繪風時間軸)──────────────────────────────
+const MARKER = "'Permanent Marker','Noto Sans TC',cursive";
+const HAND = "'Gochi Hand','Noto Sans TC',cursive";
+
+// 決定性小抖動(不用亂數 → 同資料同結果),做手繪歪斜感。
+const jit = (seed, k) => Math.sin(seed * 12.9898 + k * 78.233) * 2.6;
+// 手繪歪斜方框 path(白底黑框感):四角微抖 + 四邊微彎。
+function sketchRect(x, y, w, h, seed) {
+  const A = [x + jit(seed, 1), y + jit(seed, 2)];
+  const B = [x + w + jit(seed, 3), y + jit(seed, 4)];
+  const C = [x + w + jit(seed, 5), y + h + jit(seed, 6)];
+  const D = [x + jit(seed, 7), y + h + jit(seed, 8)];
+  const mid = (p, q, ox, oy) => [(p[0] + q[0]) / 2 + ox, (p[1] + q[1]) / 2 + oy];
+  const f = (n) => Number(n).toFixed(1);
+  const seg = (p, m, q) => `Q ${f(m[0])} ${f(m[1])} ${f(q[0])} ${f(q[1])} `;
+  return `M ${f(A[0])} ${f(A[1])} `
+    + seg(A, mid(A, B, 0, jit(seed, 9) - 1.5), B)
+    + seg(B, mid(B, C, jit(seed, 10) + 1.5, 0), C)
+    + seg(C, mid(C, D, 0, jit(seed, 11) + 1.5), D)
+    + seg(D, mid(D, A, jit(seed, 12) - 1.5, 0), A) + 'Z';
+}
+
+function renderYearsBW(data) {
+  const W = 800, cx = 400, circR = 26, headerH = 236, boxW = 138, boxH = 62, gap = 28, lineH = 20;
+  const items = Array.isArray(data.items) ? data.items : [];
+  const n = items.length || 1;
+
+  // 逐列動態高度
+  const rows = [];
+  let cursor = headerH;
+  for (let i = 0; i < n; i++) {
+    const it = items[i] || {};
+    const bodyLines = wrapLines(it.body, 26).slice(0, 8);
+    const textH = 30 + bodyLines.length * lineH + 6;
+    const contentH = Math.max(textH, boxH);
+    const ringY = cursor + contentH / 2;
+    rows.push({ ringY, bodyLines, it });
+    cursor += contentH + gap;
+  }
+  const lastY = rows[n - 1].ringY;
+  const arrowY = lastY + 54;
+  const H = arrowY + 70;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${HAND}">`;
+  s += `<rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/>`;
+
+  // 標題
+  s += `<text x="${cx}" y="130" text-anchor="middle" font-family="${MARKER}" font-size="62" fill="#222222">${esc(data.title)}</text>`;
+  s += `<text x="${cx}" y="182" text-anchor="middle" font-size="27" fill="#3A3A3A">${esc(data.subtitle)}</text>`;
+
+  // 手繪塗鴉裝飾(黑白)
+  s += `<path d="M96 150 q -26 -20 -4 -34 q 22 -14 30 10 q 7 26 -22 24 q -30 -3 -20 -30" fill="none" stroke="#2b2b2b" stroke-width="2" stroke-linecap="round"/>`;
+  const sp = (x, y, r) => `<path d="M${x} ${y - r} L${x + r * 0.28} ${y - r * 0.28} L${x + r} ${y} L${x + r * 0.28} ${y + r * 0.28} L${x} ${y + r} L${x - r * 0.28} ${y + r * 0.28} L${x - r} ${y} L${x - r * 0.28} ${y - r * 0.28} Z" fill="none" stroke="#2b2b2b" stroke-width="2" stroke-linejoin="round"/>`;
+  s += sp(W - 96, 138, 15) + sp(W - 126, 180, 9);
+  s += `<path d="M${W - 150} ${H - 70} q 18 -22 36 0 q 18 22 36 0 q 18 -22 36 0" fill="none" stroke="#2b2b2b" stroke-width="2" stroke-linecap="round"/>`;
+
+  // 起點圓點 + 虛線主軸 + 底部箭頭
+  const startY = rows[0].ringY - 48;
+  s += `<circle cx="${cx}" cy="${startY}" r="5" fill="#1c1c1c"/>`;
+  s += `<line x1="${cx}" y1="${startY}" x2="${cx}" y2="${arrowY}" stroke="#1c1c1c" stroke-width="2.5" stroke-dasharray="2 9" stroke-linecap="round"/>`;
+  s += `<path d="M${cx - 9} ${arrowY - 12} L${cx} ${arrowY} L${cx + 9} ${arrowY - 12}" fill="none" stroke="#1c1c1c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  for (let i = 0; i < n; i++) {
+    const { ringY: y, bodyLines, it } = rows[i];
+    const boxLeft = i % 2 === 0;                    // 第一項(2023)方框在左,交替
+    const shade = Math.round(232 - (192) * (n <= 1 ? 0 : i / (n - 1)));  // 由淺到深
+    const fillC = `rgb(${shade},${shade},${shade})`;
+
+    // 年份方框(手繪)+ 連接線
+    const boxX = boxLeft ? cx - circR - 42 - boxW : cx + circR + 42;
+    const boxY = y - boxH / 2;
+    const connFrom = boxLeft ? cx - circR : cx + circR;
+    const connTo = boxLeft ? boxX + boxW : boxX;
+    s += `<line x1="${connFrom}" y1="${y}" x2="${connTo}" y2="${y}" stroke="#1c1c1c" stroke-width="2"/>`;
+    s += `<path d="${sketchRect(boxX, boxY, boxW, boxH, i + 1)}" fill="#FFFFFF" stroke="#1c1c1c" stroke-width="2.4" stroke-linejoin="round"/>`;
+    s += `<text x="${boxX + boxW / 2}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="${HAND}" font-size="30" fill="#1c1c1c">${esc(it.year)}</text>`;
+
+    // 文字(對側):標題(粗)+ 內文
+    const textLeft = !boxLeft;                       // 方框左 → 文字右
+    const tx = textLeft ? 40 : W - 40;
+    const anchor = textLeft ? 'start' : 'end';
+    const blockTop = y - (30 + bodyLines.length * lineH) / 2;
+    const titleLine = wrapLines(it.title, 18)[0] || '';
+    s += `<text x="${tx}" y="${blockTop + 20}" text-anchor="${anchor}" font-size="24" font-weight="700" fill="#1c1c1c">${esc(titleLine)}</text>`;
+    bodyLines.forEach((ln, k) => {
+      s += `<text x="${tx}" y="${blockTop + 46 + k * lineH}" text-anchor="${anchor}" font-size="14.5" fill="#555555">${esc(ln)}</text>`;
+    });
+
+    // 圓點(灰階由淺到深)
+    s += `<circle cx="${cx}" cy="${y}" r="${circR}" fill="${fillC}" stroke="#1c1c1c" stroke-width="2.5"/>`;
+  }
+
+  if (data.footer) s += `<text x="${cx}" y="${H - 26}" text-anchor="middle" font-size="20" fill="#2b2b2b" letter-spacing="1">${esc(data.footer)}</text>`;
+  s += `</svg>`;
+  return s;
+}
+
+const YEARS_BW_SAMPLE = {
+  title: 'CHRONOLOGY',
+  subtitle: '公司大事記',
+  footer: 'yourcompany.com',
+  items: [
+    { year: '2023', title: '公司成立', body: '三個朋友在車庫寫下第一行程式,踏出第一步。' },
+    { year: '2024', title: '團隊擴編', body: '夥伴從 3 人成長到 20 人,建立核心團隊。' },
+    { year: '2025', title: '產品上線', body: '第一個正式版本推出,獲得市場好評。' },
+    { year: '2026', title: '獲得投資', body: '完成 A 輪募資,加速產品與市場拓展。' },
+    { year: '2027', title: '拓展海外', body: '進軍東南亞,服務跨出台灣。' },
+    { year: '2028', title: '用戶破百萬', body: '全球活躍用戶正式突破一百萬。' },
+    { year: '2029', title: '獲頒大獎', body: '榮獲年度最佳新創,受到業界肯定。' },
+    { year: '2030', title: '邁向全球', body: '服務覆蓋全球五十國,持續前進。' },
+  ],
+};
+
 export const TEMPLATES = {
   'year-timeline': {
     label: '十二個月 米白色',
@@ -206,5 +319,12 @@ export const TEMPLATES = {
     w: 900, h: 0,
     defaultData: YEAR_CARDS_SAMPLE,
     render: renderYearCards,
+  },
+  'years-bw': {
+    label: '各年度 黑白',
+    desc: '手繪黑白時間軸:歪斜年份方框 + 灰階圓點(淺到深)+ 虛線箭頭,左右交替。年份/標題/內文可填,項目數不限。',
+    w: 800, h: 0,
+    defaultData: YEARS_BW_SAMPLE,
+    render: renderYearsBW,
   },
 };

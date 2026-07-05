@@ -27,7 +27,8 @@
         </span>
       </span>
     </span>
-    <span class="spacer"></span>
+    <button id="saveCard" class="btn btn-save" title="把目前內容存成一張新圖">＋ 儲存</button>
+    <div id="cards" class="cards" title="已儲存的圖(點一下載入,× 刪除)"></div>
     <select id="templates" class="btn" title="選版型"></select>
     <select id="download" class="btn" title="下載">
       <option value="">Download</option>
@@ -38,13 +39,13 @@
 
   <main class="workspace">
     <section class="pane">
-      <div class="pane-head">文字(JSON)</div>
+      <div class="pane-head">JSON data</div>
       <pre id="err" class="err" hidden></pre>
       <textarea id="input" spellcheck="false"></textarea>
     </section>
     <div id="splitter" title="拖曳調整寬度(會記住)"></div>
     <section class="pane">
-      <div class="pane-head">預覽</div>
+      <div class="pane-head">Preview</div>
       <div id="preview" class="preview"></div>
     </section>
   </main>

@@ -33,7 +33,7 @@ function rerender() {
 }
 
 let timer;
-input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(rerender, 200); });
+input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => { rerender(); autosave(); }, 200); });
 
 // 版型下拉
 const sel = $('#templates');
@@ -41,7 +41,85 @@ for (const [id, t] of Object.entries(TEMPLATES)) {
   const o = document.createElement('option'); o.value = id; o.textContent = t.label; sel.appendChild(o);
 }
 sel.value = currentId;
-sel.addEventListener('change', () => loadTemplate(sel.value));
+// 換版型 = 開一張全新草稿(脫離目前選中的存檔,才不會把預設值覆蓋回去)
+sel.addEventListener('change', () => { setActive(null); loadTemplate(sel.value); });
+
+// ── 已儲存的圖(localStorage;topbar 晶片列)─────────────────────────
+//   儲存 = 建新晶片(最新在最左);點晶片 = 載入;× = 確認後刪除;
+//   有選中的晶片時,每次改字都自動回存到那張。
+const CARDS_KEY = 'fillcard.cards';
+const ACTIVE_KEY = 'fillcard.activeId';
+const cardsEl = $('#cards');
+let cards = loadCards();
+let activeId = localStorage.getItem(ACTIVE_KEY) || null;
+
+function loadCards() { try { return JSON.parse(localStorage.getItem(CARDS_KEY)) || []; } catch { return []; } }
+function persistCards() { localStorage.setItem(CARDS_KEY, JSON.stringify(cards)); }
+function newId() { return crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(16).slice(2); }
+
+function setActive(id) {
+  activeId = id;
+  if (id) localStorage.setItem(ACTIVE_KEY, id); else localStorage.removeItem(ACTIVE_KEY);
+  renderChips();
+}
+
+// 晶片名稱 = title(其次 subtitle),最多 20 字。
+function cardTitle(text, tplId) {
+  let t = '';
+  try { const d = JSON.parse(text); t = d.title || d.subtitle || ''; } catch {}
+  t = String(t || (TEMPLATES[tplId] && TEMPLATES[tplId].label) || '未命名').replace(/\s+/g, ' ').trim();
+  return t.length > 20 ? t.slice(0, 20) + '…' : t;
+}
+
+function renderChips() {
+  cardsEl.innerHTML = '';
+  for (const c of cards) {
+    const chip = document.createElement('div');
+    chip.className = 'card-chip' + (c.id === activeId ? ' active' : '');
+    chip.title = c.title;
+    const name = document.createElement('span'); name.className = 'chip-name'; name.textContent = c.title;
+    const x = document.createElement('button'); x.className = 'chip-x'; x.textContent = '×'; x.title = '刪除';
+    chip.append(name, x);
+    chip.addEventListener('click', (e) => { if (e.target !== x) openCard(c.id); });
+    x.addEventListener('click', (e) => { e.stopPropagation(); deleteCard(c.id); });
+    cardsEl.appendChild(chip);
+  }
+}
+
+function openCard(id) {
+  const c = cards.find((x) => x.id === id); if (!c) return;
+  currentId = TEMPLATES[c.templateId] ? c.templateId : Object.keys(TEMPLATES)[0];
+  sel.value = currentId;
+  input.value = c.data;      // 以程式設值不會觸發 input 事件 → 不會誤存
+  setActive(id);
+  rerender();
+}
+
+function saveNewCard() {
+  const c = { id: newId(), templateId: currentId, data: input.value, title: cardTitle(input.value, currentId), updatedAt: Date.now() };
+  cards.unshift(c);          // 最新放最左
+  persistCards();
+  setActive(c.id);
+  showToast('已儲存');
+}
+
+function autosave() {
+  if (!activeId) return;
+  const c = cards.find((x) => x.id === activeId); if (!c) return;
+  c.data = input.value; c.title = cardTitle(input.value, c.templateId); c.updatedAt = Date.now();
+  persistCards();
+  renderChips();
+}
+
+function deleteCard(id) {
+  const c = cards.find((x) => x.id === id); if (!c) return;
+  if (!confirm(`確定刪除「${c.title}」?`)) return;
+  cards = cards.filter((x) => x.id !== id);
+  persistCards();
+  if (activeId === id) setActive(null); else renderChips();
+}
+
+$('#saveCard').addEventListener('click', saveNewCard);
 
 // 下載
 $('#download').addEventListener('change', (e) => {
@@ -106,5 +184,7 @@ const endDrag = (e) => {
 splitter.addEventListener('pointerup', endDrag);
 splitter.addEventListener('pointercancel', endDrag);
 
-// 啟動
-loadTemplate(currentId);
+// 啟動:有存檔且上次選中的還在 → 直接開它;否則載入預設版型
+renderChips();
+if (activeId && cards.some((c) => c.id === activeId)) openCard(activeId);
+else { setActive(null); loadTemplate(currentId); }

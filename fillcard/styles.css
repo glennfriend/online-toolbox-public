@@ -10,6 +10,18 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:
 .spacer{flex:1}
 .btn{font-size:13px;padding:5px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer}
 .btn:hover{background:var(--bg-code)}
+.btn-save{flex:0 0 auto;font-weight:700;color:var(--accent);border-color:var(--accent)}
+
+/* 已儲存的圖:topbar 內從左到右的可捲動晶片列 */
+.cards{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;align-items:center;padding:2px 1px}
+.cards::-webkit-scrollbar{height:6px}
+.cards::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.card-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:2px;max-width:180px;padding:4px 4px 4px 11px;border:1px solid var(--border);border-radius:15px;background:#fff;cursor:pointer;font-size:12px;line-height:1.4;white-space:nowrap}
+.card-chip:hover{background:var(--bg-code)}
+.card-chip.active{border-color:var(--accent);background:#eaf1ff;color:var(--accent);font-weight:600}
+.chip-name{overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.chip-x{border:0;background:transparent;cursor:pointer;font-size:15px;line-height:1;color:var(--muted);padding:0 4px;border-radius:9px}
+.chip-x:hover{background:#f6d3cf;color:var(--danger)}
 
 .workspace{flex:1;display:grid;grid-template-columns:var(--left,320px) 8px minmax(0,1fr);gap:0;padding:10px;min-height:0}
 .pane{display:flex;flex-direction:column;min-height:0;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}

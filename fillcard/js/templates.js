@@ -195,6 +195,8 @@ const YEAR_CARDS_SAMPLE = {
 // ── 版型 3:各年度 黑白(手繪風時間軸)──────────────────────────────
 const MARKER = "'Permanent Marker','Noto Sans TC',cursive";
 const HAND = "'Gochi Hand','Noto Sans TC',cursive";
+const POP = "'Poppins','Noto Sans TC','Microsoft JhengHei',sans-serif";  // 圓潤粗體(標題/內文),OFL
+const SCRIPT = "'Kaushan Script','Noto Sans TC',cursive";                // 手寫花體(小標語),OFL
 
 // 決定性小抖動(不用亂數 → 同資料同結果),做手繪歪斜感。
 const jit = (seed, k) => Math.sin(seed * 12.9898 + k * 78.233) * 2.6;
@@ -476,6 +478,114 @@ const CHEVRON_SAMPLE = {
   ],
 };
 
+// ── 版型 6:圓圈嵌圖(Simply Circle Image)──────────────────────────
+//   深綠橫條 + 左右交替的圓形圖章;圓圈可嵌圖(item.img),圖自動裁成圓形。
+//   img 建議用 data: URI(可正常匯出 PNG);一般網址只能預覽(跨網域會使 PNG 匯出失敗)。
+const CI_CREAM = '#F4EFC7', CI_ORANGE = '#FBCF74', CI_DEEP = '#1C5E45', CI_BAR = '#2E7D5F';
+
+// 空圖時的「相片」佔位圖示(讓圓圈即使沒放圖也像刻意的設計)。
+function ciPhotoIcon(cx, cy) {
+  const g = '#8FBFA6';
+  return `<rect x="${cx - 24}" y="${cy - 18}" width="48" height="36" rx="6" fill="none" stroke="${g}" stroke-width="3.4"/>`
+    + `<circle cx="${cx - 9}" cy="${cy - 6}" r="4.6" fill="${g}"/>`
+    + `<path d="M ${cx - 22} ${cy + 15} L ${cx - 6} ${cy - 2} L ${cx + 3} ${cy + 7} L ${cx + 11} ${cy - 3} L ${cx + 22} ${cy + 13} Z" fill="${g}"/>`;
+}
+
+// 圓形圖章:底 + (裁成圓的圖 或 佔位圖示) + 外環。
+function ciCircle(cx, cy, r, img, seed) {
+  const id = 'ci' + seed;
+  const src = String(img ?? '').replace(/"/g, '');
+  let o = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${CI_CREAM}"/>`;
+  if (src) {
+    o += `<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r - 5}"/></clipPath>`;
+    o += `<image href="${esc(src)}" x="${cx - (r - 5)}" y="${cy - (r - 5)}" width="${2 * (r - 5)}" height="${2 * (r - 5)}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>`;
+  } else {
+    o += ciPhotoIcon(cx, cy);
+  }
+  o += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${CI_DEEP}" stroke-width="5"/>`;
+  return o;
+}
+
+function renderCircleImage(data) {
+  const items = Array.isArray(data.items) ? data.items : [];
+  const W = 800, marginX = 40, R = 62;
+  const barX = marginX, barW = W - marginX * 2;
+
+  // ── 版面計算 ──
+  const rows = items.map((it, i) => {
+    const titleLines = wrapLines(it.title, 20).slice(0, 2);
+    const bodyLines = wrapLines(it.body, 33).slice(0, 3);
+    const blockH = titleLines.length * 31 + (bodyLines.length ? 8 + bodyLines.length * 22 : 0);
+    const rowH = Math.max(104, blockH + 44);
+    return { it, i, titleLines, bodyLines, blockH, rowH };
+  });
+
+  const headerH = 250, ruleH = 12, bodyTop = headerH + ruleH + 26, rowGap = 18;
+  let cursor = bodyTop;
+  rows.forEach((r) => { r.y = cursor; cursor += r.rowH + rowGap; });
+  const footerH = 58;
+  const H = cursor - rowGap + footerH;
+
+  // ── 底色:整張橘 + 上方奶油色頁首 ──
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${POP}">`;
+  s += `<rect width="${W}" height="${H}" fill="${CI_ORANGE}"/>`;
+  s += `<rect width="${W}" height="${headerH}" fill="${CI_CREAM}"/>`;
+  s += `<rect y="${headerH}" width="${W}" height="${ruleH}" fill="${CI_DEEP}"/>`;
+
+  // ── 頁首:花體小標語 + 大標題(字級隨長度縮放,不溢出)──
+  const script = String(data.script ?? '');
+  const title = String(data.title ?? '');
+  const scriptFont = Math.min(46, (W - 160) / Math.max(1, script.length) / 0.42);
+  s += `<text x="${W / 2}" y="96" text-anchor="middle" font-family="${SCRIPT}" font-size="${scriptFont.toFixed(1)}" fill="${CI_DEEP}">${esc(script)}</text>`;
+  const titleFont = Math.min(98, (W - marginX * 2 - 16) / Math.max(1, title.length) / 0.63);
+  s += `<text x="${W / 2}" y="196" text-anchor="middle" font-size="${titleFont.toFixed(1)}" font-weight="800" letter-spacing="1" fill="${CI_DEEP}">${esc(title)}</text>`;
+
+  // ── 各列:深綠橫條 + 左右交替圓圈 + 文字 ──
+  rows.forEach((r) => {
+    const left = r.i % 2 === 0;
+    const cy = r.y + r.rowH / 2;
+    const cx = left ? marginX + 34 : W - marginX - 34;
+    const tx = left ? cx + R + 22 : marginX + 22;
+    // 文字可用寬度(避開圓圈那側)
+    const blockTop = cy - r.blockH / 2;
+
+    s += `<rect x="${barX}" y="${r.y}" width="${barW}" height="${r.rowH}" rx="11" fill="${CI_BAR}"/>`;
+    s += ciCircle(cx, cy, R, r.it.img, r.i);
+
+    r.titleLines.forEach((ln, k) => {
+      s += `<text x="${tx}" y="${(blockTop + 25 + k * 31).toFixed(1)}" font-size="26" font-weight="700" fill="#FFFFFF">${esc(ln)}</text>`;
+    });
+    const bodyY = blockTop + r.titleLines.length * 31 + 20;
+    r.bodyLines.forEach((ln, k) => {
+      s += `<text x="${tx}" y="${(bodyY + k * 22).toFixed(1)}" font-size="17" fill="#EAF3EE">${esc(ln)}</text>`;
+    });
+  });
+
+  // ── 頁尾 ──
+  if (data.source) {
+    s += `<text x="${W / 2}" y="${H - 22}" text-anchor="middle" font-size="13" fill="${CI_DEEP}">${esc(data.source)}</text>`;
+  }
+
+  s += `</svg>`;
+  return s;
+}
+
+const CIRCLE_IMAGE_SAMPLE = {
+  script: 'Great sources of',
+  title: 'CALCIUM',
+  source: 'Source | 你的品牌',
+  items: [
+    { title: '蔬菜', body: '青花菜、高麗菜、菠菜、青江菜、地瓜', img: '' },
+    { title: '魚罐頭', body: '鮪魚、沙丁魚、蝦、鮭魚', img: '' },
+    { title: '堅果', body: '巴西堅果、杏仁、榛果、腰果', img: '' },
+    { title: '新鮮水果', body: '柳橙、奇異果、杏桃、鳳梨、莓果', img: '' },
+    { title: '維生素 D', body: '維生素 D 有助於腸道吸收鈣質', img: '' },
+    { title: '強化飲品', body: '杏仁奶、米漿、柳橙汁', img: '' },
+    { title: '果乾', body: '杏桃乾、鳳梨乾、椰棗、無花果、葡萄乾', img: '' },
+    { title: '種子', body: '罌粟籽、芝麻、芝麻醬、奇亞籽、葵花籽', img: '' },
+  ],
+};
+
 export const TEMPLATES = {
   'year-timeline': {
     label: '十二個月 米白色',
@@ -511,5 +621,12 @@ export const TEMPLATES = {
     w: 0, h: 0,
     defaultData: CHEVRON_SAMPLE,
     render: renderChevron,
+  },
+  'circle-image': {
+    label: '圓圈嵌圖',
+    desc: '深綠橫條清單:左右交替的圓形圖章(可嵌圖,圖自動裁成圓形)+ 花體小標語 + 粗體大標題。標題/內文/img 可填,項目數不限。img 建議用 data: URI。',
+    w: 800, h: 0,
+    defaultData: CIRCLE_IMAGE_SAMPLE,
+    render: renderCircleImage,
   },
 };

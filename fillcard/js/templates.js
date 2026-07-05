@@ -384,6 +384,98 @@ const STEPS_SAMPLE = {
   ],
 };
 
+// ── 版型 5:Step 3-10(手繪箭頭色帶,上下交替卡片)──────────────────
+const CHEV_STRONG = ['#6E8FE0', '#46B8AE', '#7CC24A', '#A6BE48', '#F4C020', '#D2A05A', '#EE8A56', '#E0625C', '#EE79B8', '#A97BE0'];
+const CHEV_FILL = ['#C7D6F5', '#B6E5E0', '#CDE9A6', '#DEE7A6', '#FBE08A', '#ECD6B4', '#F8C6A6', '#F3B4B0', '#F9C2E0', '#DAC6F2'];
+
+// 手繪捲曲箭頭:bar↔卡片。yFrom 靠近色帶,yTo 靠近卡片(可上可下)。
+function curlyArrow(cx, yFrom, yTo) {
+  const up = yTo < yFrom;
+  const midY = (yFrom + yTo) / 2;
+  const p = `M ${cx + 9} ${yFrom} C ${cx + 20} ${midY} ${cx - 17} ${midY} ${cx - 2} ${yTo}`;
+  const head = up
+    ? `M ${cx - 10} ${yTo + 13} L ${cx - 2} ${yTo} L ${cx + 7} ${yTo + 12}`
+    : `M ${cx - 10} ${yTo - 13} L ${cx - 2} ${yTo} L ${cx + 7} ${yTo - 12}`;
+  return `<path d="${p}" fill="none" stroke="#2b2b2b" stroke-width="2.3" stroke-linecap="round"/>`
+    + `<path d="${head}" fill="none" stroke="#2b2b2b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+function renderChevron(data) {
+  const items = Array.isArray(data.items) ? data.items : [];
+  const n = Math.max(1, items.length);
+  const segW = 172, notch = 24, marginX = 42, barHalf = 38, titleBoxH = 42, lineH = 20, arrowGap = 62;
+  const stride = segW - notch;
+  const W = marginX * 2 + (n - 1) * stride + segW;
+
+  let maxBody = 1;
+  const perBody = items.map((it) => { const b = wrapLines(it.body, 14).slice(0, 6); if (b.length > maxBody) maxBody = b.length; return b; });
+  const cardH = titleBoxH + 24 + maxBody * lineH;
+  const headerH = 172;
+  const barTop = headerH + cardH + arrowGap;
+  const barY = barTop + barHalf, barBottom = barY + barHalf * 2;
+  const belowTop = barBottom + arrowGap;
+  const H = belowTop + cardH + 28;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${HAND}">`;
+  s += `<defs><pattern id="gridc" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M26 0 H0 V26" fill="none" stroke="#e6e8ec" stroke-width="1"/></pattern></defs>`;
+  s += `<rect width="${W}" height="${H}" fill="#FBFBF9"/><rect width="${W}" height="${H}" fill="url(#gridc)"/>`;
+
+  // 標題 + 黃底副標
+  const subW = Math.max(150, String(data.subtitle || '').length * 17 + 40);
+  s += `<rect x="${W / 2 - subW / 2}" y="28" width="${subW}" height="32" rx="16" fill="#FBE08A"/>`;
+  s += `<text x="${W / 2}" y="50" text-anchor="middle" font-size="18" fill="#3A3A3A">${esc(data.subtitle)}</text>`;
+  const titleLen = Math.max(1, String(data.title || '').length);
+  const titleFont = Math.max(24, Math.min(54, (W - marginX * 2 - 24) / titleLen / 0.55));
+  s += `<text x="${W / 2}" y="118" text-anchor="middle" font-size="${titleFont.toFixed(1)}" fill="#2b2b2b">${esc(data.title)}</text>`;
+
+  const T = barY - barHalf, B = barY + barHalf, M = barY;
+  for (let i = 0; i < n; i++) {
+    const it = items[i] || {};
+    const strong = CHEV_STRONG[i % 10], fill = CHEV_FILL[i % 10];
+    const segX = marginX + i * stride;
+    const cx = segX + stride / 2;
+    const above = i % 2 === 0;
+
+    // 箭頭色帶段(左凹槽、右尖;第一段左邊平)
+    let d = `M ${segX} ${T} L ${segX + segW - notch} ${T} L ${segX + segW} ${M} L ${segX + segW - notch} ${B} L ${segX} ${B} `;
+    d += i === 0 ? 'Z' : `L ${segX + notch} ${M} Z`;
+    s += `<path d="${d}" fill="${strong}" stroke="#2b2b2b" stroke-width="2"/>`;
+    s += `<text x="${cx}" y="${M}" text-anchor="middle" dominant-baseline="central" font-size="27" fill="#2b2b2b">${esc(it.year)}</text>`;
+
+    // 卡片(上或下):標題方框 + 內文 + 捲曲箭頭
+    const boxTop = above ? headerH : belowTop;
+    const boxW = segW - 4;
+    s += `<path d="${sketchRect(cx - boxW / 2, boxTop, boxW, titleBoxH, i + 30)}" fill="${fill}" stroke="#2b2b2b" stroke-width="2.2" stroke-linejoin="round"/>`;
+    const titleLine = wrapLines(it.title, 11)[0] || '';
+    s += `<text x="${cx}" y="${boxTop + titleBoxH / 2 + 6}" text-anchor="middle" font-size="20" font-weight="700" fill="#2b2b2b">${esc(titleLine)}</text>`;
+    (perBody[i] || []).forEach((ln, k) => {
+      s += `<text x="${cx}" y="${boxTop + titleBoxH + 24 + k * lineH}" text-anchor="middle" font-size="13.5" fill="#4a4a4a">${esc(ln)}</text>`;
+    });
+    if (above) s += curlyArrow(cx, barTop - 3, headerH + cardH + 3);
+    else s += curlyArrow(cx, barBottom + 3, belowTop - 3);
+  }
+
+  s += `</svg>`;
+  return s;
+}
+
+const CHEVRON_SAMPLE = {
+  title: 'HISTORICAL INFOGRAPHIC',
+  subtitle: '公司大事記',
+  items: [
+    { year: '2021', title: '起步', body: '三位工程師從一個創意點子開始創業。' },
+    { year: '2022', title: '調查', body: '專注研究、分析市場與目標客群。' },
+    { year: '2023', title: '規劃', body: '團隊組建與訓練、訂定目標與路線圖。' },
+    { year: '2024', title: '創新', body: '推出第一個面向大學的技術專案。' },
+    { year: '2025', title: '創意', body: '開發提升兒童創造力的數位方案。' },
+    { year: '2026', title: '獲獎', body: '以最佳健康 App 榮獲軟體開發大獎。' },
+    { year: '2027', title: '教育', body: '團隊擴編,投入教育領域的應用。' },
+    { year: '2028', title: '發展', body: '推出學校與托育中心的解決方案。' },
+    { year: '2029', title: '新聞', body: '導入資料分析與 AI 演算法。' },
+    { year: '2030', title: '健康', body: '為醫療院所打造 AI 解決方案。' },
+  ],
+};
+
 export const TEMPLATES = {
   'year-timeline': {
     label: '十二個月 米白色',
@@ -407,10 +499,17 @@ export const TEMPLATES = {
     render: renderYearsBW,
   },
   'steps': {
-    label: 'Step by Step(3–7 步)',
+    label: 'Step 3-7',
     desc: '手繪橫向步驟時間軸:格線底、彩色編號卡 + 向下箭頭 + 年份軸。年份/標題/內文可填,3–7 步。',
     w: 0, h: 0,
     defaultData: STEPS_SAMPLE,
     render: renderSteps,
+  },
+  'chevron': {
+    label: 'Step 3-10',
+    desc: '手繪箭頭色帶時間軸:彩色箭頭段(年份)+ 上下交替卡片 + 手繪捲曲箭頭。年份/標題/內文可填,3–10 步。',
+    w: 0, h: 0,
+    defaultData: CHEVRON_SAMPLE,
+    render: renderChevron,
   },
 };

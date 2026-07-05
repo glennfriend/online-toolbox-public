@@ -303,6 +303,87 @@ const YEARS_BW_SAMPLE = {
   ],
 };
 
+// ── 版型 4:Step by Step(手繪橫向步驟時間軸,3–7 步)──────────────────
+const STEP_FILL = ['#C7D6F5', '#B6E5E0', '#CDE9A6', '#FBE08A', '#F8C6A6', '#F9C2E0', '#DAC6F2'];
+const STEP_STRONG = ['#6E8FE0', '#46B8AE', '#7CC24A', '#F4C020', '#EE8A56', '#EE79B8', '#A97BE0'];
+
+function renderSteps(data) {
+  const steps = Array.isArray(data.steps) ? data.steps : [];
+  const n = Math.max(1, steps.length);
+  const cardW = 220, gap = 26, marginX = 46, headerH = 224, lineH = 18;
+  const W = marginX * 2 + n * cardW + (n - 1) * gap;
+
+  // 統一卡片高度(取內文最多的那張)→ 整排對齊、箭頭與軸線也齊
+  let maxBody = 1;
+  const perBody = steps.map((st) => { const b = wrapLines(st.body, 13).slice(0, 8); if (b.length > maxBody) maxBody = b.length; return b; });
+  const cardTop = headerH;
+  const cardBottom = cardTop + 90 + maxBody * lineH + 16;
+  const arrowTop = cardBottom + 16, arrowBot = arrowTop + 44;
+  const axisY = arrowBot + 26, yearY = axisY + 36, H = axisY + 62;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${HAND}">`;
+  s += `<defs><pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M26 0 H0 V26" fill="none" stroke="#e6e8ec" stroke-width="1"/></pattern></defs>`;
+  s += `<rect width="${W}" height="${H}" fill="#FBFBF9"/><rect width="${W}" height="${H}" fill="url(#grid)"/>`;
+
+  // 標題 + 黃底副標
+  s += `<text x="${W / 2}" y="112" text-anchor="middle" font-size="60" fill="#2b2b2b">${esc(data.title)}</text>`;
+  const subW = Math.max(160, (String(data.subtitle || '').length) * 17 + 44);
+  s += `<rect x="${W / 2 - subW / 2}" y="140" width="${subW}" height="34" rx="17" fill="#FBE08A"/>`;
+  s += `<text x="${W / 2}" y="163" text-anchor="middle" font-size="19" fill="#3A3A3A">${esc(data.subtitle)}</text>`;
+
+  // 底部軸線 + 右箭頭
+  s += `<line x1="${marginX - 12}" y1="${axisY}" x2="${W - marginX + 20}" y2="${axisY}" stroke="#1c1c1c" stroke-width="3" stroke-linecap="round"/>`;
+  s += `<path d="M${W - marginX + 12} ${axisY - 8} L${W - marginX + 28} ${axisY} L${W - marginX + 12} ${axisY + 8}" fill="none" stroke="#1c1c1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  for (let i = 0; i < n; i++) {
+    const st = steps[i] || {};
+    const fill = STEP_FILL[i % 7], strong = STEP_STRONG[i % 7];
+    const x = marginX + i * (cardW + gap);
+    const cxi = x + cardW / 2;
+    const cardH = cardBottom - cardTop;
+
+    // 卡片陰影(同色深)+ 手繪卡片
+    s += `<path d="${sketchRect(x + 7, cardTop + 10, cardW, cardH, i + 20)}" fill="${strong}" opacity="0.9"/>`;
+    s += `<path d="${sketchRect(x, cardTop, cardW, cardH, i + 1)}" fill="${fill}" stroke="#2b2b2b" stroke-width="2.4" stroke-linejoin="round"/>`;
+
+    // 頂端編號圓(壓在卡片上緣)
+    s += `<circle cx="${cxi}" cy="${cardTop + 2}" r="33" fill="${strong}" stroke="#2b2b2b" stroke-width="2.5"/>`;
+    s += `<text x="${cxi}" y="${cardTop + 2}" text-anchor="middle" dominant-baseline="central" font-size="34" fill="#1c1c1c">${i + 1}</text>`;
+
+    // 標題 + 內文(置中)
+    const titleLine = wrapLines(st.title, 12)[0] || '';
+    s += `<text x="${cxi}" y="${cardTop + 64}" text-anchor="middle" font-size="21" font-weight="700" fill="#2b2b2b">${esc(titleLine)}</text>`;
+    (perBody[i] || []).forEach((ln, k) => {
+      s += `<text x="${cxi}" y="${cardTop + 90 + k * lineH}" text-anchor="middle" font-size="13.5" fill="#4a4a4a">${esc(ln)}</text>`;
+    });
+
+    // 向下箭頭
+    const hh = 20, hw = 17, sw = 7;
+    s += `<path d="M${cxi - sw} ${arrowTop} L${cxi + sw} ${arrowTop} L${cxi + sw} ${arrowBot - hh} L${cxi + hw} ${arrowBot - hh} L${cxi} ${arrowBot} L${cxi - hw} ${arrowBot - hh} L${cxi - sw} ${arrowBot - hh} Z" fill="${strong}" stroke="#2b2b2b" stroke-width="2" stroke-linejoin="round"/>`;
+
+    // 軸上節點 + 年份
+    s += `<circle cx="${cxi}" cy="${axisY}" r="9" fill="${strong}" stroke="#1c1c1c" stroke-width="2.5"/>`;
+    s += `<text x="${cxi}" y="${yearY + 8}" text-anchor="middle" font-size="26" fill="#2b2b2b">${esc(st.year)}</text>`;
+  }
+
+  s += `</svg>`;
+  return s;
+}
+
+const STEPS_SAMPLE = {
+  title: 'TIMELINE',
+  subtitle: '公司大事記',
+  steps: [
+    { year: '2024', title: '起步', body: '三個工程師從一個點子開始創業。' },
+    { year: '2025', title: '調查', body: '研究市場、分析需求與競爭對手。' },
+    { year: '2026', title: '規劃', body: '團隊組建、訂定目標與路線圖。' },
+    { year: '2027', title: '創新', body: '推出第一個技術產品,獲得好評。' },
+    { year: '2028', title: '創意', body: '開發提升兒童創造力的數位方案。' },
+    { year: '2029', title: '獲獎', body: '榮獲年度最佳軟體大獎。' },
+    { year: '2030', title: '健康', body: '為醫療院所打造 AI 解決方案。' },
+  ],
+};
+
 export const TEMPLATES = {
   'year-timeline': {
     label: '十二個月 米白色',
@@ -324,5 +405,12 @@ export const TEMPLATES = {
     w: 800, h: 0,
     defaultData: YEARS_BW_SAMPLE,
     render: renderYearsBW,
+  },
+  'steps': {
+    label: 'Step by Step(3–7 步)',
+    desc: '手繪橫向步驟時間軸:格線底、彩色編號卡 + 向下箭頭 + 年份軸。年份/標題/內文可填,3–7 步。',
+    w: 0, h: 0,
+    defaultData: STEPS_SAMPLE,
+    render: renderSteps,
   },
 };

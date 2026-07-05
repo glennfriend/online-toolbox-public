@@ -224,7 +224,7 @@ function renderYearsBW(data) {
   let cursor = headerH;
   for (let i = 0; i < n; i++) {
     const it = items[i] || {};
-    const bodyLines = wrapLines(it.body, 26).slice(0, 12);
+    const bodyLines = wrapLines(it.body, 19).slice(0, 14);   // 19:讓右/左欄的字不會越過中軸
     const ringY = cursor + 26;
     const bottom = Math.max(ringY + 32 + bodyLines.length * lineH, ringY + boxH / 2) + 14;
     rows.push({ ringY, bodyLines, it });
@@ -272,7 +272,7 @@ function renderYearsBW(data) {
     const textLeft = !boxLeft;                       // 方框左 → 文字右
     const tx = textLeft ? 40 : W - 40;
     const anchor = textLeft ? 'start' : 'end';
-    const titleLine = wrapLines(it.title, 18)[0] || '';
+    const titleLine = wrapLines(it.title, 13)[0] || '';
     s += `<text x="${tx}" y="${y + 7}" text-anchor="${anchor}" font-size="24" font-weight="700" fill="#1c1c1c">${esc(titleLine)}</text>`;
     bodyLines.forEach((ln, k) => {
       s += `<text x="${tx}" y="${y + 34 + k * lineH}" text-anchor="${anchor}" font-size="14.5" fill="#555555">${esc(ln)}</text>`;

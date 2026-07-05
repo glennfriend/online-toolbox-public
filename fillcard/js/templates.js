@@ -215,21 +215,20 @@ function sketchRect(x, y, w, h, seed) {
 }
 
 function renderYearsBW(data) {
-  const W = 800, cx = 400, circR = 26, headerH = 236, boxW = 138, boxH = 62, gap = 28, lineH = 20;
+  const W = 800, cx = 400, circR = 26, headerH = 236, boxW = 138, boxH = 62, gap = 18, lineH = 20;
   const items = Array.isArray(data.items) ? data.items : [];
   const n = items.length || 1;
 
-  // 逐列動態高度
+  // 逐列動態高度:圓點/年份/標題對齊在「列頂」,內文往下流(內文多不會往上壓到標題/表頭)
   const rows = [];
   let cursor = headerH;
   for (let i = 0; i < n; i++) {
     const it = items[i] || {};
-    const bodyLines = wrapLines(it.body, 26).slice(0, 8);
-    const textH = 30 + bodyLines.length * lineH + 6;
-    const contentH = Math.max(textH, boxH);
-    const ringY = cursor + contentH / 2;
+    const bodyLines = wrapLines(it.body, 26).slice(0, 12);
+    const ringY = cursor + 26;
+    const bottom = Math.max(ringY + 32 + bodyLines.length * lineH, ringY + boxH / 2) + 14;
     rows.push({ ringY, bodyLines, it });
-    cursor += contentH + gap;
+    cursor = bottom + gap;
   }
   const lastY = rows[n - 1].ringY;
   const arrowY = lastY + 54;
@@ -273,11 +272,10 @@ function renderYearsBW(data) {
     const textLeft = !boxLeft;                       // 方框左 → 文字右
     const tx = textLeft ? 40 : W - 40;
     const anchor = textLeft ? 'start' : 'end';
-    const blockTop = y - (30 + bodyLines.length * lineH) / 2;
     const titleLine = wrapLines(it.title, 18)[0] || '';
-    s += `<text x="${tx}" y="${blockTop + 20}" text-anchor="${anchor}" font-size="24" font-weight="700" fill="#1c1c1c">${esc(titleLine)}</text>`;
+    s += `<text x="${tx}" y="${y + 7}" text-anchor="${anchor}" font-size="24" font-weight="700" fill="#1c1c1c">${esc(titleLine)}</text>`;
     bodyLines.forEach((ln, k) => {
-      s += `<text x="${tx}" y="${blockTop + 46 + k * lineH}" text-anchor="${anchor}" font-size="14.5" fill="#555555">${esc(ln)}</text>`;
+      s += `<text x="${tx}" y="${y + 34 + k * lineH}" text-anchor="${anchor}" font-size="14.5" fill="#555555">${esc(ln)}</text>`;
     });
 
     // 圓點(灰階由淺到深)

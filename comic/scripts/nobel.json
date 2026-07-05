@@ -16,12 +16,12 @@
     {
       "bg": "plain",
       "items": [{ "item": "old_man/main", "pos": { "x": 0.5, "y": 0.66 }, "scale": 0.76 }],
-      "texts": [{ "text": "「由諾貝爾……親自頒獎。」", "pos": { "x": 0.06, "y": 0.05 }, "w": 0.54, "align": "left" }]
+      "texts": [{ "text": "「由諾貝爾親自頒獎!」", "pos": { "x": 0.06, "y": 0.05 }, "w": 0.52, "align": "left" }]
     },
     {
       "bg": "plain",
       "items": [{ "item": "girl/1", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.68 }],
-      "texts": [{ "text": "女子:「(等等……那不就得先變成鬼才拿得到?!)」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.62, "align": "left" }]
+      "texts": [{ "text": "女子:「……」", "pos": { "x": 0.4, "y": 0.05 }, "w": 0.4, "align": "left" }]
     }
   ]
 }

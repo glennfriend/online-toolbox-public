@@ -9,12 +9,10 @@
         { "item": "penguin/hello", "pos": { "x": 0.27, "y": 0.66 }, "scale": 0.58 },
         { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
       ],
-      "texts": [{ "text": "醫生:「把你一邊耳朵割掉,你會怎樣?」", "pos": { "x": 0.32, "y": 0.05 }, "w": 0.6, "align": "left" }]
-    },
-    {
-      "bg": "plain",
-      "items": [{ "item": "penguin/wow", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.68 }],
-      "texts": [{ "text": "小明:「我會聽不見。」", "pos": { "x": 0.42, "y": 0.05 }, "w": 0.46, "align": "left" }]
+      "texts": [
+        { "text": "醫生:「把你一邊耳朵割掉,你會怎樣?」", "pos": { "x": 0.34, "y": 0.04 }, "w": 0.6, "align": "left" },
+        { "text": "小明:「我會聽不見。」", "pos": { "x": 0.03, "y": 0.75 }, "w": 0.46, "align": "left" }
+      ]
     },
     {
       "bg": "plain",
@@ -23,14 +21,27 @@
         { "item": "old_man/main", "pos": { "x": 0.74, "y": 0.66 }, "scale": 0.6, "flip": true }
       ],
       "texts": [
-        { "text": "醫生:「那再割掉另一個呢?」", "pos": { "x": 0.36, "y": 0.05 }, "w": 0.52, "align": "left" },
-        { "text": "小明:「我會看不見。」", "pos": { "x": 0.03, "y": 0.74 }, "w": 0.46, "align": "left" }
+        { "text": "醫生:「那再割掉另一個呢?」", "pos": { "x": 0.36, "y": 0.04 }, "w": 0.54, "align": "left" },
+        { "text": "小明:「我會看不見。」", "pos": { "x": 0.03, "y": 0.75 }, "w": 0.46, "align": "left" }
       ]
     },
     {
       "bg": "plain",
-      "items": [{ "item": "penguin/gugu", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.68 }],
-      "texts": [{ "text": "小明:「因為……我有戴眼鏡啊。」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.58, "align": "left" }]
+      "items": [
+        { "item": "old_man/main", "pos": { "x": 0.66, "y": 0.66 }, "scale": 0.66, "flip": true }
+      ],
+      "texts": [
+        { "text": "醫生:「為什麼呢?」", "pos": { "x": 0.04, "y": 0.05 }, "w": 0.44, "align": "left" }
+      ]
+    },
+    {
+      "bg": "plain",
+      "items": [
+        { "item": "penguin/gugu", "pos": { "x": 0.34, "y": 0.66 }, "scale": 0.68 }
+      ],
+      "texts": [
+        { "text": "小明:「因為我有戴眼鏡啊。」", "pos": { "x": 0.34, "y": 0.05 }, "w": 0.56, "align": "left" }
+      ]
     }
   ]
 }

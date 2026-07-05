@@ -136,8 +136,34 @@ function makeStep(stage, i) {
     card.append(view);
     if (d.capped) { const n = el('div', 'note'); n.textContent = `(顯示前 ${d.shown} 行,共 ${d.total} 行)`; card.append(n); }
     const mods = el('div', 'step-mods'); renderMods(mods, stage, i); card.append(mods);
+    card.append(makeCopyBtn(stage.input));   // 每個「文字輸出」步驟右上角 → 複製完整內容(非顯示截斷版)
   }
   return card;
+}
+
+// 複製到剪貼簿:優先用 Clipboard API,失敗(非安全內容/舊瀏覽器/無權限)退回 execCommand。
+async function copyToClipboard(text) {
+  try { await navigator.clipboard.writeText(text ?? ''); return true; }
+  catch { /* 退回舊法 */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text ?? ''; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.append(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch { return false; }
+}
+
+// 右上角「複製」鈕:複製該步驟的完整文字(輸入框 step0 不加;錯誤/圖表步驟無可複製文字,也不加)。
+function makeCopyBtn(text) {
+  const b = el('button', 'copy-btn');
+  b.type = 'button'; b.textContent = '複製'; b.title = '複製這一步的內容';
+  b.addEventListener('click', async () => {
+    b.textContent = (await copyToClipboard(text)) ? '已複製 ✓' : '複製失敗';
+    b.classList.add('copied');
+    clearTimeout(b._t);
+    b._t = setTimeout(() => { b.textContent = '複製'; b.classList.remove('copied'); }, 1200);
+  });
+  return b;
 }
 
 // ── 小渲染 ──

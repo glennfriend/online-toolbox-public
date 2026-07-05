@@ -52,7 +52,7 @@ export function initTextHandler(ctx) {
       setBadge(TYPES[type]);
       setDisplay(render(text, type));
     }
-    setCopyHandler(copyText);
+    setCopyHandler(text.trim() ? copyText : null); // 沒內容 → 停用「Memory」鈕
     setDataUriHandler(null); // 文字轉 data URI 無實質意義 → 停用「data URI」鈕(僅圖片啟用)
     notifyDisplayChanged('text');
   }

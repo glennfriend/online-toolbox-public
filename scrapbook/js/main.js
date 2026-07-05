@@ -39,7 +39,8 @@ const ctx = {
     else display.innerHTML = content;
   },
   setBadge: (text) => { badge.textContent = text; },
-  setCopyHandler: (fn) => { copyHandler = fn; },
+  // 沒有可複製的內容時停用「Memory」(避免「按了沒反應」);傳 null 即停用。
+  setCopyHandler: (fn) => { copyHandler = fn; copyBtn.disabled = !fn; },
   // 只有支援轉 data URI 的內容(目前是圖片)才啟用按鈕;其它一律灰掉。
   setDataUriHandler: (fn) => { dataUriHandler = fn; dataUriBtn.disabled = !fn; },
   addItem,

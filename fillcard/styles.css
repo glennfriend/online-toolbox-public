@@ -1,0 +1,33 @@
+:root{
+  --border:#d0d7de; --muted:#8a9099; --accent:#3b6ef2; --bg:#eef1f5; --bg-code:#f3f5f8; --danger:#c0392b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:#24292f;background:var(--bg);display:flex;flex-direction:column}
+
+.topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--border)}
+.brand{font-weight:800;font-size:18px}
+.spacer{flex:1}
+.btn{font-size:13px;padding:5px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer}
+.btn:hover{background:var(--bg-code)}
+
+.workspace{flex:1;display:grid;grid-template-columns:minmax(280px,1fr) 1.4fr;gap:10px;padding:10px;min-height:0}
+.pane{display:flex;flex-direction:column;min-height:0;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pane-head{padding:6px 10px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
+#input{flex:1;border:0;outline:none;resize:none;padding:10px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+.err{margin:0;padding:8px 10px;color:var(--danger);font-size:12px;background:#fdecea;white-space:pre-wrap}
+.preview{flex:1;overflow:auto;padding:16px;display:flex;justify-content:center;align-items:flex-start;background:var(--bg-code)}
+.preview svg{max-width:100%;height:auto;box-shadow:0 4px 18px rgba(0,0,0,.08);border-radius:26px}
+
+/* info 泡泡 */
+.info{position:relative;display:inline-block;font-size:1rem;font-weight:400}
+.info-btn{cursor:help}
+.info-tip{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:max-content;max-width:90vw;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);padding:.6rem .8rem;font-size:.8rem;line-height:1.7;text-align:left}
+.info-tip span{display:block}
+.info-btn:hover + .info-tip,.info-btn:focus + .info-tip,.info-tip:hover{display:block}
+.tip-h{font-weight:700;margin-top:.3rem;color:var(--accent)}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#24292f;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+
+@media(max-width:720px){.workspace{grid-template-columns:1fr;grid-template-rows:1fr 1fr}}

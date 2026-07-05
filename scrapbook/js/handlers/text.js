@@ -7,7 +7,7 @@
 
 import { detectType, TYPES } from '../detect.js';
 import { render } from '../renderers/index.js';
-import { copyRich, copyPlain, blobToDataURL } from '../lib/clipboard.js';
+import { copyRich } from '../lib/clipboard.js';
 
 const RENDER_DELAY = 120; // 輸入後稍微 debounce 再 render
 
@@ -53,7 +53,7 @@ export function initTextHandler(ctx) {
       setDisplay(render(text, type));
     }
     setCopyHandler(copyText);
-    setDataUriHandler(copyTextDataUri);
+    setDataUriHandler(null); // 文字轉 data URI 無實質意義 → 停用「data URI」鈕(僅圖片啟用)
     notifyDisplayChanged('text');
   }
 
@@ -61,15 +61,6 @@ export function initTextHandler(ctx) {
     if (!display.textContent.trim()) { showToast('沒有可複製的內容'); return; }
     await copyRich(display.innerHTML, display.textContent);
     showToast('已複製(保留格式)');
-  }
-
-  // 把目前顯示的 HTML 轉成 data:text/html;base64,...(可直接貼進網址列開啟)
-  async function copyTextDataUri() {
-    if (!display.textContent.trim()) { showToast('沒有可複製的內容'); return; }
-    const blob = new Blob([display.innerHTML], { type: 'text/html;charset=utf-8' });
-    const dataUrl = await blobToDataURL(blob);
-    await copyPlain(dataUrl);
-    showToast(`已複製 data URI(${dataUrl.length.toLocaleString()} 字元)`);
   }
 
   renderInput(); // 初始狀態(空 → 提示)

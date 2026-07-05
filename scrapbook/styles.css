@@ -79,6 +79,7 @@ body {
   padding: .25em .8em;
 }
 .btn:hover { background: var(--bg-code); }
+.btn:disabled { opacity: .4; cursor: not-allowed; background: #fff; }
 
 .input {
   width: 100%;

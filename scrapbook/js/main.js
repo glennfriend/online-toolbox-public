@@ -40,7 +40,8 @@ const ctx = {
   },
   setBadge: (text) => { badge.textContent = text; },
   setCopyHandler: (fn) => { copyHandler = fn; },
-  setDataUriHandler: (fn) => { dataUriHandler = fn; },
+  // 只有支援轉 data URI 的內容(目前是圖片)才啟用按鈕;其它一律灰掉。
+  setDataUriHandler: (fn) => { dataUriHandler = fn; dataUriBtn.disabled = !fn; },
   addItem,
   refreshSaved,
   showToast,

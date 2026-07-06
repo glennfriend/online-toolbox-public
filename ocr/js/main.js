@@ -51,7 +51,7 @@ function setImage(blob) {
   showPreviewSrc(previewUrl);
   el.pages.hidden = true;
   el.run.disabled = false;
-  setStatus('已載入圖片,按「辨識文字」(或按 Enter)');
+  run();   // 上傳 / 貼上後直接辨識,不用按 Enter 或按鈕
 }
 
 async function setPdf(file) {
@@ -283,6 +283,8 @@ window.addEventListener('keydown', (e) => {
 
 // 視窗 / 版面變動時重畫框(預覽圖尺寸會變)。
 window.addEventListener('resize', () => { if (lastImageResult) drawOverlay(); });
+// 自動辨識時 OCR 可能早於預覽圖解碼完成 → 圖載入後補畫框。
+el.preview.addEventListener('load', () => { if (lastImageResult) drawOverlay(); });
 
 // ── 動作 ──
 el.run.addEventListener('click', run);

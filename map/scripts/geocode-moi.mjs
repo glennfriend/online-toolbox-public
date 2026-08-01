@@ -135,6 +135,11 @@ export function distanceM(a, b) {
 }
 
 // ── 主流程 ────────────────────────────────────────────────────────────
+// 只有「直接執行」才跑;被 import 當函式庫時不該有副作用。
+const RUN_DIRECTLY = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (RUN_DIRECTLY) await main();
+
+async function main() {
 const MODE = process.argv[2] || '--report';
 
 // 驗證用:先前由 OSM/Nominatim 實查命中門牌的點(獨立來源,可當標準答案)。
@@ -210,4 +215,5 @@ if (MODE === '--validate') {
   } else {
     console.log('\n(這是 --report,沒有改檔。確認無誤後用 --apply 寫回)');
   }
+}
 }

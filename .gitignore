@@ -3,3 +3,6 @@
 
 # dictionary 建置過程的暫存 SQLite(可重新產生,不需版控)
 dictionary/data/_q.db
+
+# map 座標補正用的政府門牌開放資料(本機保留、不進 git;下載方式見 map/scripts/README.md)
+map/scripts/_src/

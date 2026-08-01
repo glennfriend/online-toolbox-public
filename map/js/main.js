@@ -113,6 +113,13 @@ function renderDetail() {
   el.detail.innerHTML = selected.route ? routeDetailHtml(selected) : pointDetailHtml(selected);
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
 }
+// 外連 Google Maps 的查詢字串:有地址就用「店名 + 地址」讓 Google 自己定位
+// (它的搜尋比我們的座標準,且會落在店家資訊卡而非路中央的圖釘);沒地址才退回座標。
+function gmapQuery(p) {
+  if (!p.address) return `${p.lat},${p.lng}`;
+  return `${p.title || ''} ${p.address}`.trim();
+}
+
 function pointDetailHtml(p) {
   const tags = (p.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join('');
   return `
@@ -124,7 +131,7 @@ function pointDetailHtml(p) {
     ${tags ? `<div class="d-tags">${tags}</div>` : ''}
     <div class="d-foot">
       <div class="d-note">${p.note ? esc(p.note) : ''}</div>
-      <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">Google Map ↗</a>
+      <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gmapQuery(p))}" target="_blank" rel="noopener" title="${p.address ? '用店名 + 地址在 Google Maps 搜尋' : '用座標在 Google Maps 開啟'}">Google Map ↗</a>
     </div>`;
 }
 function routeDetailHtml(r) {

@@ -1,0 +1,62 @@
+{
+  "_note": "台南沒有門牌開放資料(市府停電中),改用 OSM 驗證:查得到才收。景點依中西區/安平/近郊三區分。",
+  "groups": [
+    {
+      "id": "b-tnn-central-sights",
+      "name": "台南中西區 - 景點",
+      "center": { "lat": 22.9930, "lng": 120.2010, "z": 15 },
+      "points": [
+        { "emoji": "🏯", "title": "赤崁樓", "address": "台南市中西區民族路二段212號", "osmQuery": "Chihkan Tower", "tags": ["國定古蹟", "荷蘭時期", "地標"], "hours": "08:30–21:30", "note": "1653 年荷蘭人所建的普羅民遮城,清代在台基上加蓋文昌閣與海神廟,是台南最具代表性的古蹟。" },
+        { "emoji": "🎓", "title": "臺南孔子廟", "address": "台南市中西區南門路2號", "osmQuery": "Tainan Confucius Temple", "tags": ["國定古蹟", "全臺首學", "老樹"], "hours": "08:30–17:30", "note": "1665 年創建,台灣第一座孔廟,有「全臺首學」之匾,朱紅牆面配老榕與草坪,非常好拍。" },
+        { "emoji": "🏬", "title": "林百貨", "address": "台南市中西區忠義路二段63號", "osmQuery": "Hayashi Department Store Tainan", "tags": ["市定古蹟", "老百貨", "頂樓神社"], "hours": "11:00–21:00", "note": "1932 年開幕的「五層樓仔」,台南第一家百貨,保有舊電梯與頂樓神社,現為文創選物店。" },
+        { "emoji": "🖼️", "title": "臺南市美術館2館", "address": "台南市中西區忠義路二段1號", "osmQuery": "Tainan Art Museum Building 2", "tags": ["美術館", "建築", "白色量體"], "hours": "10:00–18:00(週六至21:00,週一休館)", "note": "坂茂建築設計的白色幾何量體,五角形基地層層堆疊,屋頂碎形遮陽棚是台南新地標。" },
+        { "emoji": "🏮", "title": "神農街", "address": "台南市中西區神農街", "osmQuery": "Shennong Street Tainan", "tags": ["老街", "夜景", "五條港"], "hours": "全天(店家多為傍晚後營業)", "note": "五條港區保存最完整的老街,狹長街屋掛滿燈籠,夜裡點燈後氣氛絕佳,巷內多為小酒館與工作室。" },
+        { "emoji": "🎨", "title": "臺南市美術館1館", "address": "台南市中西區南門路37號", "osmQuery": "Tainan Art Museum Building 1", "tags": ["市定古蹟", "老警署", "美術館"], "hours": "10:00–18:00(週一休館)", "note": "原台南警察署改建,1931 年的裝飾藝術建築,與 2 館相隔一條街,可一起參觀。" },
+        { "emoji": "⛩️", "title": "祀典武廟", "address": "台南市中西區永福路二段229號", "osmQuery": "Sacrificial Rites Martial Temple Tainan", "tags": ["國定古蹟", "關帝廟", "朱紅山牆"], "hours": "06:00–21:00", "note": "台灣唯一有「祀典」之名的武廟,朱紅山牆與燕尾脊是台南最經典的畫面之一。" },
+        { "emoji": "🛕", "title": "大天后宮", "address": "台南市中西區永福路二段227巷18號", "osmQuery": "Grand Matsu Temple Tainan", "tags": ["國定古蹟", "媽祖廟", "月老"], "hours": "06:00–21:00", "note": "台灣第一座official媽祖廟,由明寧靖王府改建,廟內月老也是台南四大月老之一。" },
+        { "emoji": "📚", "title": "國立臺灣文學館", "address": "台南市中西區中正路1號", "osmQuery": "National Museum of Taiwan Literature", "tags": ["國定古蹟", "免門票", "日治建築"], "hours": "09:00–18:00(週一休館)", "note": "原台南州廳,1916 年的馬薩式建築,現為台灣文學館,常設展免費、館內有咖啡廳。" },
+        { "emoji": "🐌", "title": "蝸牛巷", "address": "台南市中西區永福路二段97巷", "osmQuery": "Snail Alley Tainan", "tags": ["巷弄", "裝置藝術", "免門票"], "hours": "全天開放", "note": "以作家葉石濤作品命名的老巷弄,牆邊藏著大小蝸牛裝置,適合慢慢散步找彩蛋。" },
+        { "emoji": "🍜", "title": "水仙宮市場", "address": "台南市中西區海安路二段230號", "osmQuery": "Shuixian Temple Market Tainan", "tags": ["傳統市場", "小吃", "國華街"], "hours": "約 06:00–14:00(週一休)", "note": "國華街上的百年市場,裡外都是台南經典小吃,是體驗台南早餐文化的核心地帶。" },
+        { "emoji": "🌸", "title": "河樂廣場", "address": "台南市中西區中正路343巷11號", "osmQuery": "Tainan Spring", "tags": ["親水", "廣場", "免門票"], "hours": "全天開放", "note": "舊中國城改造的潟湖式親水廣場,由荷蘭 MVRDV 設計,夏天可以下水玩,夜間點燈很美。" }
+      ]
+    },
+    {
+      "id": "b-tnn-anping-sights",
+      "name": "台南安平 - 景點",
+      "center": { "lat": 23.0010, "lng": 120.1600, "z": 14 },
+      "points": [
+        { "emoji": "🏰", "title": "安平古堡", "address": "台南市安平區國勝路82號", "osmQuery": "Fort Zeelandia Anping", "tags": ["國定古蹟", "熱蘭遮城", "瞭望台"], "hours": "08:30–17:30", "note": "荷蘭人 1624 年興建的熱蘭遮城,台灣最早的城堡,現存古堡殘壁與白色瞭望塔可俯瞰安平。" },
+        { "emoji": "🌳", "title": "安平樹屋", "address": "台南市安平區安北路194號", "osmQuery": "Anping Tree House", "tags": ["榕樹", "廢墟美學", "德記洋行"], "hours": "08:30–17:30", "note": "舊德記洋行倉庫被百年榕樹氣根整個包覆,樹與屋合為一體,空橋可從高處俯看,是台南最奇特的風景。" },
+        { "emoji": "🛡️", "title": "億載金城", "address": "台南市安平區光州路3號", "osmQuery": "Eternal Golden Castle Tainan", "tags": ["國定古蹟", "砲台", "護城河"], "hours": "08:30–17:30", "note": "1876 年沈葆楨聘法國技師建的西式砲台,方形城池外環護城河,可划船繞城。" },
+        { "emoji": "🏮", "title": "安平老街(延平街)", "address": "台南市安平區延平街", "osmQuery": "Anping Old Street", "tags": ["老街", "小吃", "台灣第一街"], "hours": "店家多為 10:00–20:00", "note": "有「台灣第一街」之稱的延平街,窄巷兩側是蜜餞、蝦餅與劍獅工藝店,走到底就是安平古堡。" },
+        { "emoji": "🚢", "title": "安平定情碼頭德陽艦園區", "address": "台南市安平區安億路115號", "osmQuery": "ROCS Te Yang Tainan", "tags": ["軍艦博物館", "港邊", "拍照"], "hours": "09:00–22:00", "note": "全台唯一的軍艦博物館,退役的德陽艦停在運河邊開放登艦,可以看到砲塔與艦橋。" },
+        { "emoji": "🐟", "title": "大魚的祝福", "address": "台南市安平區安億路", "osmQuery": "Blessing of Big Fish Tainan", "tags": ["公共藝術", "夜間點燈", "免門票"], "hours": "全天(夜間點燈)", "note": "巨大的鯨魚骨架造型鋼構裝置,鑽進魚腹往外看很有意思,夜間點燈後是安平的打卡點。" },
+        { "emoji": "🏖️", "title": "漁光島", "address": "台南市安平區漁光路", "osmQuery": "Yuguang Island Tainan", "tags": ["沙灘", "夕陽", "月牙灣"], "hours": "全天開放", "note": "跨過漁光橋的小島,月牙灣沙灘是台南看夕陽的秘境,春天有漁光島藝術節。" },
+        { "emoji": "⛩️", "title": "安平開臺天后宮", "address": "台南市安平區國勝路33號", "osmQuery": "Anping Kaitai Tianhou Temple", "tags": ["媽祖廟", "古廟", "安平"], "hours": "05:30–21:00", "note": "台灣最早的媽祖廟之一,鄭成功隨船媽祖奉祀於此,廟埕前就是安平老街商圈。" },
+        { "emoji": "🧂", "title": "夕遊出張所", "address": "台南市安平區古堡街196號", "osmQuery": "Sio House Tainan", "tags": ["日式建築", "彩鹽", "生日鹽"], "hours": "10:00–18:00", "note": "日治時期的鹽務辦公室,現以 366 色「生日彩鹽」聞名,老樹與木造建築很好拍。" },
+        { "emoji": "🚣", "title": "四草綠色隧道", "address": "台南市安南區大眾街360號", "osmQuery": "Sicao Green Tunnel", "tags": ["紅樹林", "搭船", "台版亞馬遜"], "hours": "08:30–17:00(需搭船,建議先預約)", "note": "紅樹林枝葉在水道上方交織成綠色隧道,搭竹筏穿行有「台版亞馬遜」之稱,倒影非常美。" },
+        { "emoji": "🦁", "title": "安平劍獅埕", "address": "台南市安平區效忠街20巷", "osmQuery": "Anping Sword Lion", "tags": ["劍獅", "民俗", "巷弄"], "hours": "全天開放", "note": "安平特有的辟邪文化,老屋門楣上的劍獅各有造型,巷弄裡找劍獅是安平的經典玩法。" },
+        { "emoji": "🌉", "title": "安平運河(運河星鑽)", "address": "台南市安平區安億路", "osmQuery": "Tainan Canal", "tags": ["運河", "散步", "夜景"], "hours": "全天開放", "note": "連接安平港與台南市區的運河,兩岸有步道與遊船碼頭,夜間燈光倒映水面。" }
+      ]
+    },
+    {
+      "id": "b-tnn-outer-sights",
+      "name": "台南近郊 - 景點",
+      "center": { "lat": 22.9700, "lng": 120.2300, "z": 12 },
+      "points": [
+        { "emoji": "🏛️", "title": "奇美博物館", "address": "台南市仁德區文華路二段66號", "osmQuery": "Chimei Museum", "tags": ["博物館", "西洋藝術", "園區"], "hours": "09:30–17:30(週三休館)", "note": "仿西洋古典宮殿的博物館,收藏西洋繪畫、兵器與全球最多的小提琴,園區噴泉與橋樑也很好拍。" },
+        { "emoji": "🥁", "title": "十鼓仁糖文創園區", "address": "台南市仁德區文華路二段326號", "osmQuery": "Ten Drum Cultural Village", "tags": ["糖廠改建", "擊鼓表演", "親子"], "hours": "09:30–20:00", "note": "舊仁德糖廠改造的鼓樂主題園區,保留巨大糖廠設施,有擊鼓表演與空中溜滑梯。" },
+        { "emoji": "🎓", "title": "國立成功大學(榕園)", "address": "台南市東區大學路1號", "osmQuery": "National Cheng Kung University", "tags": ["大學", "老榕", "免門票"], "hours": "校園全天", "note": "校內的百年老榕「榕園」枝葉遮天,是台南人散步的地方,旁邊還有成大博物館。" },
+        { "emoji": "🌳", "title": "臺南公園", "address": "台南市北區公園路356號", "osmQuery": "Tainan Park", "tags": ["百年公園", "免門票", "老樹"], "hours": "全天開放", "note": "1917 年開園的台南最老公園,燕潭與老樹成蔭,春天有鳳凰花與黃花風鈴木。" },
+        { "emoji": "🦆", "title": "巴克禮紀念公園", "address": "台南市東區崇明路", "osmQuery": "Barclay Memorial Park Tainan", "tags": ["公園", "落羽松", "免門票"], "hours": "全天開放", "note": "以英國宣教士巴克禮命名的公園,夢湖倒影與冬季落羽松是台南人最愛的散步路線。" },
+        { "emoji": "🐦", "title": "台江國家公園遊客中心", "address": "台南市安南區四草大道118號", "osmQuery": "Taijiang National Park", "tags": ["建築", "水上高腳屋", "免門票"], "hours": "09:00–17:00(週一休)", "note": "白牆黑瓦的水上高腳屋建築群,倒映在水面上像座漂浮聚落,免門票,是近年熱門攝影點。" },
+        { "emoji": "🎨", "title": "藍晒圖文創園區", "address": "台南市南區西門路一段689巷", "osmQuery": "Blueprint Culture and Creative Park Tainan", "tags": ["文創園區", "藍晒圖", "夜拍"], "hours": "戶外全天;店家約 14:00–21:00", "note": "舊司法宿舍群改造,招牌藍色線條立體塗鴉延伸整片牆面,晚上打燈後更有味道。" },
+        { "emoji": "🌾", "title": "七股鹽山", "address": "台南市七股區鹽埕里66號", "osmQuery": "Qigu Salt Mountain", "tags": ["鹽山", "親子", "地標"], "hours": "09:00–18:00", "note": "堆成小山的粗鹽,可以爬上去俯瞰鹽田,園區有鹽味冰棒與親子設施。" },
+        { "emoji": "🦩", "title": "七股潟湖(黑面琵鷺保護區)", "address": "台南市七股區", "osmQuery": "Qigu Lagoon", "tags": ["潟湖", "賞鳥", "搭船"], "hours": "依船班", "note": "台灣最大的潟湖,冬季是黑面琵鷺的重要棲地,可搭膠筏遊潟湖看蚵棚。" },
+        { "emoji": "🏞️", "title": "虎頭埤風景區", "address": "台南市新化區中興路42巷36號", "osmQuery": "Hutoupi Reservoir", "tags": ["水庫", "露營", "步道"], "hours": "06:30–22:00", "note": "台灣第一座水庫,環湖步道與吊橋景色宜人,園區可露營烤肉。" },
+        { "emoji": "🏘️", "title": "新化老街", "address": "台南市新化區中正路", "osmQuery": "Xinhua Old Street Tainan", "tags": ["老街", "巴洛克街屋", "免門票"], "hours": "全天(店家各異)", "note": "保存完整的巴洛克式街屋立面,曾獲選台灣歷史建築百景,老街上有許多在地小吃。" },
+        { "emoji": "⛲", "title": "山上花園水道博物館", "address": "台南市山上區山上里16號", "osmQuery": "Tainan Shanshang Garden and Old Waterworks Museum", "tags": ["國定古蹟", "水道", "親子"], "hours": "09:30–17:30(週二休)", "note": "日治時期的自來水設施,紅磚廠房裡整排巨大濾水器很壯觀,園區腹地大適合野餐。" }
+      ]
+    }
+  ]
+}

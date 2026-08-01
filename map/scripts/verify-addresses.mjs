@@ -43,9 +43,13 @@ let fellBack = [];
 if (bad.length) {
   const wantMap = new Map(bad.map((t) => [t.key, parseAddress(t.p.address)]));
   const near = await nearestOnStreet(wantMap);
+  // 借用鄰近門牌只在「差幾號」時合理。差太多代表這條路根本沒有這個號碼區間 ——
+  // 那是地址寫錯,不是登記缺口,硬借會定位到幾百公尺外。
+  const MAX_NO_GAP = 20;
   for (const t of bad) {
     const g = near.get(t.key);
     if (!g) continue;
+    if (g.gap > MAX_NO_GAP) { t.gapTooBig = g; continue; }
     t.p.lat = +g.lat.toFixed(6);
     t.p.lng = +g.lng.toFixed(6);
     t.p.approx = true;
@@ -53,7 +57,12 @@ if (bad.length) {
     t.fallbackVia = g;
     fellBack.push(t);
   }
-  const stillBad = bad.filter((t) => !t.fallbackVia);
+  const tooFar = bad.filter((t) => t.gapTooBig);
+  if (tooFar.length) {
+    console.log(`\n⚠ 該路段最接近的門牌差太多(${tooFar.length},判定地址有誤,不定位):`);
+    tooFar.forEach((t) => console.log(`   [${t.g.name}] ${t.p.title}  ${t.p.address}  → 最近只有 ${t.gapTooBig.viaNo}號(差 ${t.gapTooBig.gap} 號)`));
+  }
+  const stillBad = bad.filter((t) => !t.fallbackVia && !t.gapTooBig);
   if (fellBack.length) {
     console.log(`\n≈ 該號未登記,改用同路段最近門牌定位(${fellBack.length},已標 approx):`);
     fellBack.forEach((t) => console.log(`   [${t.g.name}] ${t.p.title}  ${t.p.address}  → 借用 ${t.fallbackVia.viaNo}號(差 ${t.fallbackVia.gap} 號)`));

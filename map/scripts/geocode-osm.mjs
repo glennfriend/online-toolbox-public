@@ -19,6 +19,9 @@ const BBOX = {
   '台南市': { minLat: 22.88, maxLat: 23.45, minLng: 120.03, maxLng: 120.66 },
   '臺南市': { minLat: 22.88, maxLat: 23.45, minLng: 120.03, maxLng: 120.66 },
   '宜蘭縣': { minLat: 24.32, maxLat: 24.99, minLng: 121.30, maxLng: 122.01 },
+  '台中市': { minLat: 23.99, maxLat: 24.45, minLng: 120.43, maxLng: 121.46 },
+  '臺中市': { minLat: 23.99, maxLat: 24.45, minLng: 120.43, maxLng: 121.46 },
+  '高雄市': { minLat: 22.35, maxLat: 23.48, minLng: 120.10, maxLng: 121.06 },
 };
 
 // 第二道防呆:如果這個點本來就有(概略)座標,OSM 結果離太遠就不採信 ——
@@ -48,7 +51,10 @@ async function nominatim(q) {
 
 // 第二個參數可限定只處理某一組。**強烈建議只對「景點」用** ——
 // 小吃店 OSM 沒有資料,查中文地址只會拿到鄉鎮/道路的中心點,不是店家位置。
-const [input, onlyGroupId] = process.argv.slice(2);
+// 加 --only-missing 則只補「還沒有座標」的點,不動已由門牌資料驗證過的座標。
+const argv = process.argv.slice(2);
+const ONLY_MISSING = argv.includes('--only-missing');
+const [input, onlyGroupId] = argv.filter((a) => !a.startsWith('--'));
 if (!input) { console.error('用法:node geocode-osm.mjs <candidates.json> [groupId]'); process.exit(1); }
 const data = JSON.parse(fs.readFileSync(input, 'utf8'));
 
@@ -59,6 +65,7 @@ const houseNoOf = (addr) => (String(addr || '').match(/(\d+(?:之\d+)*)號/) || 
 let exact = 0, loose = 0, failed = [];
 for (const g of data.groups.filter((x) => !onlyGroupId || x.id === onlyGroupId)) {
   for (const p of g.points) {
+    if (ONLY_MISSING && Number.isFinite(p.lat) && Number.isFinite(p.lng)) continue;   // 已有座標就別動
     const queries = [p.osmQuery, p.address, `${p.title} ${p.address || ''}`.trim()].filter(Boolean);
     let hit = null, usedQ = '';
     for (const q of queries) {

@@ -18,6 +18,17 @@ const SLEEP = 1150;   // ms,Nominatim 要求 <= 1 req/s
 const BBOX = {
   '台南市': { minLat: 22.88, maxLat: 23.45, minLng: 120.03, maxLng: 120.66 },
   '臺南市': { minLat: 22.88, maxLat: 23.45, minLng: 120.03, maxLng: 120.66 },
+  '宜蘭縣': { minLat: 24.32, maxLat: 24.99, minLng: 121.30, maxLng: 122.01 },
+};
+
+// 第二道防呆:如果這個點本來就有(概略)座標,OSM 結果離太遠就不採信 ——
+// 縣市範圍內仍可能配到完全不同的地方(台南美食就踩過這種坑)。
+const MAX_SHIFT_KM = 3;
+const distKm = (a, b) => {
+  const R = 6371, r = (d) => (d * Math.PI) / 180;
+  const dLat = r(b.lat - a.lat), dLng = r(b.lng - a.lng);
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -35,15 +46,18 @@ async function nominatim(q) {
   return j[0] || null;
 }
 
-const input = process.argv[2];
-if (!input) { console.error('用法:node geocode-osm.mjs <candidates.json>'); process.exit(1); }
+// 第二個參數可限定只處理某一組。**強烈建議只對「景點」用** ——
+// 小吃店 OSM 沒有資料,查中文地址只會拿到鄉鎮/道路的中心點,不是店家位置。
+const [input, onlyGroupId] = process.argv.slice(2);
+if (!input) { console.error('用法:node geocode-osm.mjs <candidates.json> [groupId]'); process.exit(1); }
 const data = JSON.parse(fs.readFileSync(input, 'utf8'));
 
 const cityOf = (addr) => (String(addr || '').match(/^(台南市|臺南市|台中市|臺中市|高雄市|台北市|臺北市|宜蘭縣)/) || [])[1] || '';
+let rejectedFar = [];
 const houseNoOf = (addr) => (String(addr || '').match(/(\d+(?:之\d+)*)號/) || [])[1] || '';
 
 let exact = 0, loose = 0, failed = [];
-for (const g of data.groups) {
+for (const g of data.groups.filter((x) => !onlyGroupId || x.id === onlyGroupId)) {
   for (const p of g.points) {
     const queries = [p.osmQuery, p.address, `${p.title} ${p.address || ''}`.trim()].filter(Boolean);
     let hit = null, usedQ = '';
@@ -60,6 +74,16 @@ for (const g of data.groups) {
       break;
     }
     if (!hit) { failed.push({ g: g.name, p }); console.log(`❌ ${p.title}  ${p.address || ''}`); continue; }
+
+    // 本來就有座標的話,OSM 結果不能離太遠,否則視為配錯,保留原座標
+    if (Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
+      const d = distKm({ lat: p.lat, lng: p.lng }, hit);
+      if (d > MAX_SHIFT_KM) {
+        rejectedFar.push(`${p.title}(差 ${d.toFixed(1)}km)`);
+        console.log(`⛔ ${p.title}  OSM 結果離原座標 ${d.toFixed(1)}km,判定配錯,保留原值  ← ${usedQ}`);
+        continue;
+      }
+    }
 
     p.lat = +hit.lat.toFixed(6);
     p.lng = +hit.lng.toFixed(6);
@@ -78,7 +102,8 @@ for (const g of data.groups) {
   }
 }
 
-console.log(`\n門牌號相符 ${exact} 筆;僅地標層級(approx) ${loose} 筆;查無 ${failed.length} 筆`);
+console.log(`\n門牌號相符 ${exact} 筆;僅地標層級(approx) ${loose} 筆;查無 ${failed.length} 筆;離原座標太遠而不採信 ${rejectedFar.length} 筆`);
+if (rejectedFar.length) console.log('   不採信:' + rejectedFar.join('、'));
 if (failed.length) failed.forEach((f) => console.log(`   查無:[${f.g}] ${f.p.title}  ${f.p.address || ''}`));
 
 const out = input.replace(/\.json$/, '') + '.resolved.json';

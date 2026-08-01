@@ -16,8 +16,12 @@
 | `node geocode-moi.mjs --apply` | 把查到的座標寫回 builtin.json |
 | `node verify-addresses.mjs <候選檔>` | **新資料進 builtin 前的把關**:逐筆驗證地址存在並回填座標 |
 | `node nearby-numbers.mjs "<地址>" …` | 查某路段實際有哪些門牌號 —— 判斷地址是不是寫錯最快的方法 |
-| `node geocode-osm.mjs <候選檔>` | 沒有門牌資料的縣市改用 OSM 定位(目前只有台南這樣做) |
-| `node merge-candidates.mjs <*.resolved.json>` | 把驗證過的組併進 builtin.json 並依由北到南排序 |
+| `node geocode-osm.mjs <候選檔> [groupId]` | 沒有門牌資料的縣市改用 OSM 定位(台南、宜蘭)。**只對「景點」用** |
+| `node merge-candidates.mjs [--remove=id,…] <*.resolved.json>` | 把驗證過的組併進 builtin.json、依由北到南排序;`--remove` 可先刪掉舊組 |
+
+`geocode-osm.mjs` 有兩道防呆,兩道都實際擋下過錯誤:
+**縣市外接矩形**(擋掉配到國外/他縣市)、**位移上限 3km**(本來就有概略座標時,
+OSM 結果離太遠就判定配錯、保留原值 —— 宜蘭「龍潭湖風景區」就是這樣被擋下的,差 4.2km)。
 
 流程:**寫候選檔 → `verify-addresses` → 修掉查無門牌的 → `merge-candidates`**。
 
@@ -70,11 +74,14 @@ curl -L -o _src/kaohsiung-address.csv "https://data.kcg.gov.tw/File/directDownlo
 資料集 <https://data.gov.tw/dataset/120044>。產生資料當天台南市府整個網段停電維護,拿不到。
 官方註明其坐標為「人工點位、非準確坐標,僅供參考」,精度低於其他三市。
 
-### 宜蘭縣 ❌
+### 宜蘭縣 ❌ 確認沒有
 
-查不到可整包下載的門牌坐標檔(data.gov.tw 上還躺著
-[請各地方政府提供門牌座標檔的陳情](https://data.gov.tw/suggests/106384))。
-宜蘭 3 組座標目前仍是概略值。
+已逐一查證:宜蘭縣開放資料平台(<https://opendata.e-land.gov.tw>)搜「門牌」**只有 2 筆不相關結果**;
+內政部全國門牌電子地圖把宜蘭設為停用(`data.xml` 的 `Data_10002` 是 `show=0`);
+data.gov.tw 上還躺著[請各地方政府提供門牌座標檔的陳情](https://data.gov.tw/suggests/106384)。
+
+因此宜蘭改用 OSM 補景點座標(20 點中 2 筆門牌相符、5 筆地標級),**美食 15 點維持概略**
+—— 小吃店 OSM 沒有資料,查中文地址只會拿到鄉鎮/道路中心點,不是店家位置。
 
 ---
 

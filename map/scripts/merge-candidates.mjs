@@ -15,16 +15,27 @@ const BUILTIN = path.join(HERE, '..', 'data', 'builtin.json');
 const ORDER = [
   '中山國中 捷運站', '南京復興 捷運站', '忠孝復興 捷運站', '大安 捷運站', '信義安和 捷運站',
   '大稻埕 - 景點',
-  '宜蘭礁溪 - 景點', '宜蘭羅東 - 景點', '宜蘭五結 - 景點',
+  '宜蘭 - 景點', '宜蘭 - 美食',
   '台中 - 景點', '台中 - 美食',
   '台南 - 景點', '台南 - 美食',
   '高雄 - 景點', '高雄 - 美食',
 ];
 
-const files = process.argv.slice(2);
-if (!files.length) { console.error('用法:node merge-candidates.mjs <*.resolved.json> ...'); process.exit(1); }
+// --remove=id1,id2 可在合併前刪掉舊組(例如把宜蘭三鎮拆成景點/美食後,舊的三組要移除)
+const args = process.argv.slice(2);
+const removeArg = args.find((a) => a.startsWith('--remove='));
+const files = args.filter((a) => !a.startsWith('--'));
+if (!files.length && !removeArg) { console.error('用法:node merge-candidates.mjs [--remove=id,…] <*.resolved.json> ...'); process.exit(1); }
 
 const data = JSON.parse(fs.readFileSync(BUILTIN, 'utf8'));
+
+if (removeArg) {
+  const ids = new Set(removeArg.slice('--remove='.length).split(',').filter(Boolean));
+  const before = data.groups.length;
+  const gone = data.groups.filter((g) => ids.has(g.id)).map((g) => `${g.name}(${g.points.length}點)`);
+  data.groups = data.groups.filter((g) => !ids.has(g.id));
+  console.log(`− 移除 ${before - data.groups.length} 組:${gone.join('、') || '(無相符 id)'}`);
+}
 const byId = new Map(data.groups.map((g) => [g.id, g]));
 
 for (const f of files) {

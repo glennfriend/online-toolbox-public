@@ -6,3 +6,6 @@ dictionary/data/_q.db
 
 # map 座標補正用的政府門牌開放資料(本機保留、不進 git;下載方式見 map/scripts/README.md)
 map/scripts/_src/
+
+# map 候選檔跑完驗證後的產出(可由 candidates/*.json 重新產生)
+map/scripts/candidates/*.resolved.json

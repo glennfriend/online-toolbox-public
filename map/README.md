@@ -52,8 +52,10 @@
 
 - `lat` / `lng` 必填(範圍內才會被接受);其餘皆可省略。`emoji` 預設 `📍`、`z`(縮放)預設 16。
 - `tags` 可給陣列或逗號字串;`rating` 數字(0–5);**`approx: true`** 表示**座標為概略**(詳情會標示),用於「靠網路查、座標非精確」的資料。
-- **`geo: "moi-address"`** 表示座標已用政府門牌開放資料補正到**門牌級**(此時不再有 `approx`)。
-  補正工具與資料下載方式見 [`scripts/README.md`](scripts/README.md);**產生新資料時地址請寫到門牌號**,才補得了座標。
+- **`geo`** 記錄座標的來源與可信度:`moi-address`(政府門牌資料,門牌級約 10m)、
+  `moi-nearest`(該號未登記,借用同路段最近門牌,標 `approx`)、`osm`(OSM 且門牌號相符)、
+  `osm-approx`(OSM 只到路/地標層級,標 `approx`);沒有 `geo` = 未驗證的舊資料。
+  補正工具與資料下載方式見 [`scripts/README.md`](scripts/README.md);**產生新資料時地址請寫到門牌號**,才驗得了、補得了座標。
 
 > 外連 Google Maps 用的是「**店名 + 地址**」而非我們的座標(`js/main.js` 的 `gmapQuery()`):
 > Google 自己的搜尋比我們的座標準,且會落在店家資訊卡而不是路中央的圖釘。沒地址的點才退回座標。

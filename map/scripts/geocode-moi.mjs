@@ -19,12 +19,58 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BUILTIN = path.join(HERE, '..', 'data', 'builtin.json');
 const SRC_DIR = path.join(HERE, '_src');
 
-// 台北市 CSV 只有「鄉鎮市區代碼」沒有區名。本表由資料本身的代表街道反推驗證過
-// (如 63000060 出現南京西路/民權西路 → 大同區)。
+// 各市 CSV 只有「鄉鎮市區代碼」沒有區名。以下對照表都是**由資料本身的代表街道反推並逐一核對**過
+// (例:台北 63000060 出現南京西路/民權西路 → 大同區;高雄 6400100 出現七賢三路 → 鹽埕區)。
 const TPE_DISTRICT = {
   63000010: '松山區', 63000020: '信義區', 63000030: '大安區', 63000040: '中山區',
   63000050: '中正區', 63000060: '大同區', 63000070: '萬華區', 63000080: '文山區',
   63000090: '南港區', 63000100: '內湖區', 63000110: '士林區', 63000120: '北投區',
+};
+
+const TXG_DISTRICT = {
+  6600100: '中區', 6600200: '東區', 6600300: '南區', 6600400: '西區', 6600500: '北區',
+  6600600: '西屯區', 6600700: '南屯區', 6600800: '北屯區', 6600900: '豐原區', 6601000: '東勢區',
+  6601100: '大甲區', 6601200: '清水區', 6601300: '沙鹿區', 6601400: '梧棲區', 6601500: '后里區',
+  6601600: '神岡區', 6601700: '潭子區', 6601800: '大雅區', 6601900: '新社區', 6602000: '石岡區',
+  6602100: '外埔區', 6602200: '大安區', 6602300: '烏日區', 6602400: '大肚區', 6602500: '龍井區',
+  6602600: '霧峰區', 6602700: '太平區', 6602800: '大里區', 6602900: '和平區',
+};
+
+const KHH_DISTRICT = {
+  6400100: '鹽埕區', 6400200: '鼓山區', 6400300: '左營區', 6400400: '楠梓區', 6400500: '三民區',
+  6400600: '新興區', 6400700: '前金區', 6400800: '苓雅區', 6400900: '前鎮區', 6401000: '旗津區',
+  6401100: '小港區', 6401200: '鳳山區', 6401300: '林園區', 6401400: '大寮區', 6401500: '大樹區',
+  6401600: '大社區', 6401700: '仁武區', 6401800: '鳥松區', 6401900: '岡山區', 6402000: '橋頭區',
+  6402100: '燕巢區', 6402200: '田寮區', 6402300: '阿蓮區', 6402400: '路竹區', 6402500: '湖內區',
+  6402600: '茄萣區', 6402700: '永安區', 6402800: '彌陀區', 6402900: '梓官區', 6403000: '旗山區',
+  6403100: '美濃區', 6403200: '六龜區', 6403300: '甲仙區', 6403400: '杉林區', 6403500: '內門區',
+  6403600: '茂林區', 6403700: '桃源區', 6403800: '那瑪夏區',
+};
+
+// 沒有門牌 CSV 的縣市,仍需要行政區清單才能正確切「區名 / 路名」。
+const TNN_DISTRICTS = ['中西區', '東區', '南區', '北區', '安平區', '安南區', '永康區', '歸仁區', '新化區',
+  '左鎮區', '玉井區', '楠西區', '南化區', '仁德區', '關廟區', '龍崎區', '官田區', '麻豆區', '佳里區',
+  '西港區', '七股區', '將軍區', '學甲區', '北門區', '新營區', '後壁區', '白河區', '東山區', '六甲區',
+  '下營區', '柳營區', '鹽水區', '善化區', '大內區', '山上區', '新市區', '安定區'];
+const ILA_DISTRICTS = ['宜蘭市', '羅東鎮', '蘇澳鎮', '頭城鎮', '礁溪鄉', '壯圍鄉', '員山鄉', '冬山鄉',
+  '五結鄉', '三星鄉', '大同鄉', '南澳鄉'];
+
+// 檔名 → 該市設定。lonLat 有值表示 CSV 已自帶 WGS84 經緯度(台中),不必自己換算 TWD97。
+const CITIES = [
+  { city: '臺北市', match: /taipei|臺北|台北/i, districts: TPE_DISTRICT },
+  { city: '臺中市', match: /taichung|臺中|台中/i, districts: TXG_DISTRICT, lonLat: [11, 12] },
+  { city: '高雄市', match: /kaohsiung|高雄/i, districts: KHH_DISTRICT },
+  { city: '臺南市', match: /tainan|臺南|台南/i, districts: null },   // 待台南開放平台恢復後補
+  { city: '宜蘭縣', match: /yilan|宜蘭/i, districts: null },
+];
+
+// 城市 → 行政區名稱清單(給 parseAddress 切「區名 / 路名」用)。
+const DISTRICTS_OF = {
+  '台北市': Object.values(TPE_DISTRICT),
+  '台中市': Object.values(TXG_DISTRICT),
+  '高雄市': Object.values(KHH_DISTRICT),
+  '台南市': TNN_DISTRICTS,
+  '宜蘭縣': ILA_DISTRICTS,
 };
 
 // ── TWD97 TM2(EPSG:3826)→ WGS84 ─────────────────────────────────────
@@ -70,43 +116,58 @@ export function twd97ToWgs84(x, y) {
 // CSV 的「號」是全形(如 ９１號、５之２號),我們的資料是半形 → 統一成半形比對。
 const toHalf = (s) => String(s ?? '').replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
 
-// 只取「N號」或「N之M號」這段(丟掉樓層:同棟樓共用同一組座標)。
+// 只取「N號」「N之M號」(台中還有「2之3之2號」)這段;丟掉樓層,同棟樓共用一組座標。
 function baseNo(s) {
-  const m = toHalf(s).match(/^(\d+(?:之\d+)?號)/);
+  const m = toHalf(s).match(/^(\d+(?:之\d+)*號)/);
   return m ? m[1] : '';
 }
 
 // 「53-4號」「53之4號」是同一個門牌;CSV 一律用「之」。先統一,否則 53-4 會被誤讀成 4 號。
 const normDash = (s) => s.replace(/(\d+)\s*[-–—]\s*(\d+)\s*號/g, '$1之$2號');
 
+// 「臺」與「台」在路名/區名混用(CSV 寫「臺灣大道」,一般人寫「台灣大道」)。
+// 組 key 前兩邊都轉成「台」,否則整條臺灣大道都會查不到。
+const normTai = (s) => String(s ?? '').replace(/臺/g, '台');
+
+// 街道名多數放在「街路段」欄;但老聚落(如旗津旗下巷)街路段是空的,名字在「地區」欄。
+const streetOf = (f) => f[4] || f[5] || '';
+
 // 我們的地址字串 → { city, district, street, lane, alley, no };無法解析回 null。
 export function parseAddress(addr) {
   const a = normDash(toHalf(addr).replace(/\s+/g, ''));
-  const m = a.match(/^(台北市|臺北市|宜蘭縣)(.{1,4}?[區鄉鎮市])(.+)$/);
-  if (!m) return null;
-  const [, city, district, rest] = m;
+  // 區名一律「比對該市的實際行政區清單」,不用正規表示式猜 —— 猜會出事:
+  //   非貪婪 → 「前鎮區」被切成「前鎮」+「區新光路」(鎮 在字元類裡)
+  //   貪婪   → 「中區市府路」被切成「中區市」+「府路」(市 也在字元類裡)
+  const cm = a.match(/^(台北市|臺北市|台中市|臺中市|台南市|臺南市|高雄市|宜蘭縣)(.+)$/);
+  if (!cm) return null;
+  const city = cm[1];
+  const list = DISTRICTS_OF[normTai(city)] || [];
+  // 由長到短比對,避免「東區」先吃掉「東區…」而漏掉更長的正解
+  const district = [...list].sort((x, y) => y.length - x.length).find((d) => normTai(cm[2]).startsWith(normTai(d)));
+  if (!district) return null;
+  const rest = cm[2].slice(district.length);
 
-  const no = (rest.match(/(\d+(?:之\d+)?)號/) || [])[1];
+  const no = (rest.match(/(\d+(?:之\d+)*)號/) || [])[1];
   if (!no) return null;                                   // 沒門牌號 → 這份資料救不了
   const lane = (rest.match(/(\d+)巷/) || [])[1] || '';
   const alley = (rest.match(/(\d+)弄/) || [])[1] || '';
-  const street = rest.split(/\d+巷|\d+弄|\d+(?:之\d+)?號/)[0];
+  const street = rest.split(/\d+巷|\d+弄|\d+(?:之\d+)*號/)[0];
   if (!street) return null;
 
   return { city: city.replace('台', '臺'), district, street, lane, alley, no: no + '號' };
 }
 
-const keyOf = (p) => [p.city, p.district, p.street, p.lane, p.alley, p.no].join('|');
+export const keyOf = (p) => [p.city, p.district, p.street, p.lane, p.alley, p.no].map(normTai).join('|');
 
 // ── 掃 CSV,只撿我們要的門牌(單趟串流,不建 1.1M 筆索引)─────────────
-async function lookupAll(wanted) {
+export async function lookupAll(wanted) {
   const found = new Map();
   const files = fs.existsSync(SRC_DIR) ? fs.readdirSync(SRC_DIR).filter((f) => /\.csv$/i.test(f)) : [];
   if (!files.length) throw new Error(`找不到門牌 CSV。請先依 ${path.join(HERE, 'README.md')} 下載到 ${SRC_DIR}`);
 
   for (const file of files) {
-    const city = /taipei|臺北|台北/i.test(file) ? '臺北市' : /yilan|宜蘭/i.test(file) ? '宜蘭縣' : null;
-    if (!city) { console.warn(`⚠ 跳過無法判斷縣市的檔案:${file}`); continue; }
+    const cfg = CITIES.find((c) => c.match.test(file));
+    if (!cfg) { console.warn(`⚠ 跳過無法判斷縣市的檔案:${file}`); continue; }
 
     const rl = readline.createInterface({ input: fs.createReadStream(path.join(SRC_DIR, file), { encoding: 'utf8' }) });
     let first = true, rows = 0;
@@ -115,15 +176,70 @@ async function lookupAll(wanted) {
       const f = line.split(',');
       if (f.length < 11) continue;
       rows++;
-      const district = TPE_DISTRICT[f[1]] || f[1];
-      const k = [city, district, f[4], toHalf(f[6]).replace('巷', ''), toHalf(f[7]).replace('弄', ''), baseNo(f[8])].join('|');
+      const district = (cfg.districts && cfg.districts[f[1]]) || f[1];
+      const k = [cfg.city, district, streetOf(f), toHalf(f[6]).replace('巷', ''), toHalf(f[7]).replace('弄', ''), baseNo(f[8])]
+        .map(normTai).join('|');
       if (!wanted.has(k) || found.has(k)) continue;
-      const x = parseFloat(f[9]), y = parseFloat(f[10]);
-      if (Number.isFinite(x) && Number.isFinite(y)) found.set(k, twd97ToWgs84(x, y));
+      if (cfg.lonLat) {                                   // CSV 自帶 WGS84(台中)→ 直接用,不必換算
+        const lng = parseFloat(f[cfg.lonLat[0]]), lat = parseFloat(f[cfg.lonLat[1]]);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) found.set(k, { lat, lng });
+      } else {
+        const x = parseFloat(f[9]), y = parseFloat(f[10]);
+        if (Number.isFinite(x) && Number.isFinite(y)) found.set(k, twd97ToWgs84(x, y));
+      }
     }
     console.log(`  掃過 ${file}:${rows.toLocaleString()} 筆`);
   }
   return found;
+}
+
+// 退路:門牌庫查無「該號」時,找同一路段(同巷弄)號碼最接近的門牌當概略位置。
+// 用於「地址在各來源一致、但政府門牌登記有缺口」的情況 —— 回傳值一律標 approx,不假裝精確。
+//   wanted: Map<key, {city,district,street,lane,alley,no}>
+//   回傳 Map<key, {lat,lng,viaNo,gap}>
+export async function nearestOnStreet(wanted) {
+  const out = new Map();
+  const files = fs.existsSync(SRC_DIR) ? fs.readdirSync(SRC_DIR).filter((f) => /\.csv$/i.test(f)) : [];
+  // 每個 key 蒐集同路段所有號碼 → 之後挑最近的
+  const pool = new Map();   // key -> [{n, lat, lng}]
+  for (const file of files) {
+    const cfg = CITIES.find((c) => c.match.test(file));
+    if (!cfg) continue;
+    const rl = readline.createInterface({ input: fs.createReadStream(path.join(SRC_DIR, file), { encoding: 'utf8' }) });
+    let first = true;
+    for await (const line of rl) {
+      if (first) { first = false; continue; }
+      const f = line.split(',');
+      if (f.length < 11) continue;
+      const district = (cfg.districts && cfg.districts[f[1]]) || f[1];
+      const no = baseNo(f[8]);
+      if (!no) continue;
+      const streetKey = [cfg.city, district, streetOf(f), toHalf(f[6]).replace('巷', ''), toHalf(f[7]).replace('弄', '')]
+        .map(normTai).join('|');
+      for (const [key, p] of wanted) {
+        const want = [p.city, p.district, p.street, p.lane, p.alley].map(normTai).join('|');
+        if (want !== streetKey) continue;
+        const n = parseInt(no, 10);
+        if (!Number.isFinite(n)) continue;
+        const pt = cfg.lonLat
+          ? { lat: parseFloat(f[cfg.lonLat[1]]), lng: parseFloat(f[cfg.lonLat[0]]) }
+          : twd97ToWgs84(parseFloat(f[9]), parseFloat(f[10]));
+        if (!Number.isFinite(pt.lat) || !Number.isFinite(pt.lng)) continue;
+        if (!pool.has(key)) pool.set(key, []);
+        pool.get(key).push({ n, ...pt });
+      }
+    }
+  }
+  for (const [key, arr] of pool) {
+    const target = parseInt(wanted.get(key).no, 10);
+    let best = null;
+    for (const c of arr) {
+      const gap = Math.abs(c.n - target);
+      if (!best || gap < best.gap) best = { ...c, gap };
+    }
+    if (best) out.set(key, { lat: best.lat, lng: best.lng, viaNo: best.n, gap: best.gap });
+  }
+  return out;
 }
 
 // 兩座標距離(公尺),用來量誤差。

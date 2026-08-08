@@ -46,22 +46,36 @@ function initialWordFromUrl() {
 
 boot();
 
+// 離線支援:sw.js 讓 shell 離線可開;persist() 降低 OPFS/快取被瀏覽器清掉的機率。
+// 兩者都是「盡力而為」:失敗不影響線上使用。
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
 async function boot() {
   setStatus('載入字典中…(第一次約 13MB,只載這一次,之後免下載)');
   try {
+    // 正常路:抓 manifest 比對版本(相同→用 OPFS 免下載;不同→下載新版)
     const manifest = await (await fetch('data/manifest.json?t=' + Date.now())).json();
     const dbUrl = new URL('data/' + manifest.db, location.href).href;
-    const res = await db.init(dbUrl, manifest.version);
+    onReady(await db.init(dbUrl, manifest.version), '');
+  } catch (e) {
+    // 拿不到 manifest(離線 / 伺服器掛)→ 退用 OPFS 既有資料;連本機都沒有才算真的失敗
+    try {
+      onReady(await db.openLocal(), '・離線(未檢查更新)');
+    } catch (_) {
+      setStatus('字典載入失敗:' + e.message + '(本機也沒有既有資料 —— 第一次使用需要網路)');
+    }
+  }
+
+  function onReady(res, suffix) {
     ready = true;
     setStatus('');
     versionEl.textContent = `資料版本 ${res.version}・${(res.counts.words || 0).toLocaleString()} 字` +
-      (res.downloaded ? '(剛下載)' : '(本機快取)');
+      (res.downloaded ? '(剛下載)' : '(本機快取)') + suffix;
     boxes.forEach((b) => b.enable());
     const iw = initialWordFromUrl();
     if (iw) boxes[0].query(iw);   // 直接開 …/dictionary/book 或 ?w=book → 先查它
     boxes[0].focus();
-  } catch (e) {
-    setStatus('字典載入失敗:' + e.message);
   }
 }
 

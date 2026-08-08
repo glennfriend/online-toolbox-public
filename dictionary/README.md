@@ -61,6 +61,23 @@ dictionary/
     └── frequency-norvig/  frequency-google-10k/  wordlist-dwyl/  hyphenation/   (各含 SOURCE.md)
 ```
 
+## 離線使用(2026-08 起支援)
+
+**第一次上線開過之後,之後沒網路也能查字**(Android Firefox 等現代瀏覽器)。分工:
+
+- **`sw.js`(service worker)**:預快取 app shell(HTML/CSS/JS/wasm,約 1.5MB)→ 離線時頁面照開。
+  `data/`(manifest 與 .db.gz)刻意**不進 SW 快取**——資料的持久化由 OPFS 負責,不重複存 13MB。
+- **`boot()` fail-soft(main.js)**:啟動先抓 `manifest.json` 比對版本(線上行為不變);
+  **拿不到 manifest(離線)→ 退用 OPFS 既有資料**,版本列顯示「・離線(未檢查更新)」;
+  連本機都沒有(第一次就離線)才顯示需要網路。
+- **`db.openLocal()`(db.worker.js)**:離線退路指令 —— 不比對版本,直接開 OPFS 那份。
+- 已請求 `navigator.storage.persist()`,降低瀏覽器空間吃緊時清掉 OPFS/快取的機率。
+
+離線時的功能狀態:查詢/自動完成 **全部可用**;點 🔊 退瀏覽器內建語音;「劍橋發音 ↗」外部連結開不了(本來就是外站)。
+
+> **維護規則:改了 shell 任一檔(index.html / styles.css / js/* / vendor/*)就要把 `sw.js` 的 `VERSION` +1**,
+> 使用者下次上線才會換到新版。資料更新**不用**動 VERSION(manifest 比對每次上線都做)。
+
 ## 外部相依(誠實列出)
 
 查詢本身**完全離線**:.db 存在 OPFS、sqlite-wasm 內嵌在 `vendor/`,查字不連任何外部服務。

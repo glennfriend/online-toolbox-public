@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Online Toolbox</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧰%3C/text%3E%3C/svg%3E">
+  <style>
+    /* 自包含:入口頁只有這一檔 + sw.js,離線也開得了 */
+    :root { --ok: #1a7f37; --net: #c0392b; --muted: #8a9099; --border: #e3e6ea; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 28px 20px; font-family: 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;
+           color: #24292f; background: #fafbfc; max-width: 760px; margin-inline: auto; }
+    h1 { font-size: 26px; margin: 0 0 6px; }
+    .legend { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin: 0 4px 0 12px; }
+    .legend .dot.ok { background: var(--ok); }
+    .legend .dot.net { background: var(--net); }
+    h2 { font-size: 15px; color: var(--muted); font-weight: 600; margin: 26px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li { display: flex; align-items: baseline; gap: 10px; padding: 7px 2px; }
+    a { font-weight: 700; text-decoration: none; font-size: 16px; }
+    a.ok { color: var(--ok); }
+    a.net { color: var(--net); }
+    a:hover { text-decoration: underline; }
+    .desc { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Online Toolbox</h1>
+  <div class="legend">
+    連結顏色:<span class="dot ok"></span><b style="color:var(--ok)">綠色</b> = 有離線功能(第一次開過之後,沒網路也能用核心功能)
+    <span class="dot net"></span><b style="color:var(--net)">紅色</b> = 需要網路
+  </div>
+
+  <h2>記錄工具</h2>
+  <ul>
+    <li><a class="net" href="markdown/">Markdown</a><span class="desc">Markdown 筆記</span></li>
+    <li><a class="net" href="scrapbook/">Scrapbook</a><span class="desc">資料, 圖片 暫存</span></li>
+    <li><a class="net" href="chart/">Chart</a><span class="desc">統計圖表</span></li>
+  </ul>
+
+  <h2>查詢工具</h2>
+  <ul>
+    <li><a class="ok" href="dictionary/">Dictionary</a><span class="desc">英文字典</span></li>
+    <li><a class="net" href="curvelab/">Curvelab</a><span class="desc">學生用的 數學公式圖形</span></li>
+    <li><a class="net" href="map/">Map</a><span class="desc">地圖</span></li>
+    <li><a class="net" href="comic/">Comic</a><span class="desc">JSON 劇本 → 漫畫</span></li>
+  </ul>
+
+  <h2>工具</h2>
+  <ul>
+    <li><a class="net" href="ocr/">OCR</a><span class="desc">圖片轉文字</span></li>
+    <li><a class="net" href="calcpad/">Calcpad</a><span class="desc">計算工具 數學 時區</span></li>
+    <li><a class="net" href="scrollshot/">Scrollshot</a><span class="desc">網頁截圖</span></li>
+    <li><a class="net" href="fillcard/">Fillcard</a><span class="desc">填字進版型 → 出圖</span></li>
+    <li><a class="net" href="pipeflow/">Pipeflow</a><span class="desc">簡易資料轉換</span></li>
+    <li><a class="net" href="textdiff/">TextDiff</a><span class="desc">文字比對</span></li>
+  </ul>
+
+  <script>
+    // 入口頁自己也要能離線開(不然離線時連這張清單都看不到)
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  </script>
+</body>
+</html>

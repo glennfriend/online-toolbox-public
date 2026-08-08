@@ -40,6 +40,23 @@ async function init({ dbUrl, version }) {
   }
 }
 
+// 離線退路:不比對版本,直接開 OPFS 既有的那份;沒有就丟錯(由上層決定怎麼顯示)。
+// 用途:離線(或伺服器掛了)拿不到 manifest 時,boot() 退用本機資料。
+async function openLocal() {
+  await ensureEngine();
+  const probe = new pool.OpfsSAHPoolDb(DBNAME);
+  try {
+    const v = probe.selectValue("SELECT value FROM meta WHERE key='version'");
+    if (!v) throw new Error('no meta');
+    DB = probe;
+    let counts = {}; try { counts = JSON.parse(DB.selectValue("SELECT value FROM meta WHERE key='counts'") || '{}'); } catch (_) {}
+    return { version: v, downloaded: false, counts };
+  } catch (_) {
+    try { probe.close(); } catch (_) {}
+    throw new Error('本機沒有既有的字典資料');
+  }
+}
+
 // 前綴自動完成(走 wordlc 索引,依詞頻排序)
 function suggest({ prefix, limit }) {
   const p = (prefix || '').toLowerCase().replace(/[%_\\]/g, '');
@@ -74,7 +91,7 @@ async function clear() {
   return { cleared: true };
 }
 
-const HANDLERS = { init, suggest, lookup, clear };
+const HANDLERS = { init, openLocal, suggest, lookup, clear };
 
 self.onmessage = async (e) => {
   const { id, cmd, ...args } = e.data;

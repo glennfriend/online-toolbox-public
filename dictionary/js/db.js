@@ -33,6 +33,7 @@ function call(cmd, args = {}) {
 
 export const db = {
   init: (dbUrl, version) => call('init', { dbUrl, version }),
+  openLocal: () => call('openLocal'),   // 離線退路:直接開 OPFS 既有資料(不比對版本)
   suggest: (prefix, limit) => call('suggest', { prefix, limit }),
   lookup: (word) => call('lookup', { word }),
   clear: () => call('clear'),

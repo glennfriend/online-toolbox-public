@@ -1,5 +1,8 @@
 # Online Toolbox
 
+入口頁:<https://glennfriend.github.io/online-toolbox-public/>(離線也開得了;
+連結**綠色 = 有離線功能**、**紅色 = 需要網路**。目前綠色:Dictionary)
+
 | 記錄工具 | 說明 | 查詢工具 | 說明 | 工具 | 說明 |
 |---|---|---|---|---|---|
 | [**Markdown**](https://glennfriend.github.io/online-toolbox-public/markdown/) | Markdown 筆記 | [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/) | 英文字典 | [**OCR**](https://glennfriend.github.io/online-toolbox-public/ocr/) | 圖片轉文字 |

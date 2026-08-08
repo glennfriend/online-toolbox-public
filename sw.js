@@ -6,7 +6,7 @@
 //
 // 更新規則:改了 index.html 就把 VERSION +1。
 
-const VERSION = 2;   // 2:入口頁移除 Scrollshot
+const VERSION = 3;   // 3:入口頁改為只列可離線工具(Dictionary / Curvelab)
 const CACHE = `toolbox-index-v${VERSION}`;
 
 self.addEventListener('install', (e) => {

@@ -175,6 +175,9 @@
     last = s;
   });
   last.onload = function(){ if (window.App && App.init) App.init(); };  // 全部載入後才掛載 App
+
+  // 離線支援:sw.js 預快取整個 app(第二次起沒網路也能用)。失敗不影響線上使用。
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
 </script>
 </body>

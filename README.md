@@ -1,7 +1,7 @@
 # Online Toolbox
 
 入口頁:<https://glennfriend.github.io/online-toolbox-public/>(離線也開得了;
-連結**綠色 = 有離線功能**、**紅色 = 需要網路**。目前綠色:Dictionary)
+**只列可離線使用的工具**。目前:Dictionary、Curvelab)
 
 | 記錄工具 | 說明 | 查詢工具 | 說明 | 工具 | 說明 |
 |---|---|---|---|---|---|

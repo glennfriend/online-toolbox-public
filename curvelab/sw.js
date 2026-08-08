@@ -6,7 +6,7 @@
 //
 // 更新規則:改了任何檔(index.html / js/*)就把 VERSION +1。
 
-const VERSION = 1;
+const VERSION = 2;   // 2:手機版面(控制列可換行、切換鈕 2 欄網格)
 const CACHE = `curvelab-v${VERSION}`;
 
 const SHELL = [

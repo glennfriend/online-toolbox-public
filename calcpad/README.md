@@ -2,6 +2,8 @@
 
 numbr 風格的「筆記型計算機」:大輸入區逐行輸入有意義的資訊,每行右側即時給出答案。內容會即時編進網址,複製網址給別人就能看到一模一樣的內容。純前端、零第三方相依、單頁應用。
 
+線上:<https://glennfriend.github.io/online-toolbox-public/calcpad/>
+
 ---
 
 ## 功能目標

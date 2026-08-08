@@ -46,6 +46,9 @@ chart/
     ├── echarts-loader.js   載入 ECharts(CDN 優先、失敗用本地)
     ├── detect.js           輸入格式偵測(json / tsv / csv / markdown)
     ├── table.js            統一二維表模型 + 型別判斷 + 依類別彙總(group-by)
+    ├── storage.js          儲存庫:把輸入資料存進 IndexedDB(回填 / 刪除)
+    ├── examples.js         範例資料
+    ├── lib/idb.js          IndexedDB 薄封裝(storage.js 用)
     ├── parse/              每種輸入格式一個解析器(可插拔)→ 統一表
     │   ├── index.js        解析派發 parse(raw, format)
     │   ├── json.js         JSON 三種常見形狀

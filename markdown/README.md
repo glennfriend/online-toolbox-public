@@ -47,13 +47,15 @@
 markdown/
 ├── index.html            外框 + import map(CDN 庫)+ 載入 js/main.js
 ├── styles.css            app 外框與三種檢視版面
-├── themes/{default,github}.css   預覽內文樣式(套在 .md-preview;換主題=換檔)
+├── themes/{default,github,pandoc}.css  預覽內文樣式(套在 .md-preview;換主題=換檔)
 ├── docs/*.md             內建文件(同源 fetch 載入)
 └── js/
     ├── main.js           殼層:文件庫/編輯/預覽/檢視/主題/側欄/捲動同步/下載 串接
     ├── renderer.js       markdown-it 薄 adapter(核心可抽換;html:false;breaks:true)
     ├── registry.js       模組登記表 + 隔離(try/catch:壞了只錯單一模組)
     ├── store.js          文件庫(localStorage:list/開啟/自動存/刪/內建保護)
+    ├── resize.js         殼層 UI:可拖曳分隔線(側欄全域記憶、分割線每份文件各自記憶)
+    ├── shortcuts.js      殼層 UI:Alt 快速鍵提示(KeyTips)
     └── modules/*.js      各功能模組(見上表)
 ```
 

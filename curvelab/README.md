@@ -2,6 +2,8 @@
 
 互動式「公式圖形庫」:選一個公式,拉動參數(或按播放),即時看圖形怎麼變、怎麼被「畫」出來,並解釋每個公式的意義。純前端、零第三方相依,用瀏覽器開 `index.html` 即可,不需要 server。
 
+線上:<https://glennfriend.github.io/online-toolbox-public/curvelab/>
+
 ---
 
 ## 功能目的

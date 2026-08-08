@@ -84,8 +84,17 @@ map/
 │   ├── mapview.js  地圖呈現層:免 key Google 崁入 iframe + LRU 快取
 │   ├── io.js       匯入匯出 + 點正規化(JSON)
 │   └── util.js     共用小工具(esc / 營業中判斷 / 下載)
-└── data/
-    └── builtin.json  內建(版控)組;唯讀,由 agent 產生填入
+├── data/
+│   └── builtin.json  內建(版控)組;唯讀,由 agent 產生填入
+└── scripts/          ★ 建置時工具(不部署、瀏覽器不會載到)
+    ├── README.md            門牌開放資料的下載方式、踩過的坑、新增資料的做法
+    ├── geocode-moi.mjs      政府門牌資料 → 補正 builtin.json 座標(多城市)
+    ├── verify-addresses.mjs 候選檔把關:逐筆驗證地址存在並回填座標
+    ├── nearby-numbers.mjs   查某路段實際有哪些門牌號(判斷地址是否寫錯)
+    ├── geocode-osm.mjs      沒有門牌資料的縣市改用 OSM(台南/宜蘭)
+    ├── geocode-street-osm.mjs  街道級 OSM 定位(保留為紀錄,不建議使用)
+    ├── merge-candidates.mjs 把驗證過的組併進 builtin.json
+    └── candidates/*.json    各城市的候選資料(進 git;*.resolved.json 為產物,不進 git)
 ```
 
 各模組是純函式 / 單一職責,殼層只負責「串」。**要換地圖引擎(例如 Leaflet+OSM)只需改寫 `mapview.js`**,維持 `initMapView / showPoint / showRoute / clearMapView` 介面,其餘程式一律不動。

@@ -6,6 +6,8 @@
 2. **建置(build)** — `build/` 的 Node 腳本把 `raw/` 正規化、合併、建索引,產出**一個 SQLite 檔** `data/dictionary-<版本>.db.gz` + `manifest.json` + `build-report.md`。
 3. **前端查詢** — 純前端(HTML/CSS/JS):首次下載該 .db、解壓存進瀏覽器 **OPFS**(持久),之後免下載;用 **OPFS SQLite(SAHPool VFS,跑在 Worker)** 即時查詢。
 
+線上:<https://glennfriend.github.io/online-toolbox-public/dictionary/>
+
 ## 資料生命週期(開發者怎麼持續管理)
 
 **真相只有一個:你 build 出來、部署的那支 `dictionary.db`。** 瀏覽器 OPFS 那份是**唯讀快取**,你不會去改它;更新永遠是單向:`raw/ → build → 部署 → 使用者下次自動同步`。
@@ -45,11 +47,12 @@ dictionary/
 ├── js/
 │   ├── main.js           殼層:輸入框、自動完成、渲染字典卡
 │   ├── db.js             與 worker 溝通的查詢 API(load / suggest / lookup / clear)
-│   └── db.worker.js      OPFS SQLite worker:下載/解壓/存 OPFS/版本比對/查詢
+│   ├── db.worker.js      OPFS SQLite worker:下載/解壓/存 OPFS/版本比對/查詢
+│   └── pronounce.js      點 🔊 才發音【外部相依,見下】
 ├── vendor/sqlite-wasm/   內嵌的官方 sqlite-wasm(不靠 CDN,長久穩定)
 ├── build/                離線建置(Node,不部署執行,只產出 data/)
 │   ├── build.mjs         orchestrator:raw → dictionary.db + manifest + report
-│   └── sources/          每個來源一個解析器(可插拔):wordset / cmudict / frequency / arpabet
+│   └── sources/          每個來源一個解析器(可插拔):wordset / cmudict / ecdict / frequency / arpabet
 ├── data/                 build 產物(部署):dictionary-<版本>.db.gz / manifest.json / build-report.md
 ├── browsertest/          DB 相容性實測頁
 └── raw/                  原始資料區(只放原樣下載的資料,納入版控)
@@ -57,3 +60,17 @@ dictionary/
     ├── cmudict/  wordnet/  wordset/  websters-1913/  moby/
     └── frequency-norvig/  frequency-google-10k/  wordlist-dwyl/  hyphenation/   (各含 SOURCE.md)
 ```
+
+## 外部相依(誠實列出)
+
+查詢本身**完全離線**:.db 存在 OPFS、sqlite-wasm 內嵌在 `vendor/`,查字不連任何外部服務。
+唯一會連外的是**發音**,而且只有在使用者主動點 🔊 時才發生:
+
+| 功能 | 外部資源 | 抓不到時 |
+|---|---|---|
+| 點 🔊 播放真人發音 | `api.dictionaryapi.dev`(免 key、CORS 可用)的錄音 mp3 | 退到瀏覽器內建語音(Web Speech),仍會出聲 |
+
+- **顯示的發音(IPA)來自內建 CMUdict,不連網**;只有「播放聲音」才會打上面那支 API。
+- 兩者都失敗時只有該次播放無聲,不影響查詢。
+- `browsertest/db-compat.html` 是**開發用的相容性測試頁**(會從 cdnjs / jsdelivr 載 sql.js、DuckDB-Wasm 做對照),
+  不是使用者頁面,主程式不依賴它。

@@ -1,7 +1,7 @@
 # Online Toolbox
 
 入口頁:<https://glennfriend.github.io/online-toolbox-public/>(離線也開得了;
-**只列可離線使用的工具**。目前:Dictionary、Curvelab、Map(地圖畫面需網路))
+**只列可離線使用的工具**。目前:Dictionary、Curvelab、Map(地圖畫面需網路)、Handbook)
 
 | 記錄工具 | 說明 | 查詢工具 | 說明 | 工具 | 說明 |
 |---|---|---|---|---|---|
@@ -9,7 +9,7 @@
 | [**Scrapbook**](https://glennfriend.github.io/online-toolbox-public/scrapbook/) | 資料, 圖片 暫存 | [**Curvelab**](https://glennfriend.github.io/online-toolbox-public/curvelab/) | 學生用的 數學公式圖形 | [**Calcpad**](https://glennfriend.github.io/online-toolbox-public/calcpad/) | 計算工具 數學 時區 |
 | [**Chart**](https://glennfriend.github.io/online-toolbox-public/chart/) | 統計圖表 | [**Map**](https://glennfriend.github.io/online-toolbox-public/map/) | 地圖 | [**Scrollshot**](https://glennfriend.github.io/online-toolbox-public/scrollshot/) | 網頁截圖 |
 |  |  | [**Comic**](https://glennfriend.github.io/online-toolbox-public/comic/) | JSON 劇本 → 漫畫 | [**Fillcard**](https://glennfriend.github.io/online-toolbox-public/fillcard/) | 填字進版型 → 出圖 |
-|  |  |  |  | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/) | 簡易資料轉換 |
+|  |  | [**Handbook**](https://glennfriend.github.io/online-toolbox-public/handbook/) | 生活資訊手冊 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/) | 簡易資料轉換 |
 |  |  |  |  | [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/) | 文字比對 |
 
 ---

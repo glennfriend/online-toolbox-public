@@ -6,7 +6,7 @@
 //
 // 更新規則:改了 index.html 就把 VERSION +1。
 
-const VERSION = 4;   // 4:入口頁加入 Map
+const VERSION = 5;   // 5:入口頁加入 Handbook
 const CACHE = `toolbox-index-v${VERSION}`;
 
 self.addEventListener('install', (e) => {

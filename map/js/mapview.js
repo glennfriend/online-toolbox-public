@@ -29,6 +29,10 @@ export function clearMapView() { for (const e of cache) e.el.remove(); cache = [
 
 // ── 內部:LRU iframe 快取 ──
 function showUrl(key, url) {
+  // 離線:Google 崁入地圖載不進來,與其留一塊死掉的 iframe,不如誠實說明。
+  // (清單/詳情/路線順序不受影響;回到線上後點任一地點就會正常載圖。)
+  if (!navigator.onLine) { showOfflineNote(); return; }
+  hideOfflineNote();
   let entry = cache.find((e) => e.key === key);
   if (entry) {
     cache = cache.filter((e) => e !== entry);          // 命中:拉到最近使用(不重載)
@@ -44,3 +48,17 @@ function showUrl(key, url) {
   while (cache.length > MAP_CACHE_MAX) cache.shift().el.remove();   // 淘汰最久沒看的
   for (const e of cache) e.el.style.display = (e === entry) ? 'block' : 'none';
 }
+
+// ── 內部:離線說明(取代死掉的 iframe)──
+let offlineNote = null;
+function showOfflineNote() {
+  for (const e of cache) e.el.style.display = 'none';   // 藏起載不進來的 iframe
+  if (!offlineNote) {
+    offlineNote = document.createElement('div');
+    offlineNote.className = 'map-offline';
+    offlineNote.innerHTML = '📡 離線中 —— 地圖畫面需要網路。<br>清單、詳情與路線順序仍可使用;<br>回到線上後,點任一地點即會載入地圖。';
+    container.appendChild(offlineNote);
+  }
+  offlineNote.style.display = 'flex';
+}
+function hideOfflineNote() { if (offlineNote) offlineNote.style.display = 'none'; }

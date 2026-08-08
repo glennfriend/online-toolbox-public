@@ -6,7 +6,7 @@
 //
 // 更新規則:改了 index.html 就把 VERSION +1。
 
-const VERSION = 3;   // 3:入口頁改為只列可離線工具(Dictionary / Curvelab)
+const VERSION = 4;   // 4:入口頁加入 Map
 const CACHE = `toolbox-index-v${VERSION}`;
 
 self.addEventListener('install', (e) => {

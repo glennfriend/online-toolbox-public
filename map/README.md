@@ -76,6 +76,7 @@
 ```
 map/
 ├── index.html
+├── sw.js             service worker:離線支援【見下方「離線使用」】
 ├── styles.css
 ├── js/
 │   ├── main.js     殼層:狀態、DOM 渲染、事件(只串接,不放邏輯)
@@ -100,6 +101,18 @@ map/
 各模組是純函式 / 單一職責,殼層只負責「串」。**要換地圖引擎(例如 Leaflet+OSM)只需改寫 `mapview.js`**,維持 `initMapView / showPoint / showRoute / clearMapView` 介面,其餘程式一律不動。
 
 > ⚠️ 內建組裡若 `approx: true`,表示座標是靠網路概略推估、非精確,僅供參考;要精確請改用 Google Maps 連結重新定位。
+
+## 離線使用(2026-08 起支援)
+
+**第一次上線開過之後,離線能用**:組清單、點詳情(地址/營業/說明)、路線順序計算
+(builtin.json 有快取、使用者組本來就在 localStorage)。**離線不能用**:右側地圖畫面
+(Google 崁入 iframe,內容來自 Google 伺服器,無法快取 —— 離線時顯示說明取代死掉的 iframe,
+回到線上點任一地點即恢復)、搜尋加點(Nominatim 外部服務)。
+
+`sw.js` 的快取策略分兩種:
+- **shell**(HTML/CSS/JS)預快取、快取優先 → **改檔要把 `VERSION` +1**
+- **`data/builtin.json`** 網路優先、成功順手更新快取、離線退快取 →
+  **資料更新不用動 VERSION**,上線永遠拿最新,離線用最後一次拿到的
 
 ## 計畫(之後可加)
 

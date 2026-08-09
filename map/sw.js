@@ -12,7 +12,7 @@
 //     這份資料常更新(新增景點美食),上線永遠拿最新,離線用最後一次拿到的,
 //     而且「資料更新不需要動 VERSION」。
 
-const VERSION = 1;
+const VERSION = 2;   // 2:點位新增 url 欄位,詳情卡多出「官網 ↗」
 const CACHE = `map-shell-v${VERSION}`;
 const DATA_CACHE = 'map-data';          // 資料另放一桶:shell 換版時不必重抓資料
 

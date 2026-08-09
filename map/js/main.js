@@ -131,6 +131,7 @@ function pointDetailHtml(p) {
     ${tags ? `<div class="d-tags">${tags}</div>` : ''}
     <div class="d-foot">
       <div class="d-note">${p.note ? esc(p.note) : ''}</div>
+      ${p.url ? `<a class="d-gmap d-site" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" title="${esc(p.url)}">官網 ↗</a>` : ''}
       <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gmapQuery(p))}" target="_blank" rel="noopener" title="${p.address ? '用店名 + 地址在 Google Maps 搜尋' : '用座標在 Google Maps 開啟'}">Google Map ↗</a>
     </div>`;
 }

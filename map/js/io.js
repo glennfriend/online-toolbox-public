@@ -2,8 +2,19 @@
 // 一個檔 = 一組。JSON schema 同時是「給 AI agent 產生資料的契約」(見 README)。
 import { validLatLng } from './geo.js';
 
+// 只收 http/https 的絕對網址。擋掉 javascript: / data: 這類會變成 XSS 的協定 ——
+// 詳情卡會把它當 href 直接輸出,所以過濾要在資料進來的這一關做,不是在渲染那一關補。
+function normUrl(v) {
+  const s = (v || '').toString().trim();
+  if (!s) return '';
+  try {
+    const u = new URL(s);
+    return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : '';
+  } catch { return ''; }
+}
+
 // 把任意輸入正規化成標準的「點」。回傳 null 表示座標無效(會被濾掉)。
-// 欄位:emoji / title / lat / lng / z / rating / address / hours / tags[] / note / approx(座標是否為概略)
+// 欄位:emoji / title / lat / lng / z / rating / address / hours / tags[] / note / url / approx(座標是否為概略)
 export function normPoint(p) {
   if (!p) return null;
   const lat = +p.lat, lng = +p.lng;
@@ -20,6 +31,7 @@ export function normPoint(p) {
     hours: (p.hours || '').toString().trim(),
     tags,
     note: (p.note || '').toString(),
+    url: normUrl(p.url),
     approx: !!p.approx,
   };
 }
@@ -30,7 +42,7 @@ export function groupToJSON(group) {
     name: group.name,
     points: group.points.map((p) => clean({
       emoji: p.emoji, title: p.title, lat: p.lat, lng: p.lng, z: p.z || 16,
-      rating: p.rating, address: p.address, hours: p.hours, tags: p.tags, note: p.note, approx: p.approx || undefined,
+      rating: p.rating, address: p.address, hours: p.hours, tags: p.tags, note: p.note, url: p.url, approx: p.approx || undefined,
     })),
   }, null, 2);
 }

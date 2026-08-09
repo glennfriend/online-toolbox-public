@@ -4,12 +4,14 @@
 // 要新增/校正內容 → 改那個檔(或請 AI 改);頁面永遠唯讀。
 
 import { parseQA, matches } from './parse.js';
+import * as saved from './saved.js';
 
 const $ = (s) => document.querySelector(s);
 const el = { q: $('#q'), tags: $('#tags'), list: $('#list'), status: $('#status') };
 
 let entries = [];
-let activeTag = null;   // 目前點選的 tag(單選;再點一次取消)
+let activeTag = null;          // 目前點選的 tag(單選;再點一次取消)
+let savedList = saved.load();  // 記住的搜尋(localStorage,重新整理後還在)
 
 init();
 
@@ -24,14 +26,29 @@ async function init() {
     renderTags();
     render();
   } catch (e) {
-    el.status.textContent = '資料載入失敗:' + e.message + '(第一次使用需要網路)';
+    // 筆數欄位只是搜尋框右側一小塊,塞不下錯誤訊息 —— 錯誤要寫在清單區才看得到
+    el.status.textContent = '';
+    const p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = '資料載入失敗:' + e.message + '(第一次使用需要網路)';
+    el.list.replaceChildren(p);
   }
 }
 
 let timer;
 el.q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(render, 150); });
 
-// ── tag 列:依出現次數排序;點選 = 篩選(單選),再點 = 取消 ──
+// Enter = 把目前這組搜尋字記起來,之後一鍵重來
+el.q.addEventListener('keydown', (ev) => {
+  if (ev.key !== 'Enter') return;
+  ev.preventDefault();
+  const before = savedList;
+  savedList = saved.add(savedList, el.q.value);
+  if (savedList !== before) renderTags();
+});
+
+// ── tag 列:依出現次數排序;點選 = 篩選(單選),再點 = 取消。
+//    「記住的搜尋」接在同一列的後面,沒有記住任何東西時就完全不佔空間。 ──
 function renderTags() {
   const count = new Map();
   entries.forEach((e) => e.tags.forEach((t) => count.set(t, (count.get(t) || 0) + 1)));
@@ -46,6 +63,40 @@ function renderTags() {
     b.addEventListener('click', () => { activeTag = (activeTag === tag) ? null : tag; renderTags(); render(); });
     el.tags.appendChild(b);
   }
+
+  for (const q of savedList) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tag saved' + (q === el.q.value.trim() ? ' active' : '');
+    b.textContent = '🔍 ' + q;
+    b.title = '點一下搜尋「' + q + '」;長按刪除';
+    const wasLongPress = bindLongPress(b, () => {
+      if (!confirm(`要刪除記住的搜尋「${q}」嗎?`)) return;
+      savedList = saved.remove(savedList, q);
+      renderTags();
+    });
+    b.addEventListener('click', () => {
+      if (wasLongPress()) return;          // 這次是長按觸發的,不要又當成一般點擊
+      el.q.value = q;
+      renderTags();
+      render();
+    });
+    el.tags.appendChild(b);
+  }
+}
+
+// 長按(600ms)才觸發 onLong。回傳一個函式,讓 click 能問「剛剛那下是不是長按」。
+function bindLongPress(node, onLong) {
+  let timer = null;
+  let fired = false;
+  const cancel = () => { clearTimeout(timer); timer = null; };
+  node.addEventListener('pointerdown', () => {
+    fired = false;
+    timer = setTimeout(() => { fired = true; onLong(); }, 600);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((t) => node.addEventListener(t, cancel));
+  node.addEventListener('contextmenu', (ev) => ev.preventDefault());   // 手機長按不要跳出瀏覽器選單
+  return () => fired;
 }
 
 // ── 清單:搜尋(空白分隔 AND)+ tag 篩選;有搜尋字時符合的卡自動展開 ──
@@ -56,8 +107,8 @@ function render() {
   );
 
   el.status.textContent = (query || activeTag)
-    ? `符合 ${hits.length} 筆(共 ${entries.length} 筆)`
-    : `共 ${entries.length} 筆`;
+    ? `符合 ${hits.length}/${entries.length}`
+    : `${entries.length} 筆`;
 
   const terms = query.split(/\s+/).filter(Boolean);
 

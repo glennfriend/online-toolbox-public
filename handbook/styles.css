@@ -23,24 +23,43 @@ body {
   max-width: 680px; margin-inline: auto; padding: 10px 12px 40px;
 }
 
-/* 搜尋框:手機上要大、好按 */
-#q {
-  width: 100%; font: inherit; font-size: 17px;
-  padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
-  background: var(--surface); color: var(--ink);
+/* 搜尋框:手機上要大、好按。外框畫在 .q-wrap 上,input 本身透明,
+   筆數才能墊在底下當背景 —— 輸入的字會直接蓋過去。 */
+.q-wrap {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
 }
-#q:focus { outline: 2px solid var(--accent); border-color: transparent; }
-
-.status { font-size: 13px; color: var(--muted); margin: 8px 2px 10px; min-height: 18px; }
+.q-wrap:focus-within { outline: 2px solid var(--accent); border-color: transparent; }
+#q {
+  position: relative; z-index: 1;     /* 疊在筆數上面 */
+  width: 100%; font: inherit; font-size: 17px;
+  padding: 12px 14px;
+  background: transparent; border: 0; color: var(--ink);
+}
+#q:focus { outline: none; }           /* 外框交給 .q-wrap 畫,不要畫兩層 */
+.q-count {
+  position: absolute; z-index: 0;     /* 墊在 input 底下 */
+  right: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; color: var(--muted);
+  white-space: nowrap; pointer-events: none;
+}
 
 /* tag 列 */
-#tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+#tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
 .tag {
   font: inherit; font-size: 14px; padding: 7px 13px; cursor: pointer;
   border: 1px solid var(--border); border-radius: 17px;
   background: var(--surface); color: var(--ink);
 }
 .tag.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+/* 記住的搜尋:排在 tag 後面,用虛線框跟 tag 區分。長按會刪除,所以擋掉選字與長按選單 */
+.tag.saved {
+  border-style: dashed;
+  max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.tag.saved.active { border-style: solid; }
 
 /* 問答卡:預設收合(只看問題+tags),點問題展開;搜尋時自動展開 */
 .card {

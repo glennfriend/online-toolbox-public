@@ -37,14 +37,10 @@ async function init() {
 let timer;
 el.q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(render, 150); });
 
-// Enter 也能記住。但手機虛擬鍵盤不一定給得出 Enter / 搜尋鍵(輸入法各家不同),
-// 所以真正可靠的入口是 tag 列最前面那顆「＋ 記住」chip,這裡只是順手支援。
-el.q.addEventListener('keydown', (ev) => {
-  if (ev.key !== 'Enter') return;
-  ev.preventDefault();
-  rememberCurrent();
-});
-
+// 記住搜尋只有一個入口:tag 列最前面那顆「＋ 記住」chip。
+// 這裡刻意「不」監聽 Enter —— 手機虛擬鍵盤給不給得出 Enter 各家輸入法不同,
+// 兩個入口會讓「到底怎樣才會被記住」變得不好預期,不如只留看得見、按得到的那個。
+// (搜尋本身是邊打邊更新的,所以 Enter 沒有動作也不會少任何功能。)
 function rememberCurrent() {
   const before = savedList;
   savedList = saved.add(savedList, el.q.value);

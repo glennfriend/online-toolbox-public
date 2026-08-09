@@ -5,7 +5,7 @@
 //   • data/qa.md → 網路優先、成功順手更新快取、離線退快取:
 //     內容常新增修正,上線永遠拿最新,離線用最後一次拿到的,「資料更新不用動 VERSION」。
 
-const VERSION = 1;
+const VERSION = 2;   // 2:版面精簡(移除大標與展開箭頭,tags 併入標題行)
 const CACHE = `handbook-shell-v${VERSION}`;
 const DATA_CACHE = 'handbook-data';
 

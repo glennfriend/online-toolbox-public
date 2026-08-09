@@ -64,20 +64,18 @@ function render() {
     const card = document.createElement('article');
     card.className = 'card' + (query ? ' open' : '');
 
+    // 標題 + tags 同一行(tags 接在問題後面,最大化顯示區)
     const h = document.createElement('h2');
     h.className = 'card-q';
-    h.textContent = e.q;
+    h.append(document.createTextNode(e.q));
+    e.tags.forEach((t) => { const s = document.createElement('span'); s.className = 'qtag'; s.textContent = t; h.appendChild(s); });
     h.addEventListener('click', () => card.classList.toggle('open'));
-
-    const tagRow = document.createElement('div');
-    tagRow.className = 'card-tags';
-    e.tags.forEach((t) => { const s = document.createElement('span'); s.textContent = t; tagRow.appendChild(s); });
 
     const a = document.createElement('div');
     a.className = 'card-a';
     a.textContent = e.a;                     // textContent + CSS pre-line:內容永遠當純文字,安全又保留換行
 
-    card.append(h, tagRow, a);
+    card.append(h, a);
     el.list.appendChild(card);
   }
   if (!hits.length && entries.length) {

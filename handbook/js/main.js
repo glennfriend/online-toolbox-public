@@ -59,6 +59,8 @@ function render() {
     ? `符合 ${hits.length} 筆(共 ${entries.length} 筆)`
     : `共 ${entries.length} 筆`;
 
+  const terms = query.split(/\s+/).filter(Boolean);
+
   el.list.innerHTML = '';
   for (const e of hits) {
     const card = document.createElement('article');
@@ -67,13 +69,13 @@ function render() {
     // 標題 + tags 同一行(tags 接在問題後面,最大化顯示區)
     const h = document.createElement('h2');
     h.className = 'card-q';
-    h.append(document.createTextNode(e.q));
+    appendMarked(h, e.q, terms);
     e.tags.forEach((t) => { const s = document.createElement('span'); s.className = 'qtag'; s.textContent = t; h.appendChild(s); });
     h.addEventListener('click', () => card.classList.toggle('open'));
 
     const a = document.createElement('div');
     a.className = 'card-a';
-    a.textContent = e.a;                     // textContent + CSS pre-line:內容永遠當純文字,安全又保留換行
+    appendMarked(a, e.a, terms);             // 純文字 + CSS pre-line,只有命中的字被包進 .hl
 
     card.append(h, a);
     el.list.appendChild(card);
@@ -81,4 +83,51 @@ function render() {
   if (!hits.length && entries.length) {
     el.list.innerHTML = '<p class="empty">沒有符合的資料。</p>';
   }
+}
+
+// ── 搜尋字highlight ──
+// 把 text 接到 el 底下,命中搜尋詞的片段用 <span class="hl"> 包起來。
+// 全程 createTextNode / createElement,不碰 innerHTML —— 內容依然當純文字處理,
+// 不會因為加了 highlight 就變成可被注入 HTML 的破口。
+function appendMarked(el, text, terms) {
+  const ranges = matchRanges(text, terms);
+  if (!ranges.length) { el.appendChild(document.createTextNode(text)); return; }
+  let at = 0;
+  for (const [s, e] of ranges) {
+    if (s > at) el.appendChild(document.createTextNode(text.slice(at, s)));
+    const m = document.createElement('span');
+    m.className = 'hl';
+    m.textContent = text.slice(s, e);
+    el.appendChild(m);
+    at = e;
+  }
+  if (at < text.length) el.appendChild(document.createTextNode(text.slice(at)));
+}
+
+// 找出所有搜尋詞在 text 裡的位置(不分大小寫),重疊的併成一段,並依位置排序。
+function matchRanges(text, terms) {
+  if (!terms.length) return [];
+  // 少數字元轉小寫後長度會變(例如 İ → i̇),那樣索引會對不上原字串。
+  // 遇到就退回「區分大小寫」比對,寧可少 highlight 幾個字,也不要標錯位置。
+  let hay = text.toLowerCase();
+  const caseSensitive = hay.length !== text.length;
+  if (caseSensitive) hay = text;
+
+  const hits = [];
+  for (const t of terms) {
+    const needle = caseSensitive ? t : t.toLowerCase();
+    if (!needle) continue;
+    let i = hay.indexOf(needle);
+    while (i !== -1) { hits.push([i, i + needle.length]); i = hay.indexOf(needle, i + needle.length); }
+  }
+  if (!hits.length) return [];
+
+  hits.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const out = [hits[0]];
+  for (let i = 1; i < hits.length; i++) {
+    const last = out[out.length - 1];
+    if (hits[i][0] <= last[1]) last[1] = Math.max(last[1], hits[i][1]);   // 兩個詞重疊 → 併成一段
+    else out.push(hits[i]);
+  }
+  return out;
 }

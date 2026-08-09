@@ -38,9 +38,21 @@ body {
   background: transparent; border: 0; color: var(--ink);
 }
 #q:focus { outline: none; }           /* 外框交給 .q-wrap 畫,不要畫兩層 */
+/* 自己畫 type=search 的清除鈕:預設大小各瀏覽器不一樣,量不準就沒辦法算「筆數要讓開多少」。
+   指定成 16px 之後,它佔的範圍就是右邊 padding 14px + 16px = 30px,筆數退到 36px 就一定不會疊。
+   順便讓它跟著主題變色(預設那顆是寫死的深色,深色模式下看不清楚)。 */
+#q::-webkit-search-cancel-button {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; cursor: pointer;
+  background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 4l8 8M12 4l-8 8' stroke='%23000' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 4l8 8M12 4l-8 8' stroke='%23000' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+}
 .q-count {
   position: absolute; z-index: 0;     /* 墊在 input 底下 */
-  right: 14px; top: 50%; transform: translateY(-50%);
+  /* 讓開 type=search 原生的清除 ✕(Chrome / Safari 會畫在最右邊),
+     不然有字的時候筆數會跟 ✕ 疊在一起看不懂 */
+  right: 36px; top: 50%; transform: translateY(-50%);
   font-size: 13px; color: var(--muted);
   white-space: nowrap; pointer-events: none;
 }
@@ -53,6 +65,12 @@ body {
   background: var(--surface); color: var(--ink);
 }
 .tag.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+/* 「＋ 記住」:tag 列第一顆,只在有輸入且還沒記過時出現。
+   手機虛擬鍵盤不一定有 Enter / 搜尋鍵,這顆才是可靠的入口,所以做得明顯一點 */
+.tag.save-now {
+  border-color: var(--accent); color: var(--accent); font-weight: 700;
+  max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 /* 記住的搜尋:排在 tag 後面,用虛線框跟 tag 區分。長按會刪除,所以擋掉選字與長按選單 */
 .tag.saved {
   border-style: dashed;

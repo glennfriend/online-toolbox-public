@@ -23,7 +23,6 @@ async function init() {
     const res = await fetch('data/qa.md');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     entries = parseQA(await res.text());
-    renderTags();
     render();
   } catch (e) {
     // 筆數欄位只是搜尋框右側一小塊,塞不下錯誤訊息 —— 錯誤要寫在清單區才看得到
@@ -38,47 +37,62 @@ async function init() {
 let timer;
 el.q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(render, 150); });
 
-// Enter = 把目前這組搜尋字記起來,之後一鍵重來
+// Enter 也能記住。但手機虛擬鍵盤不一定給得出 Enter / 搜尋鍵(輸入法各家不同),
+// 所以真正可靠的入口是 tag 列最前面那顆「＋ 記住」chip,這裡只是順手支援。
 el.q.addEventListener('keydown', (ev) => {
   if (ev.key !== 'Enter') return;
   ev.preventDefault();
-  const before = savedList;
-  savedList = saved.add(savedList, el.q.value);
-  if (savedList !== before) renderTags();
+  rememberCurrent();
 });
 
-// ── tag 列:依出現次數排序;點選 = 篩選(單選),再點 = 取消。
-//    「記住的搜尋」接在同一列的後面,沒有記住任何東西時就完全不佔空間。 ──
+function rememberCurrent() {
+  const before = savedList;
+  savedList = saved.add(savedList, el.q.value);
+  if (savedList !== before) render();
+}
+
+// ── tag 列(由左到右):「＋ 記住」→ tag → 已記住的搜尋。
+//    第一顆只在「有輸入字且還沒記過」時出現,平常完全不佔空間。 ──
 function renderTags() {
+  el.tags.innerHTML = '';
+
+  const query = el.q.value.trim();
+  if (query && !savedList.includes(query)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tag save-now';
+    b.textContent = '＋ 記住「' + query + '」';
+    b.title = '把這組搜尋記起來(重新整理後還在)';
+    b.addEventListener('click', rememberCurrent);
+    el.tags.appendChild(b);
+  }
+
   const count = new Map();
   entries.forEach((e) => e.tags.forEach((t) => count.set(t, (count.get(t) || 0) + 1)));
   const tags = [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-Hant'));
-
-  el.tags.innerHTML = '';
   for (const [tag, n] of tags) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'tag' + (tag === activeTag ? ' active' : '');
     b.textContent = `${tag} ${n}`;
-    b.addEventListener('click', () => { activeTag = (activeTag === tag) ? null : tag; renderTags(); render(); });
+    b.addEventListener('click', () => { activeTag = (activeTag === tag) ? null : tag; render(); });
     el.tags.appendChild(b);
   }
 
   for (const q of savedList) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'tag saved' + (q === el.q.value.trim() ? ' active' : '');
+    b.className = 'tag saved' + (q === query ? ' active' : '');
     b.textContent = '🔍 ' + q;
     b.title = '點一下搜尋「' + q + '」;長按刪除';
     const wasLongPress = bindLongPress(b, () => {
       if (!confirm(`要刪除記住的搜尋「${q}」嗎?`)) return;
       savedList = saved.remove(savedList, q);
-      renderTags();
+      render();
     });
     b.addEventListener('click', () => {
       if (wasLongPress()) return;          // 這次是長按觸發的,不要又當成一般點擊
       el.q.value = q;
-      renderTags();
       render();
     });
     el.tags.appendChild(b);
@@ -101,6 +115,7 @@ function bindLongPress(node, onLong) {
 
 // ── 清單:搜尋(空白分隔 AND)+ tag 篩選;有搜尋字時符合的卡自動展開 ──
 function render() {
+  renderTags();                    // tag 列的第一顆會跟著輸入內容變,所以一起重畫
   const query = el.q.value.trim();
   const hits = entries.filter((e) =>
     (!activeTag || e.tags.includes(activeTag)) && (!query || matches(e, query))

@@ -1,8 +1,5 @@
 # Online Toolbox
 
-入口頁:<https://glennfriend.github.io/online-toolbox-public/>(離線也開得了;
-**只列可離線使用的工具**。目前:Dictionary、Curvelab、Map(地圖畫面需網路)、Handbook)
-
 | 記錄工具 | 說明 | 查詢工具 | 說明 | 工具 | 說明 |
 |---|---|---|---|---|---|
 | [**Markdown**](https://glennfriend.github.io/online-toolbox-public/markdown/) | Markdown 筆記 | [**Dictionary**](https://glennfriend.github.io/online-toolbox-public/dictionary/) | 英文字典 | [**OCR**](https://glennfriend.github.io/online-toolbox-public/ocr/) | 圖片轉文字 |

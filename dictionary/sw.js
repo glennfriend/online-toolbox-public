@@ -12,7 +12,7 @@
 // 就要把 VERSION +1 —— 瀏覽器發現 sw.js 內容變了才會裝新版、換新快取。
 // 資料更新「不用」動 VERSION(manifest 比對本來就每次上線都做)。
 
-const VERSION = 1;
+const VERSION = 2;   // 2:activate 清理限縮在自己的快取(修掉會刪掉別的工具快取的 bug)
 const CACHE = `dictionary-shell-v${VERSION}`;
 
 const SHELL = [
@@ -34,7 +34,10 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      // 只清自己的舊版快取。CacheStorage 是「整個網域共用」的,四個工具都在同一個
+      // origin —— 若寫成 k !== CACHE 會把 curvelab / map / handbook / 入口頁的快取
+      // 一起刪掉,害別的工具離線失效。務必用自己的前綴限縮範圍。
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('dictionary-shell-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

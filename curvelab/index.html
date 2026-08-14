@@ -200,7 +200,9 @@
     showPreviousFailure();
 
     navigator.serviceWorker.addEventListener('message', function(ev){
-      if (ev.data && ev.data.type === 'precache-failed') offlineNote(ev.data.detail);
+      if (!ev.data) return;
+      if (ev.data.type === 'precache-failed') offlineNote(ev.data.detail);
+      if (ev.data.type === 'precache-ok') clearNote();     // 補齊了就把先前的警告收掉
     });
 
     // 等頁面載完才註冊。原本是立刻註冊,結果 SW 的 27 個預快取請求跟這一頁自己的
@@ -210,7 +212,13 @@
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('sw.js')
         .then(function(){ return readyOrTimeout(20000); })
-        .then(function(){ return verifyOfflineReady(); })
+        .then(function(reg){
+          // 每次載入都要求補齊上次少抓的檔。install 只在 sw.js 變更時才跑,
+          // 不主動要求的話,缺掉的圖模組永遠補不回來。
+          var sw = (reg && reg.active) || navigator.serviceWorker.controller;
+          if (sw) sw.postMessage('topup');
+          return verifyOfflineReady();
+        })
         .catch(function(err){ offlineNote(err && err.message ? err.message : String(err)); });
     });
   }
@@ -236,22 +244,36 @@
   }
 
   // 頁面本來就知道自己需要哪些檔(就是上面的 files),直接拿去問快取。
+  // 分兩級判斷,因為後果不同:核心檔缺 = 離線打不開;圖模組缺 = 只是少幾張圖。
   function verifyOfflineReady() {
     var need = ['index.html'].concat(files);
     return Promise.all(need.map(function(p){
       return caches.match(p).then(function(hit){ return hit ? null : p; });
     })).then(function(res){
       var missing = res.filter(Boolean);
-      if (missing.length) {
-        throw new Error('離線功能還沒就緒:' + missing.length + '/' + need.length +
-                        ' 個檔案沒進快取(例如 ' + missing[0] + ')');
+      if (!missing.length) return;
+      var graphsOnly = missing.every(function(p){ return p.indexOf('js/graphs/') === 0; });
+      if (graphsOnly) {
+        throw new Error('離線可用,但少了 ' + missing.length + ' 張圖(' + missing[0] +
+                        ');下次進站會再試著補');
       }
+      throw new Error('離線功能還沒就緒:核心檔案缺 ' + missing.length + ' 個(' + missing[0] + ')');
     });
   }
 
   // 同一次載入可能有兩個來源回報(SW 的 message 與 register 的 rejection),
   // 只留一條,而且以先到的(來自 SW、比較具體的那個)為準。
+  // 用旗標而不只是「移除那個 div」:showPreviousFailure 是非同步讀快取的,
+  // 補齊完成的訊息有可能比它先到 —— 只做移除會清到空氣,警告隨後又冒出來。
+  var precacheOk = false;
+  function clearNote() {
+    precacheOk = true;
+    var n = document.querySelector('.offline-note');
+    if (n) n.remove();
+  }
+
   function offlineNote(msg) {
+    if (precacheOk) return;                                  // 已經補齊了,舊紀錄不用再嚇人
     if (document.querySelector('.offline-note')) return;
     var d = document.createElement('div');
     d.className = 'offline-note';

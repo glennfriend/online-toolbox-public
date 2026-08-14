@@ -8,26 +8,46 @@
 //
 // 更新規則:改了任何檔(index.html / js/*)就把 VERSION +1。
 
-const VERSION = 6;   // 6:預快取可續傳(保留已抓到的,下次只補缺的);退避時間拉長
+const VERSION = 11;  // 11:補齊完成的訊息與舊紀錄的競態(用旗標,不只移除 div)
 const CACHE = `curvelab-v${VERSION}`;
 const DIAG = 'curvelab-diag';   // 失敗原因存這裡,下次載入頁面一定讀得到
-const RETRIES = 4;
+// 重試刻意「短」:在 install 裡長時間空等(之前用過 1s→2s→4s)會讓 SW 一直閒置,
+// 瀏覽器可能直接把它回收掉,install 就中斷在半路 —— 實測就卡在這裡。
+// 真正負責復原的是「跨頁面續傳」:這次缺的,下次進站再補。
+const RETRIES = 2;
+const RETRY_WAIT = 400;
 const BATCH = 4;     // 一次只同時抓 4 個(見 precache)
 
-const SHELL = [
+// 分兩級,因為這兩種東西「缺了」的後果完全不同:
+//   CORE   少一個 → 整個 app 打不開,所以必須全部收齊才算安裝成功
+//   GRAPHS 各張圖彼此獨立(app 的設計就是「一張圖一個檔」),缺一個只是少一張圖
+//
+// 這個區分是被實際情況逼出來的:有使用者的裝置固定抓不到某一支圖模組
+// (重試 4 次都 NetworkError,而其他 26 個都成功、儲存空間也充足),
+// 舊版把 27 個一律當必要,結果為了一張圖讓整個離線功能不能用 —— 那不合理。
+const CORE = [
   './',
   './index.html',
-  // 共用 library
   './js/theme.js', './js/num.js', './js/plot.js', './js/ui.js', './js/expr.js', './js/registry.js',
-  // 各圖模組(與 index.html 的 files 陣列同步;新增圖檔時兩邊都要加)
+];
+// 與 index.html 的 files 陣列同步;新增圖檔時兩邊都要加
+const GRAPHS = [
   './js/graphs/line.js', './js/graphs/quadratic.js', './js/graphs/parabola.js', './js/graphs/inverse.js', './js/graphs/abs.js',
   './js/graphs/circle.js', './js/graphs/ellipse.js', './js/graphs/system.js', './js/graphs/roots.js', './js/graphs/pythagoras.js',
   './js/graphs/sine.js', './js/graphs/tan.js', './js/graphs/catenary.js', './js/graphs/cycloid.js', './js/graphs/spiral.js', './js/graphs/cardioid.js',
   './js/graphs/astroid.js', './js/graphs/lemniscate.js', './js/graphs/lissajous.js',
 ];
+const SHELL = CORE.concat(GRAPHS);
 
 self.addEventListener('install', (e) => {
   e.waitUntil(precache().then(() => self.skipWaiting()));
+});
+
+// 補齊的入口。這是必要的:install 只有在 sw.js 內容變更時才會被觸發,
+// 所以「上次少抓的圖模組」不會自己補回來 —— 得由頁面每次載入時主動要求。
+// precache() 本身可續傳又是幂等的,重複呼叫沒有副作用。
+self.addEventListener('message', (e) => {
+  if (e.data === 'topup') e.waitUntil(precache());
 });
 
 // 刻意不用 cache.addAll():它會把 27 個請求「同時」發出去,手機網路上很容易有幾個
@@ -40,30 +60,42 @@ self.addEventListener('install', (e) => {
 //     於是永遠得一次湊滿 27 個才會成功 —— 那是不會收斂的。保留進度之後,
 //     下一次進站只需要補那幾個缺的,成功機率高得多。
 //
-// 但 install 仍然必須「收齊才算成功」:沒收齊就讓它失敗、SW 不啟用。
-// 寧可離線時乾脆打不開,也不要啟用一個半殘的快取、讓你在莫名其妙的地方壞掉。
+// install 的成敗只看 CORE:CORE 收齊就啟用(離線至少開得起來),
+// GRAPHS 缺的只是少幾張圖,會回報但不阻擋 —— 而且因為可續傳,下次進站還會再試補齊。
 async function precache() {
   const cache = await caches.open(CACHE);
-  const missing = [];
-  for (const url of SHELL) {
-    if (!(await cache.match(url))) missing.push(url);
-  }
-  if (!missing.length) { await caches.delete(DIAG); return; }
+  const missing = async (list) => {
+    const out = [];
+    for (const url of list) if (!(await cache.match(url))) out.push(url);
+    return out;
+  };
 
+  const coreFailed = await fetchInto(cache, await missing(CORE));
+  if (coreFailed.length) {
+    await report(`離線功能沒有就緒:核心檔案缺 ${coreFailed.length} 個 —— ${coreFailed[0]}`);
+    throw new Error(`core precache incomplete: ${coreFailed.length} failed`);
+  }
+
+  const graphFailed = await fetchInto(cache, await missing(GRAPHS));
+  if (graphFailed.length) {
+    // 注意這裡「不」throw:離線仍然可用,只是少幾張圖。誠實講清楚就好。
+    await report(`離線可用,但少了 ${graphFailed.length}/${GRAPHS.length} 張圖:${graphFailed[0]}` +
+                 `;其餘 ${SHELL.length - graphFailed.length} 個檔案已收齊,下次進站會再試著補`);
+    return;
+  }
+  await caches.delete(DIAG);   // 全部收齊了,清掉上次留下的紀錄
+  await announce({ type: 'precache-ok' });   // 讓頁面把先前顯示的警告收掉
+}
+
+// 回傳失敗清單(不 throw),讓同一批裡其他檔案照樣被收下來。
+async function fetchInto(cache, urls) {
   const failed = [];
-  for (let i = 0; i < missing.length; i += BATCH) {
-    const batch = missing.slice(i, i + BATCH);
+  for (let i = 0; i < urls.length; i += BATCH) {
+    const batch = urls.slice(i, i + BATCH);
     const results = await Promise.all(batch.map((url) => addWithRetry(cache, url)));
     results.forEach((err, n) => { if (err) failed.push(`${batch[n]}(${err})`); });
   }
-
-  if (failed.length) {
-    const done = SHELL.length - failed.length;
-    await report(`快取不到 ${failed.length}/${SHELL.length} 個檔案:${failed[0]}` +
-                 `${failed.length > 1 ? ` 等 ${failed.length} 個` : ''};已收齊 ${done} 個,下次進站只會補缺的`);
-    throw new Error(`precache incomplete: ${failed.length} failed`);
-  }
-  await caches.delete(DIAG);   // 這次收齊了,清掉上次留下的失敗紀錄
+  return failed;
 }
 
 // 成功回傳 null,失敗回傳錯誤描述(不 throw)—— 這樣同一批裡其他檔案還是會被收下來。
@@ -75,8 +107,7 @@ async function addWithRetry(cache, url) {
       return null;
     } catch (err) {
       lastErr = err;
-      // 退避拉長(1s → 2s → 4s):原本 0.5s / 1s 太急,連線斷一兩秒就三次全滅
-      if (i < RETRIES) await new Promise((r) => setTimeout(r, Math.pow(2, i - 1) * 1000));
+      if (i < RETRIES) await new Promise((r) => setTimeout(r, RETRY_WAIT));
     }
   }
   return `重試 ${RETRIES} 次仍失敗:${lastErr && lastErr.message ? lastErr.message : lastErr}`;
@@ -94,9 +125,14 @@ async function report(detail) {
     const c = await caches.open(DIAG);
     await c.put('diag', new Response(info, { headers: { 'content-type': 'text/plain; charset=utf-8' } }));
   } catch { /* 連診斷都寫不進去,通常本身就是儲存空間的問題 */ }
+  await announce({ type: 'precache-failed', detail: info });
+}
+
+async function announce(msg) {
   try {
+    // includeUncontrolled 是必要的:安裝失敗時這個 SW 還沒控制任何頁面
     const cs = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-    cs.forEach((c) => c.postMessage({ type: 'precache-failed', detail: info }));
+    cs.forEach((c) => c.postMessage(msg));
   } catch { /* 回報失敗就算了,不要蓋掉原始錯誤 */ }
 }
 
@@ -115,7 +151,10 @@ async function storageNote() {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('curvelab-') && k !== CACHE).map((k) => caches.delete(k))))
+      // 要排除 DIAG:它也叫 curvelab-*,但那是診斷紀錄,不是舊版快取。
+      // (踩過:「圖模組缺幾個」屬於 install 成功,activate 會跑,結果剛寫好的
+      //  診斷紀錄立刻被這裡刪掉,持久管道等於白做。)
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('curvelab-') && k !== CACHE && k !== DIAG).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

@@ -8,10 +8,10 @@
 //
 // 更新規則:改了任何檔(index.html / js/*)就把 VERSION +1。
 
-const VERSION = 5;   // 5:失敗原因改寫進快取(postMessage 會漏接),並附上儲存空間用量
+const VERSION = 6;   // 6:預快取可續傳(保留已抓到的,下次只補缺的);退避時間拉長
 const CACHE = `curvelab-v${VERSION}`;
 const DIAG = 'curvelab-diag';   // 失敗原因存這裡,下次載入頁面一定讀得到
-const RETRIES = 3;
+const RETRIES = 4;
 const BATCH = 4;     // 一次只同時抓 4 個(見 precache)
 
 const SHELL = [
@@ -32,35 +32,54 @@ self.addEventListener('install', (e) => {
 
 // 刻意不用 cache.addAll():它會把 27 個請求「同時」發出去,手機網路上很容易有幾個
 // 逾時或被中斷,而它又是全有全無 —— 失敗一個,27 個全部白做,而且不會告訴你是哪一個。
-// 這裡改成一次只抓 BATCH 個、每個檔各自重試,對不穩的連線友善得多。
-// 代價是全部抓完的時間變長一些(27 個小檔共約 76K,可接受)。
+//
+// 這裡的兩個關鍵設計:
+//   • 一次只抓 BATCH 個、每個檔各自退避重試 —— 對不穩的連線友善得多
+//   • 「可續傳」:已經在快取裡的就跳過,失敗時也保留已抓到的。
+//     實測有使用者卡在單一檔案抓不到(NetworkError),舊版每次失敗就整批砍掉重練,
+//     於是永遠得一次湊滿 27 個才會成功 —— 那是不會收斂的。保留進度之後,
+//     下一次進站只需要補那幾個缺的,成功機率高得多。
+//
+// 但 install 仍然必須「收齊才算成功」:沒收齊就讓它失敗、SW 不啟用。
+// 寧可離線時乾脆打不開,也不要啟用一個半殘的快取、讓你在莫名其妙的地方壞掉。
 async function precache() {
   const cache = await caches.open(CACHE);
-  try {
-    for (let i = 0; i < SHELL.length; i += BATCH) {
-      await Promise.all(SHELL.slice(i, i + BATCH).map((url) => addWithRetry(cache, url)));
-    }
-  } catch (err) {
-    // 不留半殘的快取:寧可完全沒有,也不要只有一半 —— 一半會讓離線時壞在莫名其妙的地方
-    await caches.delete(CACHE);
-    await report(err.message || String(err));
-    throw err;
+  const missing = [];
+  for (const url of SHELL) {
+    if (!(await cache.match(url))) missing.push(url);
   }
-  await caches.delete(DIAG);   // 這次成功了,清掉上次留下的失敗紀錄
+  if (!missing.length) { await caches.delete(DIAG); return; }
+
+  const failed = [];
+  for (let i = 0; i < missing.length; i += BATCH) {
+    const batch = missing.slice(i, i + BATCH);
+    const results = await Promise.all(batch.map((url) => addWithRetry(cache, url)));
+    results.forEach((err, n) => { if (err) failed.push(`${batch[n]}(${err})`); });
+  }
+
+  if (failed.length) {
+    const done = SHELL.length - failed.length;
+    await report(`快取不到 ${failed.length}/${SHELL.length} 個檔案:${failed[0]}` +
+                 `${failed.length > 1 ? ` 等 ${failed.length} 個` : ''};已收齊 ${done} 個,下次進站只會補缺的`);
+    throw new Error(`precache incomplete: ${failed.length} failed`);
+  }
+  await caches.delete(DIAG);   // 這次收齊了,清掉上次留下的失敗紀錄
 }
 
+// 成功回傳 null,失敗回傳錯誤描述(不 throw)—— 這樣同一批裡其他檔案還是會被收下來。
 async function addWithRetry(cache, url) {
   let lastErr;
   for (let i = 1; i <= RETRIES; i++) {
     try {
       await cache.add(url);
-      return;
+      return null;
     } catch (err) {
       lastErr = err;
-      if (i < RETRIES) await new Promise((r) => setTimeout(r, i * 500));
+      // 退避拉長(1s → 2s → 4s):原本 0.5s / 1s 太急,連線斷一兩秒就三次全滅
+      if (i < RETRIES) await new Promise((r) => setTimeout(r, Math.pow(2, i - 1) * 1000));
     }
   }
-  throw new Error(`快取不到 ${url}(重試 ${RETRIES} 次):${lastErr && lastErr.message ? lastErr.message : lastErr}`);
+  return `重試 ${RETRIES} 次仍失敗:${lastErr && lastErr.message ? lastErr.message : lastErr}`;
 }
 
 // 把失敗的「具體原因」留下來。瀏覽器給的 install 錯誤只說「失敗」,不說哪個檔、

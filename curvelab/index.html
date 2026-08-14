@@ -202,10 +202,17 @@
     navigator.serviceWorker.addEventListener('message', function(ev){
       if (ev.data && ev.data.type === 'precache-failed') offlineNote(ev.data.detail);
     });
-    navigator.serviceWorker.register('sw.js')
-      .then(function(){ return readyOrTimeout(15000); })
-      .then(function(){ return verifyOfflineReady(); })
-      .catch(function(err){ offlineNote(err && err.message ? err.message : String(err)); });
+
+    // 等頁面載完才註冊。原本是立刻註冊,結果 SW 的 27 個預快取請求跟這一頁自己的
+    // 25 支 script 撞在一起搶頻寬 —— Firefox 對單一主機的並發連線約 6 條,
+    // 兩邊加起來近 50 個請求排隊,很容易有某一個逾時(實測就有使用者卡在單一檔案
+    // NetworkError)。延到 load 之後,預快取獨佔連線,而且不會拖慢首次開啟。
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js')
+        .then(function(){ return readyOrTimeout(20000); })
+        .then(function(){ return verifyOfflineReady(); })
+        .catch(function(err){ offlineNote(err && err.message ? err.message : String(err)); });
+    });
   }
 
   function showPreviousFailure() {

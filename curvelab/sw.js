@@ -8,9 +8,10 @@
 //
 // 更新規則:改了任何檔(index.html / js/*)就把 VERSION +1。
 
-const VERSION = 3;   // 3:預快取失敗會重試;index.html 不再用 ?v= 查詢字串
+const VERSION = 4;   // 4:預快取改分批 + 逐檔重試;失敗會把具體原因回報給頁面
 const CACHE = `curvelab-v${VERSION}`;
 const RETRIES = 3;
+const BATCH = 4;     // 一次只同時抓 4 個(見 precache)
 
 const SHELL = [
   './',
@@ -28,22 +29,46 @@ self.addEventListener('install', (e) => {
   e.waitUntil(precache().then(() => self.skipWaiting()));
 });
 
-// addAll 全有全無:一個檔失敗就整批不進快取。手機網路抖一下就會這樣,
-// 所以重試幾次(間隔遞增)。都失敗就往外丟 —— install 失敗、SW 不會啟用,
-// 舊版(若有)繼續服務,不會出現「快取只有一半」這種殘缺狀態。
+// 刻意不用 cache.addAll():它會把 27 個請求「同時」發出去,手機網路上很容易有幾個
+// 逾時或被中斷,而它又是全有全無 —— 失敗一個,27 個全部白做,而且不會告訴你是哪一個。
+// 這裡改成一次只抓 BATCH 個、每個檔各自重試,對不穩的連線友善得多。
+// 代價是全部抓完的時間變長一些(27 個小檔共約 76K,可接受)。
 async function precache() {
   const cache = await caches.open(CACHE);
+  try {
+    for (let i = 0; i < SHELL.length; i += BATCH) {
+      await Promise.all(SHELL.slice(i, i + BATCH).map((url) => addWithRetry(cache, url)));
+    }
+  } catch (err) {
+    // 不留半殘的快取:寧可完全沒有,也不要只有一半 —— 一半會讓離線時壞在莫名其妙的地方
+    await caches.delete(CACHE);
+    await report(err.message || String(err));
+    throw err;
+  }
+}
+
+async function addWithRetry(cache, url) {
   let lastErr;
   for (let i = 1; i <= RETRIES; i++) {
     try {
-      await cache.addAll(SHELL);
+      await cache.add(url);
       return;
     } catch (err) {
       lastErr = err;
-      if (i < RETRIES) await new Promise((r) => setTimeout(r, i * 1000));
+      if (i < RETRIES) await new Promise((r) => setTimeout(r, i * 500));
     }
   }
-  throw lastErr;
+  throw new Error(`快取不到 ${url}(重試 ${RETRIES} 次):${lastErr && lastErr.message ? lastErr.message : lastErr}`);
+}
+
+// 把失敗的「具體原因」送回頁面。瀏覽器給的 install 錯誤訊息只說「失敗」,
+// 不說哪個檔、為什麼 —— 那樣沒辦法查。includeUncontrolled 是必要的:
+// 安裝失敗時這個 SW 還沒控制任何頁面。
+async function report(detail) {
+  try {
+    const cs = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+    cs.forEach((c) => c.postMessage({ type: 'precache-failed', detail }));
+  } catch { /* 回報本身失敗就算了,不要蓋掉原始錯誤 */ }
 }
 
 self.addEventListener('activate', (e) => {

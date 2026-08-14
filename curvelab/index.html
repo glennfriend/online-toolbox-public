@@ -37,6 +37,12 @@
   }
   .app__head{ flex:0 0 92px; position:sticky; top:14px; padding:4px 0; }
   .app__head h1{ font-size:18px; font-weight:600; margin:0; letter-spacing:.01em; }
+  /* 離線沒就緒的警告:預設不存在,只有真的沒收齊快取時才由 JS 插入(見頁尾載入器) */
+  .offline-note{
+    margin-top:6px; padding:6px 9px; border-radius:8px; cursor:pointer;
+    font-size:11.5px; line-height:1.5; color:var(--danger);
+    background:rgba(192,57,43,.08); border:1px solid rgba(192,57,43,.28);
+  }
 
   .stage{
     flex:1; min-width:0; padding:0 0 24px;
@@ -156,12 +162,14 @@
   <nav class="tabs" id="tabs" aria-label="選擇公式"></nav>
 </div>
 
-<!-- 載入器:用 Date.now() 當版本號,讓瀏覽器每次都抓最新檔,不必再手動改版本號。
-     (代價:每次載入重抓這些小檔,對這種小工具可忽略;離線 file:// 會忽略查詢字串,不影響。)
-     新增一個圖 = 在 js/graphs/ 加一個檔案,再把檔名加進下面 files 陣列(順序 = 右側按鈕順序)。 -->
+<!-- 載入器:依序載入共用 library 與各圖模組。
+     網址刻意「不加」查詢字串 —— 快取更新交給 sw.js 的 VERSION,
+     以前用 ?v=Date.now() 的做法會讓每次載入都重抓 25 個檔,
+     而且離線時得靠 SW 的 ignoreSearch 才對得上快取,多一層不必要的相依。
+     新增一個圖 = 在 js/graphs/ 加一個檔案,再把檔名加進下面 files 陣列(順序 = 右側按鈕順序),
+     同時要加進 sw.js 的 SHELL,並把 VERSION +1。 -->
 <script>
 (function(){
-  var v = Date.now();
   var files = [
     // 共用 library(要在各圖之前)
     'js/theme.js', 'js/num.js', 'js/plot.js', 'js/ui.js', 'js/expr.js', 'js/registry.js',
@@ -174,15 +182,59 @@
   var last;
   files.forEach(function(src){
     var s = document.createElement('script');
-    s.src = src + '?v=' + v;
+    s.src = src;
     s.async = false;                 // 動態插入的 script:設 async=false 保留執行順序
     document.head.appendChild(s);
     last = s;
   });
   last.onload = function(){ if (window.App && App.init) App.init(); };  // 全部載入後才掛載 App
 
-  // 離線支援:sw.js 預快取整個 app(第二次起沒網路也能用)。失敗不影響線上使用。
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+  // ── 離線支援 ──
+  // sw.js 會預快取整個 app(27 個檔),第二次起沒網路也能用。
+  // 這裡不只註冊完就算了:註冊成功不等於快取收齊 —— cache.addAll() 是全有全無,
+  // 手機網路斷一下就整批失敗,而且失敗完全沒有跡象,你只會在離線時才發現進不去。
+  // 所以裝完之後由頁面自己核對「我需要的檔案是不是都在快取裡」,沒收齊就講出來。
+  if ('serviceWorker' in navigator && window.caches) {
+    navigator.serviceWorker.register('sw.js')
+      .then(function(){ return readyOrTimeout(15000); })
+      .then(function(){ return verifyOfflineReady(); })
+      .catch(function(err){ offlineNote(err && err.message ? err.message : String(err)); });
+  }
+
+  // 陷阱:預快取失敗時 SW 不會啟用,而 navigator.serviceWorker.ready 在「沒有 active SW」
+  // 的情況下是永遠不 resolve 的 —— 只 await 它的話,最常見的失敗情境反而什麼都不會顯示。
+  // 所以加逾時,讓它變成一個會講話的錯誤。
+  function readyOrTimeout(ms) {
+    return Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise(function(_, reject){
+        setTimeout(function(){ reject(new Error('離線功能安裝沒有完成(可能是網路不穩)')); }, ms);
+      })
+    ]);
+  }
+
+  // 頁面本來就知道自己需要哪些檔(就是上面的 files),直接拿去問快取。
+  function verifyOfflineReady() {
+    var need = ['index.html'].concat(files);
+    return Promise.all(need.map(function(p){
+      return caches.match(p).then(function(hit){ return hit ? null : p; });
+    })).then(function(res){
+      var missing = res.filter(Boolean);
+      if (missing.length) {
+        throw new Error('離線功能還沒就緒:' + missing.length + '/' + need.length +
+                        ' 個檔案沒進快取(例如 ' + missing[0] + ')');
+      }
+    });
+  }
+
+  function offlineNote(msg) {
+    var d = document.createElement('div');
+    d.className = 'offline-note';
+    d.textContent = '⚠ ' + msg + '。下次有網路時重新整理即可。';
+    d.title = '點一下關閉';
+    d.onclick = function(){ d.remove(); };
+    document.querySelector('.app__head').appendChild(d);
+  }
 })();
 </script>
 </body>

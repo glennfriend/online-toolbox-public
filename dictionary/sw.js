@@ -1,42 +1,42 @@
-// sw.js — service worker:把 app shell 預快取,讓字典「第二次起離線可用」。
+// sw.js — 讓字典「第二次起離線可用」。
 //
-// 邊界(這支只做一件事):
-//   • shell(HTML/CSS/JS/wasm,約 1.5MB)→ 預快取,離線直接供應。
-//   • data/(manifest.json 與 .db.gz)→ 一律直接走網路、不進快取:
+// 離線快取思維(與 curvelab / map / handbook 一致):
+//   • shell(HTML/CSS/JS/wasm)→ 邊用邊快取:install 盡力預熱(永不失敗),
+//     fetch 再 cache-first、沒有就抓、抓到順手存。頁面每次都會載入整組 shell,
+//     所以線上載過就會被存起來供離線用。單一檔被擋 / 逾時只影響那個檔,不會
+//     像 cache.addAll 那樣「一個失敗整批不進快取」。
+//   • data/(manifest.json 與 .db.gz)→ 一律走網路、不進 SW 快取:
 //       - 資料的持久化由 OPFS 負責(db.worker.js),SW 再存一份 = 重複 13MB。
-//       - manifest 必須拿到「網路上的最新版」才有意義;離線拿不到時,
-//         由 main.js 的 boot() 退用 OPFS 既有資料(fail-soft),不是 SW 的事。
-//   • 跨網域(發音 API 等)→ 不攔,維持原行為。
+//       - manifest 要拿「網路最新版」才有意義;離線拿不到時由 main.js 的 boot()
+//         退用 OPFS 既有資料(fail-soft),不是 SW 的事。
+//   • 跨網域(發音 API 等)→ 不攔。
 //
-// 更新規則(重要):改了 shell 任一檔(index.html / styles.css / js/* / vendor/*)
-// 就要把 VERSION +1 —— 瀏覽器發現 sw.js 內容變了才會裝新版、換新快取。
-// 資料更新「不用」動 VERSION(manifest 比對本來就每次上線都做)。
+// 更新規則:改了 shell 任一檔就把 VERSION +1(activate 只清自己的舊版快取)。
 
-const VERSION = 2;   // 2:activate 清理限縮在自己的快取(修掉會刪掉別的工具快取的 bug)
+const VERSION = 3;   // 3:shell 改用邊用邊快取(與其他工具一致)
 const CACHE = `dictionary-shell-v${VERSION}`;
 
+// 預熱清單 = 只是「盡力」給第一次造訪開頭;真正保證離線的是 fetch 邊用邊快取。
 const SHELL = [
-  './',
-  './index.html',
-  './styles.css',
-  './js/main.js',
-  './js/db.js',
-  './js/db.worker.js',
-  './js/pronounce.js',
-  './vendor/sqlite-wasm/index.mjs',
-  './vendor/sqlite-wasm/sqlite3.wasm',
+  './', './index.html', './styles.css',
+  './js/main.js', './js/db.js', './js/db.worker.js', './js/pronounce.js',
+  './vendor/sqlite-wasm/index.mjs', './vendor/sqlite-wasm/sqlite3.wasm',
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // allSettled:單一檔失敗(被封鎖器擋、逾時)不影響其他,整體永不 reject → 一定裝得起來。
+  e.waitUntil(
+    caches.open(CACHE)
+      .then((c) => Promise.allSettled(SHELL.map((url) => c.add(url))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      // 只清自己的舊版快取。CacheStorage 是「整個網域共用」的,四個工具都在同一個
-      // origin —— 若寫成 k !== CACHE 會把 curvelab / map / handbook / 入口頁的快取
-      // 一起刪掉,害別的工具離線失效。務必用自己的前綴限縮範圍。
+      // 只清自己的舊版。CacheStorage 是整個 origin 共用的,四個工具同在一個網域,
+      // 若不用前綴限縮會刪掉別的工具的快取。
       .then((keys) => Promise.all(keys.filter((k) => k.startsWith('dictionary-shell-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
@@ -50,17 +50,27 @@ self.addEventListener('fetch', (e) => {
   if (!url.pathname.startsWith(scopePath())) return;                // 只管自己 scope 內
   if (url.pathname.includes('/data/')) return;                      // 資料一律走網路(見檔頭)
 
-  // 導航請求(重新整理/直接開網址)→ 給快取的 index.html
   if (req.mode === 'navigate') {
-    e.respondWith(caches.match('./index.html').then((hit) => hit || fetch(req)));
+    e.respondWith(cacheFirst(req, './index.html'));
     return;
   }
-
-  // shell:快取優先,沒中才走網路(shell 已全數預快取,沒中代表漏列 → 上線時仍可用,離線才會發現)
-  e.respondWith(
-    caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req))
-  );
+  e.respondWith(cacheFirst(req, req));
 });
+
+// cache-first;沒有就抓、抓到成功順手存(邊用邊快取)。key 可與請求不同,
+// 讓導覽把帶查詢字串的頁面網址正規化存成 './index.html'。
+function cacheFirst(req, key) {
+  return caches.match(key).then((hit) => {
+    if (hit) return hit;
+    return fetch(req).then((resp) => {
+      if (resp && resp.ok) {
+        const copy = resp.clone();
+        caches.open(CACHE).then((c) => c.put(key, copy)).catch(() => {});
+      }
+      return resp;
+    });
+  });
+}
 
 function scopePath() {
   return new URL(self.registration.scope).pathname;

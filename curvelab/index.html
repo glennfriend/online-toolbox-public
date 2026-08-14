@@ -37,12 +37,6 @@
   }
   .app__head{ flex:0 0 92px; position:sticky; top:14px; padding:4px 0; }
   .app__head h1{ font-size:18px; font-weight:600; margin:0; letter-spacing:.01em; }
-  /* 離線沒就緒的警告:預設不存在,只有真的沒收齊快取時才由 JS 插入(見頁尾載入器) */
-  .offline-note{
-    margin-top:6px; padding:6px 9px; border-radius:8px; cursor:pointer;
-    font-size:11.5px; line-height:1.5; color:var(--danger);
-    background:rgba(192,57,43,.08); border:1px solid rgba(192,57,43,.28);
-  }
 
   .stage{
     flex:1; min-width:0; padding:0 0 24px;
@@ -189,98 +183,14 @@
   });
   last.onload = function(){ if (window.App && App.init) App.init(); };  // 全部載入後才掛載 App
 
-  // ── 離線支援 ──
-  // sw.js 會預快取整個 app(27 個檔),第二次起沒網路也能用。
-  // 這裡不只註冊完就算了:註冊成功不等於快取收齊 —— cache.addAll() 是全有全無,
-  // 手機網路斷一下就整批失敗,而且失敗完全沒有跡象,你只會在離線時才發現進不去。
-  // 所以裝完之後由頁面自己核對「我需要的檔案是不是都在快取裡」,沒收齊就講出來。
-  if ('serviceWorker' in navigator && window.caches) {
-    // 上一次失敗的紀錄(sw.js 寫在 curvelab-diag 裡)。這是主要管道:
-    // 它是持久的,不像 postMessage 會因為頁面是舊版沒掛監聽而漏接。
-    showPreviousFailure();
-
-    navigator.serviceWorker.addEventListener('message', function(ev){
-      if (!ev.data) return;
-      if (ev.data.type === 'precache-failed') offlineNote(ev.data.detail);
-      if (ev.data.type === 'precache-ok') clearNote();     // 補齊了就把先前的警告收掉
-    });
-
-    // 等頁面載完才註冊。原本是立刻註冊,結果 SW 的 27 個預快取請求跟這一頁自己的
-    // 25 支 script 撞在一起搶頻寬 —— Firefox 對單一主機的並發連線約 6 條,
-    // 兩邊加起來近 50 個請求排隊,很容易有某一個逾時(實測就有使用者卡在單一檔案
-    // NetworkError)。延到 load 之後,預快取獨佔連線,而且不會拖慢首次開啟。
+  // 離線支援:sw.js 採「邊用邊快取」—— 這一頁載入的每個模組,SW 順手存進快取,
+  // 第二次起沒網路也能用。註冊延到 load 之後,不跟頁面自己載入的模組搶連線。
+  // 失敗不影響線上使用,所以這裡不需要任何檢查 / 回報機制(那些交給瀏覽器的
+  // 開發者工具就好);離線是否完整由 sw.js 自癒,單一被封鎖器擋掉的檔只少一張圖。
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('sw.js')
-        .then(function(){ return readyOrTimeout(20000); })
-        .then(function(reg){
-          // 每次載入都要求補齊上次少抓的檔。install 只在 sw.js 變更時才跑,
-          // 不主動要求的話,缺掉的圖模組永遠補不回來。
-          var sw = (reg && reg.active) || navigator.serviceWorker.controller;
-          if (sw) sw.postMessage('topup');
-          return verifyOfflineReady();
-        })
-        .catch(function(err){ offlineNote(err && err.message ? err.message : String(err)); });
+      navigator.serviceWorker.register('sw.js').catch(function(){});
     });
-  }
-
-  function showPreviousFailure() {
-    caches.open('curvelab-diag')
-      .then(function(c){ return c.match('diag'); })
-      .then(function(res){ return res ? res.text() : null; })
-      .then(function(txt){ if (txt) offlineNote(txt); })
-      .catch(function(){ /* 沒有紀錄就是好事 */ });
-  }
-
-  // 陷阱:預快取失敗時 SW 不會啟用,而 navigator.serviceWorker.ready 在「沒有 active SW」
-  // 的情況下是永遠不 resolve 的 —— 只 await 它的話,最常見的失敗情境反而什麼都不會顯示。
-  // 所以加逾時,讓它變成一個會講話的錯誤。
-  function readyOrTimeout(ms) {
-    return Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise(function(_, reject){
-        setTimeout(function(){ reject(new Error('離線功能安裝沒有完成(可能是網路不穩)')); }, ms);
-      })
-    ]);
-  }
-
-  // 頁面本來就知道自己需要哪些檔(就是上面的 files),直接拿去問快取。
-  // 分兩級判斷,因為後果不同:核心檔缺 = 離線打不開;圖模組缺 = 只是少幾張圖。
-  function verifyOfflineReady() {
-    var need = ['index.html'].concat(files);
-    return Promise.all(need.map(function(p){
-      return caches.match(p).then(function(hit){ return hit ? null : p; });
-    })).then(function(res){
-      var missing = res.filter(Boolean);
-      if (!missing.length) return;
-      var graphsOnly = missing.every(function(p){ return p.indexOf('js/graphs/') === 0; });
-      if (graphsOnly) {
-        throw new Error('離線可用,但少了 ' + missing.length + ' 張圖(' + missing[0] +
-                        ');下次進站會再試著補');
-      }
-      throw new Error('離線功能還沒就緒:核心檔案缺 ' + missing.length + ' 個(' + missing[0] + ')');
-    });
-  }
-
-  // 同一次載入可能有兩個來源回報(SW 的 message 與 register 的 rejection),
-  // 只留一條,而且以先到的(來自 SW、比較具體的那個)為準。
-  // 用旗標而不只是「移除那個 div」:showPreviousFailure 是非同步讀快取的,
-  // 補齊完成的訊息有可能比它先到 —— 只做移除會清到空氣,警告隨後又冒出來。
-  var precacheOk = false;
-  function clearNote() {
-    precacheOk = true;
-    var n = document.querySelector('.offline-note');
-    if (n) n.remove();
-  }
-
-  function offlineNote(msg) {
-    if (precacheOk) return;                                  // 已經補齊了,舊紀錄不用再嚇人
-    if (document.querySelector('.offline-note')) return;
-    var d = document.createElement('div');
-    d.className = 'offline-note';
-    d.textContent = '⚠ ' + msg + '。下次有網路時重新整理即可。';
-    d.title = '點一下關閉';
-    d.onclick = function(){ d.remove(); };
-    document.querySelector('.app__head').appendChild(d);
   }
 })();
 </script>

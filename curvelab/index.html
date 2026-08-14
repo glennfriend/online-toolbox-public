@@ -195,8 +195,10 @@
   // 手機網路斷一下就整批失敗,而且失敗完全沒有跡象,你只會在離線時才發現進不去。
   // 所以裝完之後由頁面自己核對「我需要的檔案是不是都在快取裡」,沒收齊就講出來。
   if ('serviceWorker' in navigator && window.caches) {
-    // 先掛監聽再註冊:sw.js 預快取失敗時會 postMessage 回來,裡面才有「哪個檔、為什麼」。
-    // 瀏覽器自己給的 install 錯誤只說「失敗」,查不出東西。
+    // 上一次失敗的紀錄(sw.js 寫在 curvelab-diag 裡)。這是主要管道:
+    // 它是持久的,不像 postMessage 會因為頁面是舊版沒掛監聽而漏接。
+    showPreviousFailure();
+
     navigator.serviceWorker.addEventListener('message', function(ev){
       if (ev.data && ev.data.type === 'precache-failed') offlineNote(ev.data.detail);
     });
@@ -204,6 +206,14 @@
       .then(function(){ return readyOrTimeout(15000); })
       .then(function(){ return verifyOfflineReady(); })
       .catch(function(err){ offlineNote(err && err.message ? err.message : String(err)); });
+  }
+
+  function showPreviousFailure() {
+    caches.open('curvelab-diag')
+      .then(function(c){ return c.match('diag'); })
+      .then(function(res){ return res ? res.text() : null; })
+      .then(function(txt){ if (txt) offlineNote(txt); })
+      .catch(function(){ /* 沒有紀錄就是好事 */ });
   }
 
   // 陷阱:預快取失敗時 SW 不會啟用,而 navigator.serviceWorker.ready 在「沒有 active SW」

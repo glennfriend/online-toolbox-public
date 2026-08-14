@@ -8,8 +8,9 @@
 //
 // 更新規則:改了任何檔(index.html / js/*)就把 VERSION +1。
 
-const VERSION = 4;   // 4:預快取改分批 + 逐檔重試;失敗會把具體原因回報給頁面
+const VERSION = 5;   // 5:失敗原因改寫進快取(postMessage 會漏接),並附上儲存空間用量
 const CACHE = `curvelab-v${VERSION}`;
+const DIAG = 'curvelab-diag';   // 失敗原因存這裡,下次載入頁面一定讀得到
 const RETRIES = 3;
 const BATCH = 4;     // 一次只同時抓 4 個(見 precache)
 
@@ -45,6 +46,7 @@ async function precache() {
     await report(err.message || String(err));
     throw err;
   }
+  await caches.delete(DIAG);   // 這次成功了,清掉上次留下的失敗紀錄
 }
 
 async function addWithRetry(cache, url) {
@@ -61,14 +63,34 @@ async function addWithRetry(cache, url) {
   throw new Error(`快取不到 ${url}(重試 ${RETRIES} 次):${lastErr && lastErr.message ? lastErr.message : lastErr}`);
 }
 
-// 把失敗的「具體原因」送回頁面。瀏覽器給的 install 錯誤訊息只說「失敗」,
-// 不說哪個檔、為什麼 —— 那樣沒辦法查。includeUncontrolled 是必要的:
-// 安裝失敗時這個 SW 還沒控制任何頁面。
+// 把失敗的「具體原因」留下來。瀏覽器給的 install 錯誤只說「失敗」,不說哪個檔、
+// 為什麼 —— 那樣沒辦法查。
+//
+// 這裡用兩個管道,因為單靠 postMessage 會漏:如果頁面是舊版(GitHub Pages 對
+// index.html 設 10 分鐘快取,重新整理很可能還是拿到舊檔),它就沒有掛監聽,
+// 訊息送出去等於丟進虛空。寫進快取則是持久的,下次載入一定讀得到。
 async function report(detail) {
+  const info = detail + await storageNote();
+  try {
+    const c = await caches.open(DIAG);
+    await c.put('diag', new Response(info, { headers: { 'content-type': 'text/plain; charset=utf-8' } }));
+  } catch { /* 連診斷都寫不進去,通常本身就是儲存空間的問題 */ }
   try {
     const cs = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-    cs.forEach((c) => c.postMessage({ type: 'precache-failed', detail }));
-  } catch { /* 回報本身失敗就算了,不要蓋掉原始錯誤 */ }
+    cs.forEach((c) => c.postMessage({ type: 'precache-failed', detail: info }));
+  } catch { /* 回報失敗就算了,不要蓋掉原始錯誤 */ }
+}
+
+// 附上儲存空間用量:如果失敗其實是空間不足造成的,錯誤訊息本身通常看不出來。
+async function storageNote() {
+  try {
+    if (!navigator.storage || !navigator.storage.estimate) return '';
+    const e = await navigator.storage.estimate();
+    const mb = (n) => Math.round((n || 0) / 1048576) + 'MB';
+    return `(儲存空間 已用 ${mb(e.usage)} / 上限 ${mb(e.quota)})`;
+  } catch {
+    return '';
+  }
 }
 
 self.addEventListener('activate', (e) => {

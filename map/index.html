@@ -17,6 +17,7 @@
           <span>🔒 內建資料組 來自版控資料、唯讀預設值</span>
           <span>User 可以 新增 / 匯入 / 刪除</span>
           <span>評分排序</span>
+          <span>距離排序(手機定位,沒網路也能用)</span>
           <span>可解析輸入 Google Map url</span>
           <span class="tip-h">[不支援]</span>
           <span>地點搜尋、商家搜尋</span>
@@ -39,6 +40,7 @@
       <option value="none">不排序</option>
       <option value="rating">評分高→低</option>
       <option value="title">名稱</option>
+      <option value="distance">距離近→遠</option>
     </select>
     <span class="spacer"></span>
     <button id="newGroup" class="btn" type="button">＋ 新組</button>
@@ -75,6 +77,7 @@
       </div>
 
       <div id="detail" class="detail" hidden></div>
+      <div id="locStatus" class="loc-status" hidden></div>
       <div id="list" class="list"></div>
     </aside>
 

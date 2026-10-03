@@ -117,6 +117,11 @@ body {
 .title { flex: 1; min-width: 0; font: inherit; font-size: .9rem; padding: .45em .6em; border: 1px solid var(--border); border-radius: 8px; }
 .note { font: inherit; font-size: .85rem; min-height: 56px; resize: vertical; padding: .45em .6em; border: 1px solid var(--border); border-radius: 8px; }
 
+/* 定位狀態列(只在「距離近→遠」時出現) */
+.loc-status { flex: 0 0 auto; font-size: .8rem; color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .35rem .7rem; }
+.loc-status.err { color: var(--danger); border-color: #ffcecb; background: #fff8f7; }
+.row-dist { color: var(--accent); font-weight: 600; }
+
 /* 地點清單(填滿剩餘、可捲動) */
 .list { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow-y: auto; flex: 1; min-height: 0; }
 .empty { padding: 1rem; color: var(--muted); font-size: .85rem; }

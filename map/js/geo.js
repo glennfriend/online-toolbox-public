@@ -52,6 +52,13 @@ export function haversineKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
+// 距離顯示:<1km 取到 10m(350m)、<10km 一位小數(1.2km)、其餘整數(35km)。
+export function fmtDist(km) {
+  if (km < 1) return `${Math.round(km * 100) * 10}m`;
+  if (km < 10) return `${km.toFixed(1)}km`;
+  return `${Math.round(km)}km`;
+}
+
 // 路線排序:最近鄰(從 start 出發)+ 2-opt 解交叉。回傳 points 的排序(不含 start)。
 export function orderByRoute(points, start) {
   const pts = points.slice();

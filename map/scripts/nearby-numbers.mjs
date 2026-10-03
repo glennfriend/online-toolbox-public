@@ -39,7 +39,8 @@ for (const [city, qs] of byCity) {
   const bucket = new Map();      // street|lane|alley -> Set(號)
   const codeSeen = new Map();    // street|lane|alley -> Set(區代碼)
   const toHalf = (s) => String(s ?? '').replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
-  const wanted = new Set(qs.map((q) => [q.p.street, q.p.lane, q.p.alley].join('|')));
+  const nt = (s) => String(s ?? '').replace(/臺/g, '台');   // 臺/台 統一(門牌檔與輸入寫法不一)
+  const wanted = new Set(qs.map((q) => [q.p.street, q.p.lane, q.p.alley].map(nt).join('|')));
 
   const rl = readline.createInterface({ input: fs.createReadStream(path.join(SRC, file), { encoding: 'utf8' }) });
   let first = true;
@@ -56,7 +57,7 @@ for (const [city, qs] of byCity) {
   }
 
   for (const q of qs) {
-    const k = [q.p.street, q.p.lane, q.p.alley].join('|');
+    const k = [q.p.street, q.p.lane, q.p.alley].map(nt).join('|');
     const set = bucket.get(k) || new Set();
     const target = q.p.no.replace('號', '');
     const list = [...set].map((x) => ({ r: x, n: parseInt(x, 10) })).sort((a, b) => a.n - b.n);

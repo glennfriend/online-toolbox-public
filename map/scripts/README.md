@@ -17,6 +17,7 @@
 | `node verify-addresses.mjs <候選檔>` | **新資料進 builtin 前的把關**:逐筆驗證地址存在並回填座標 |
 | `node nearby-numbers.mjs "<地址>" …` | 查某路段實際有哪些門牌號 —— 判斷地址是不是寫錯最快的方法 |
 | `node geocode-osm.mjs <候選檔> [groupId]` | 沒有門牌資料的縣市改用 OSM 定位(台南、宜蘭)。**只對「景點」用** |
+| `node stale.mjs [--days=180] [--group=台中] [--json]` | 列出**該重新上網查證**的點(沒有 `checked` 或超過門檻天數),唯讀 |
 | `node merge-candidates.mjs [--remove=id,…] <*.resolved.json>` | 把驗證過的組併進 builtin.json、依由北到南排序;`--remove` 可先刪掉舊組 |
 
 `geocode-osm.mjs` 有兩道防呆,兩道都實際擋下過錯誤:

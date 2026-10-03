@@ -15,6 +15,7 @@ function normUrl(v) {
 
 // 把任意輸入正規化成標準的「點」。回傳 null 表示座標無效(會被濾掉)。
 // 欄位:emoji / title / lat / lng / z / rating / address / hours / tags[] / note / url / approx(座標是否為概略)
+//       / checked(最後上網查證日 YYYY-MM-DD)
 export function normPoint(p) {
   if (!p) return null;
   const lat = +p.lat, lng = +p.lng;
@@ -33,6 +34,7 @@ export function normPoint(p) {
     note: (p.note || '').toString(),
     url: normUrl(p.url),
     approx: !!p.approx,
+    checked: /^\d{4}-\d{2}-\d{2}$/.test(p.checked || '') ? p.checked : '',
   };
 }
 
@@ -42,7 +44,7 @@ export function groupToJSON(group) {
     name: group.name,
     points: group.points.map((p) => clean({
       emoji: p.emoji, title: p.title, lat: p.lat, lng: p.lng, z: p.z || 16,
-      rating: p.rating, address: p.address, hours: p.hours, tags: p.tags, note: p.note, url: p.url, approx: p.approx || undefined,
+      rating: p.rating, address: p.address, hours: p.hours, tags: p.tags, note: p.note, url: p.url, approx: p.approx || undefined, checked: p.checked,
     })),
   }, null, 2);
 }

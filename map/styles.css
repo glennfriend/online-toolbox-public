@@ -59,6 +59,8 @@ body {
 .d-rating, .row-rating { color: #9a6700; font-weight: 600; }
 .d-coord { font-size: .76rem; color: var(--muted); margin: .15rem 0 .4rem; }
 .d-approx { color: var(--danger); }
+.d-checked { font-size: .74rem; color: var(--muted); margin-top: .3rem; }
+.d-checked.stale { color: var(--danger); }
 .d-line { font-size: .85rem; margin: .15rem 0; }
 .d-k { display: inline-block; min-width: 3em; color: var(--accent); font-weight: 600; margin-right: .4rem; }
 .d-tags { margin: .4rem 0 .2rem; display: flex; flex-wrap: wrap; gap: .3rem; }
@@ -121,6 +123,10 @@ body {
 .loc-status { flex: 0 0 auto; font-size: .8rem; color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .35rem .7rem; }
 .loc-status.err { color: var(--danger); border-color: #ffcecb; background: #fff8f7; }
 .row-dist { color: var(--accent); font-weight: 600; }
+/* 詳情卡方向列:往東北 520m;有羅盤時多一個指向目的地的箭頭 */
+.d-dir { display: flex; align-items: center; gap: .5rem; margin: .1rem 0 .4rem; font-size: 1rem; font-weight: 700; color: var(--accent); }
+.d-arrow { display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem;
+  font-size: 1.4rem; line-height: 1; border-radius: 50%; background: #eef4ff; border: 2px solid var(--accent); }
 
 /* 地點清單(填滿剩餘、可捲動) */
 .list { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow-y: auto; flex: 1; min-height: 0; }

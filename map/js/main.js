@@ -2,6 +2,7 @@
 //   store.js   使用者組的 localStorage 存取
 //   geo.js     座標解析 / 地名搜尋 / 距離 / 路線規劃(純計算)
 //   locate.js  我的位置(Geolocation;只在「距離近→遠」排序時追蹤)
+//   compass.js 手機朝向(羅盤;同上,只在距離排序時聽)
 //   mapview.js 地圖呈現層(免 key Google 崁入;未來可換 Leaflet,介面不變)
 //   io.js      匯入匯出 + 點正規化
 //   util.js    共用小工具(esc / 營業中判斷 / 下載)
@@ -9,11 +10,12 @@
 // 兩種組:內建組(版控 builtin.json,唯讀)+ 使用者組(localStorage,可加點/匯入/刪除)。
 
 import { loadUser, saveUser, uid } from './store.js';
-import { parseLatLng, search, placeNameFromUrl, planRoute, haversineKm, fmtDist } from './geo.js';
+import { parseLatLng, search, placeNameFromUrl, planRoute, haversineKm, fmtDist, bearingDeg, dirName } from './geo.js';
 import { startWatch, stopWatch } from './locate.js';
+import { startCompass, stopCompass } from './compass.js';
 import { groupToJSON, parseImport, normPoint } from './io.js';
 import { initMapView, showPoint, showRoute as drawRoute, clearMapView } from './mapview.js';
-import { esc, openMark, download, safeName } from './util.js';
+import { esc, openMark, checkedInfo, download, safeName } from './util.js';
 
 const $ = (s) => document.querySelector(s);
 const el = {
@@ -35,6 +37,7 @@ let pick = null;                    // 待加入的地點 { lat, lng, name }
 let results = [];                   // 最近一次搜尋結果
 let selected = null;                // 目前詳情:單一點物件,或 { route:true, ... }
 let me = null;                      // 我的位置 { lat, lng, acc }(只在「距離近→遠」時有值)
+let heading = null;                 // 手機朝向(度);拿不到絕對方位就一直是 null
 
 const allGroups = () => [...builtinGroups, ...user.userGroups];
 const current = () => allGroups().find((g) => g.id === user.currentId) || allGroups()[0];
@@ -87,7 +90,7 @@ function renderList() {
     </div>` : '';
   el.list.innerHTML = routeRow + sortedPoints(g).map((p) => {
     const l2 = esc(line2Text(p));
-    const dist = me ? `<span class="row-dist">${fmtDist(haversineKm(me, p))}</span>` : '';
+    const dist = me ? `<span class="row-dist">${dirName(bearingDeg(me, p))} ${fmtDist(haversineKm(me, p))}</span>` : '';
     const note = dist + (dist && l2 ? ' · ' : '') + l2;
     return `
     <div class="row${selected && selected.id === p.id ? ' on' : ''}" data-id="${p.id}" title="點一下:看詳情並跳到地圖">
@@ -112,16 +115,38 @@ function sortedPoints(g) {
 // 位置更新時,移動 ≥ 15m 才重排清單(GPS 小幅飄動不讓清單一直跳)。
 function syncLocate() {
   if (user.sort !== 'distance') {
-    stopWatch(); me = null; el.locStatus.hidden = true;
+    stopWatch(); stopCompass(); me = null; heading = null; el.locStatus.hidden = true;
+    updateDir();
     return;
   }
   if (!me) setLocStatus('📍 定位中…(第一次會詢問位置權限;沒網路時 GPS 定位較慢)');
   startWatch(onPos, onLocErr);
+  startCompass((h) => { heading = h; updateArrow(); });
 }
 function onPos(pos) {
   const moved = !me || haversineKm(me, pos) * 1000 >= 15;
   if (moved) { me = pos; renderList(); } else me.acc = pos.acc;
   setLocStatus(`📍 已定位(誤差約 ${Math.round(pos.acc)}m)· 依直線距離排序`);
+  updateDir();
+}
+
+// 詳情卡的方向列:「往東北 520m」;有羅盤時加一個跟著手機轉的箭頭(直接指向目的地)。
+// 只改方向列裡的文字 / 箭頭角度,不重繪整張詳情卡(羅盤一秒觸發幾十次)。
+function updateDir() {
+  const box = $('#dDir');
+  if (!box) return;
+  const p = selected && !selected.route ? selected : null;
+  box.hidden = !(p && me);
+  if (box.hidden) return;
+  $('#dDirText').textContent = `往${dirName(bearingDeg(me, p))} ${fmtDist(haversineKm(me, p))}(直線)`;
+  updateArrow();
+}
+function updateArrow() {
+  const arrow = $('#dArrow');
+  if (!arrow) return;
+  const p = selected && !selected.route ? selected : null;
+  arrow.hidden = !(p && me && heading !== null);
+  if (!arrow.hidden) arrow.style.transform = `rotate(${bearingDeg(me, p) - heading}deg)`;
 }
 function onLocErr(msg) {
   setLocStatus(`⚠ ${msg}${me ? '(目前用最後一次的位置)' : ''}`, true);
@@ -146,6 +171,7 @@ function renderDetail() {
   el.detail.innerHTML = selected.route ? routeDetailHtml(selected) : pointDetailHtml(selected);
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
   if (!selected.route) $('#goBtn').addEventListener('click', () => openGo(selected));
+  updateDir();
 }
 // 外連 Google Maps 的查詢字串:有地址就用「店名 + 地址」讓 Google 自己定位
 // (它的搜尋比我們的座標準,且會落在店家資訊卡而非路中央的圖釘);沒地址才退回座標。
@@ -156,13 +182,17 @@ function gmapQuery(p) {
 
 function pointDetailHtml(p) {
   const tags = (p.tags || []).map((t) => `<span class="chip">${esc(t)}</span>`).join('');
+  // 查證日只對內建組有意義(使用者自己加的點不經查證流程)
+  const ck = isBuiltin(current()) ? checkedInfo(p.checked) : null;
   return `
     <button class="detail-close" id="detailClose" type="button" title="關閉">✕</button>
     <div class="d-title">${esc(p.emoji)} ${esc(p.title || '(未命名)')}${p.rating ? ` <span class="d-rating">★${esc(p.rating)}</span>` : ''}</div>
     <div class="d-coord">${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}${p.approx ? ' <span class="d-approx">(座標概略)</span>' : ''}</div>
+    <div class="d-dir" id="dDir" hidden><span class="d-arrow" id="dArrow" hidden>⬆</span><span id="dDirText"></span></div>
     ${p.address ? `<div class="d-line"><span class="d-k">地址</span>${esc(p.address)}</div>` : ''}
     ${p.hours ? `<div class="d-line"><span class="d-k">營業</span>${openMark(p.hours)}${esc(p.hours)}</div>` : ''}
     ${tags ? `<div class="d-tags">${tags}</div>` : ''}
+    ${ck ? `<div class="d-checked${ck.stale ? ' stale' : ''}">${ck.stale ? '⚠ ' : ''}${esc(ck.text)}</div>` : ''}
     <div class="d-foot">
       <div class="d-note">${p.note ? esc(p.note) : ''}</div>
       ${p.url ? `<a class="d-gmap d-site" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" title="${esc(p.url)}">官網 ↗</a>` : ''}

@@ -59,6 +59,20 @@ export function fmtDist(km) {
   return `${Math.round(km)}km`;
 }
 
+// 從 a 看 b 的方位角(度,0=北、90=東,順時針)。
+export function bearingDeg(a, b) {
+  const rad = (d) => d * Math.PI / 180;
+  const φ1 = rad(a.lat), φ2 = rad(b.lat), Δλ = rad(b.lng - a.lng);
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+// 方位角 → 八方位中文(北 / 東北 / 東 …)。
+export function dirName(deg) {
+  return ['北', '東北', '東', '東南', '南', '西南', '西', '西北'][Math.round(deg / 45) % 8];
+}
+
 // 路線排序:最近鄰(從 start 出發)+ 2-opt 解交叉。回傳 points 的排序(不含 start)。
 export function orderByRoute(points, start) {
   const pts = points.slice();

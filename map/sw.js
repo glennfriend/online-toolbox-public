@@ -14,13 +14,13 @@
 //     這份資料常更新(新增景點美食),上線永遠拿最新,離線用最後一次拿到的,
 //     而且「資料更新不需要動 VERSION」。放另一個 bucket,shell 換版時不必重抓資料。
 
-const VERSION = 5;   // 5:距離近→遠排序(locate.js)
+const VERSION = 7;   // 7:公休日判斷營業中 + 詳情卡顯示查證日(checked)
 const CACHE = `map-shell-v${VERSION}`;
 const DATA_CACHE = 'map-data';
 
 const SHELL = [
   './', './index.html', './styles.css',
-  './js/main.js', './js/store.js', './js/geo.js', './js/locate.js', './js/mapview.js', './js/io.js', './js/util.js',
+  './js/main.js', './js/store.js', './js/geo.js', './js/locate.js', './js/compass.js', './js/mapview.js', './js/io.js', './js/util.js',
 ];
 
 self.addEventListener('install', (e) => {

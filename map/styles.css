@@ -67,8 +67,26 @@ body {
 .d-note { font-size: .82rem; color: var(--fg); white-space: pre-wrap; flex: 1; min-width: 0; }
 .d-gmap { flex: 0 0 auto; white-space: nowrap; font-size: .78rem; color: var(--muted); text-decoration: none; }
 .d-gmap:hover { color: var(--accent); text-decoration: underline; }
-/* 官網:只有店家自己有網站時才出現(不放 FB / 掛號平台),排在 Google Map 前面 */
+/* 官網:只有店家自己有網站時才出現(不放 FB / 掛號平台),排在 🗺️ 前面 */
 .d-site { color: var(--accent); }
+/* 🗺️:點了跳出外連選單(大觸控目標) */
+.d-go { flex: 0 0 auto; font-size: 1.5rem; line-height: 1; padding: .3rem .45rem; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.d-go:hover { background: var(--bg-code); }
+
+/* 外連選單:手機從底部升起、桌機置中;兩顆大按鈕 */
+.sheet { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.sheet-box { width: 100%; max-width: 380px; background: #fff; border-radius: 14px; padding: 1rem;
+  display: flex; flex-direction: column; gap: .7rem; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.sheet-title { font-weight: 700; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheet-btn { display: flex; align-items: center; justify-content: center; min-height: 56px; padding: .6rem 1rem;
+  font-size: 1.1rem; font-weight: 600; text-decoration: none; color: var(--fg);
+  border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+.sheet-btn:hover { background: var(--bg-code); }
+.sheet-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sheet-btn.primary:hover { background: var(--accent); filter: brightness(1.08); }
+.sheet-cancel { font: inherit; font-size: 1rem; min-height: 44px; cursor: pointer; border: 0; background: transparent; color: var(--muted); }
 
 /* 新增地點區 */
 .add { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: .7rem; flex: 0 0 auto; }
@@ -119,4 +137,6 @@ body {
   .panel { flex: none; }
   .list { max-height: 40vh; }
   .mapwrap { height: 70vh; min-height: 360px; }
+  .sheet { align-items: flex-end; padding: 0; }
+  .sheet-box { max-width: none; border-radius: 16px 16px 0 0; padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
 }

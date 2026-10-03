@@ -62,6 +62,9 @@
 
 > 外連 Google Maps 用的是「**店名 + 地址**」而非我們的座標(`js/main.js` 的 `gmapQuery()`):
 > Google 自己的搜尋比我們的座標準,且會落在店家資訊卡而不是路中央的圖釘。沒地址的點才退回座標。
+>
+> 詳情卡的 🗺️ 會跳出兩顆大按鈕(手機好按):**在 Google Map 查看**(`maps/search`)與
+> **從目前位置導航到這裡**(`maps/dir/?api=1&destination=…`,不給起點 = Google 從使用者目前位置出發,手機會直接開 App 導航)。
 
 ### 給 AI agent 用
 

@@ -21,6 +21,7 @@ const el = {
   emoji: $('#emoji'), title: $('#title'), address: $('#address'), hours: $('#hours'), tags: $('#tags'), rating: $('#rating'), note: $('#note'),
   addPoint: $('#addPoint'), adder: $('#adder'), detail: $('#detail'),
   delGroup: $('#delGroup'), renameGroup: $('#renameGroup'), line2: $('#line2'), sort: $('#sort'),
+  goSheet: $('#goSheet'),
 };
 
 // ── 狀態 ──
@@ -112,6 +113,7 @@ function renderDetail() {
   el.detail.hidden = false;
   el.detail.innerHTML = selected.route ? routeDetailHtml(selected) : pointDetailHtml(selected);
   $('#detailClose').addEventListener('click', () => { selected = null; renderDetail(); renderList(); });
+  if (!selected.route) $('#goBtn').addEventListener('click', () => openGo(selected));
 }
 // 外連 Google Maps 的查詢字串:有地址就用「店名 + 地址」讓 Google 自己定位
 // (它的搜尋比我們的座標準,且會落在店家資訊卡而非路中央的圖釘);沒地址才退回座標。
@@ -132,9 +134,20 @@ function pointDetailHtml(p) {
     <div class="d-foot">
       <div class="d-note">${p.note ? esc(p.note) : ''}</div>
       ${p.url ? `<a class="d-gmap d-site" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" title="${esc(p.url)}">官網 ↗</a>` : ''}
-      <a class="d-gmap" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gmapQuery(p))}" target="_blank" rel="noopener" title="${p.address ? '用店名 + 地址在 Google Maps 搜尋' : '用座標在 Google Maps 開啟'}">Google Map ↗</a>
+      <button class="d-go" id="goBtn" type="button" title="Google Map / 導航">🗺️</button>
     </div>`;
 }
+
+// ── 外連選單(手機友善:點 🗺️ 跳出兩顆大按鈕)──
+// 查看 = Google Maps 搜尋該店;導航 = dir 連結不給起點 → Google 從「目前位置」出發(手機會開 App)。
+function openGo(p) {
+  const q = encodeURIComponent(gmapQuery(p));
+  $('#goTitle').textContent = `${p.emoji} ${p.title || '(未命名)'}`;
+  $('#goMap').href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  $('#goNav').href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
+  el.goSheet.hidden = false;
+}
+const closeGo = () => { el.goSheet.hidden = true; };
 function routeDetailHtml(r) {
   const steps = r.included.map((p, i) => `<div class="r-step"><span class="r-num">${i + 1}</span>${esc(p.emoji)} ${esc(p.title || '(未命名)')}</div>`).join('');
   const total = r.included.length + r.dropped.length;
@@ -262,6 +275,9 @@ el.renameGroup.addEventListener('click', renameGroup);
 el.delGroup.addEventListener('click', delGroup);
 $('#exportJson').addEventListener('click', () => download(safeName(current().name) + '.json', groupToJSON(current()), 'application/json'));
 $('#importBtn').addEventListener('click', () => $('#importFile').click());
+// 外連選單:點背景 / 取消 / Esc 關閉;點了任一連結(開新分頁或 App)也順手關掉
+el.goSheet.addEventListener('click', (e) => { if (e.target === el.goSheet || e.target.closest('a, #goCancel')) closeGo(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.goSheet.hidden) closeGo(); });
 $('#importFile').addEventListener('change', (e) => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; });
 
 init();

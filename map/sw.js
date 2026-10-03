@@ -14,7 +14,7 @@
 //     這份資料常更新(新增景點美食),上線永遠拿最新,離線用最後一次拿到的,
 //     而且「資料更新不需要動 VERSION」。放另一個 bucket,shell 換版時不必重抓資料。
 
-const VERSION = 3;   // 3:shell 改用邊用邊快取(與其他工具一致)
+const VERSION = 4;   // 4:詳情卡 🗺️ 外連選單(Google Map 查看 / 從目前位置導航)
 const CACHE = `map-shell-v${VERSION}`;
 const DATA_CACHE = 'map-data';
 

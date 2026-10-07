@@ -1,0 +1,4 @@
+# 原始資料一律 byte 原樣保存:關掉換行(CRLF/LF)轉換,確保 clone/checkout 與來源完全一致。
+* -text
+# 文件記錄維持文字屬性(可正常 diff)。
+*.md text

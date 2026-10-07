@@ -7,7 +7,7 @@
 | [**Chart**](https://glennfriend.github.io/online-toolbox-public/chart/) | 統計圖表 | [**Map**](https://glennfriend.github.io/online-toolbox-public/map/) | 地圖 | [**Scrollshot**](https://glennfriend.github.io/online-toolbox-public/scrollshot/) | 網頁截圖 |
 |  |  | [**Comic**](https://glennfriend.github.io/online-toolbox-public/comic/) | JSON 劇本 → 漫畫 | [**Fillcard**](https://glennfriend.github.io/online-toolbox-public/fillcard/) | 填字進版型 → 出圖 |
 |  |  | [**Handbook**](https://glennfriend.github.io/online-toolbox-public/handbook/) | 生活資訊手冊 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/) | 簡易資料轉換 |
-|  |  |  |  | [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/) | 文字比對 |
+|  |  | [**JDict**](https://glennfriend.github.io/online-toolbox-public/jdict/) | 日文字典 | [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/) | 文字比對 |
 
 ---
 

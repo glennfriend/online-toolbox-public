@@ -6,13 +6,16 @@
 <title>404</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E❓%3C/text%3E%3C/svg%3E">
 <script>
-// 靜態網站(GitHub Pages)沒有後端路由。深層連結 …/dictionary/<word> 會落到這支 404,
+// 靜態網站(GitHub Pages)沒有後端路由。深層連結 …/dictionary/<word>、…/jdict/<word> 會落到這支 404,
 // 這裡把它轉回字典頁並帶上 ?w=<word>,由前端查詢並改回漂亮網址。其餘 404 顯示一般訊息。
 (function () {
-  var marker = '/dictionary/', p = location.pathname, i = p.indexOf(marker);
-  if (i >= 0) {
+  var markers = ['/dictionary/', '/jdict/'], p = location.pathname;
+  for (var m = 0; m < markers.length; m++) {
+    var marker = markers[m], i = p.indexOf(marker);
+    if (i < 0) continue;
     var word = decodeURIComponent(p.slice(i + marker.length).replace(/\/+$/, ''));
     location.replace(p.slice(0, i + marker.length) + (word ? ('?w=' + encodeURIComponent(word)) : ''));
+    return;
   }
 })();
 </script>

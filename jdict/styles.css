@@ -1,0 +1,155 @@
+/* JDict — 延續 dictionary 的風格:system-ui、藍色主色、淺灰底、白卡片。 */
+:root {
+  --fg: #24292f; --muted: #57606a; --border: #d0d7de; --border-soft: #d8dee4;
+  --accent: #2563eb; --bg-code: #f6f8fa; --bg-page: #dde2e9; --danger: #cf222e;
+  --zh-bg: #eef6ff; --zh-border: #cfe3ff; --pitch: #d1242f;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scrollbar-gutter: stable; }
+body {
+  font-family: -apple-system, "Segoe UI", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.7; max-width: 1040px; margin: 0 auto; padding: 2rem 1.2rem;
+  color: var(--fg); background: var(--bg-page);
+}
+/* 日文字用日文字形(避免台灣字型把 直/骨 等字畫成中文寫法) */
+:lang(ja), .headword, .eg-ja, .forms, .kc, .seg, .seg-plain, .suggest-item .sw, .suggest-item .sk, .mora {
+  font-family: "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Meiryo", "Noto Sans CJK JP", "Noto Sans JP", sans-serif;
+}
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
+.right .title { margin: 0; font-size: 1.5rem; }
+
+/* 角落 ⓘ */
+.info { position: relative; }
+.info-btn { background: transparent; border: 0; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; padding: .1em .25em; }
+.info-btn:hover { color: var(--accent); }
+.info-pop {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 30;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; width: max-content; max-width: 300px;
+}
+.info-pop .version { display: block; font-size: .78rem; color: var(--muted); margin: 0 0 .5rem; }
+.credit a { color: var(--accent); }
+
+/* 💡 說明氣泡 */
+.tipinfo { position: relative; display: inline-block; font-size: 1rem; font-weight: 400; vertical-align: middle; }
+.tipinfo-btn { color: var(--muted); cursor: help; }
+.tipinfo-btn:hover { color: var(--accent); }
+.tipinfo-tip { display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 30; width: max-content; max-width: min(90vw, 420px); background: #fff; color: var(--fg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .6rem .8rem; font-size: .82rem; line-height: 1.6; text-align: left; }
+.tipinfo:hover .tipinfo-tip, .tipinfo-btn:focus + .tipinfo-tip { display: block; }
+.tipinfo-tip > span { display: block; margin: .15rem 0 .15rem .8rem; color: var(--muted); }
+.tipinfo-tip > .tip-h { margin: .55rem 0 .15rem; color: var(--fg); font-weight: 700; }
+.tipinfo-tip > .tip-h:first-child { margin-top: 0; }
+
+/* 兩欄:左=結果,右=搜尋 */
+.layout { display: flex; align-items: flex-start; gap: 1.5rem; }
+.left { flex: 1 1 auto; min-width: 0; }
+.right { flex: 0 0 420px; max-width: 100%; position: sticky; top: 1rem; }
+@media (max-width: 760px) { .layout { flex-direction: column; } .right { order: -1; flex-basis: auto; width: 100%; position: static; } }
+kbd {
+  font-family: ui-monospace, Consolas, monospace; font-size: .8em;
+  background: #fff; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; padding: .05em .4em;
+}
+
+/* 搜尋框 + 自動完成 */
+.search-box { position: relative; display: flex; gap: .5rem; align-items: center; }
+.word {
+  flex: 1; min-width: 0; font: inherit; font-size: 1.05rem; padding: .55rem .8rem;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--fg);
+}
+.word:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.word:disabled { background: var(--bg-code); color: var(--muted); }
+.go-btn {
+  position: relative; font: inherit; font-size: .95rem; cursor: pointer; flex: 0 0 auto; align-self: stretch;
+  border: 1px solid var(--accent); border-radius: 10px; background: var(--accent); color: #fff; padding: 0 1.1rem;
+}
+.go-btn:hover { filter: brightness(1.05); }
+.go-tip {
+  display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 20;
+  background: #fff; color: var(--fg); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.12); padding: .5rem .7rem; white-space: nowrap; text-align: left; font-size: .82rem;
+}
+.go-btn:hover .go-tip { display: block; }
+.go-tip > span { display: block; margin: .2rem 0; color: var(--muted); }
+.go-tip kbd { color: var(--fg); }
+.suggest {
+  position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
+}
+.suggest-item { padding: .4rem .9rem; cursor: pointer; font-size: 1rem; white-space: nowrap; overflow: hidden; }
+.suggest-item .sk { color: var(--muted); font-size: .85rem; margin-left: .5rem; }
+.suggest-item .sv { font-size: .7rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 0 .3em; margin-left: .5rem; vertical-align: 2px; }
+.suggest-item .sc { color: var(--muted); margin-left: .7rem; font-size: .9rem; }
+.suggest-item:hover, .suggest-item.active { background: var(--accent); color: #fff; }
+.suggest-item:hover .sc, .suggest-item.active .sc, .suggest-item:hover .sk, .suggest-item.active .sk { color: rgba(255,255,255,.9); }
+.suggest-item:hover .sv, .suggest-item.active .sv { color: #fff; border-color: #fff; }
+
+.status { margin: .8rem 0; font-size: .9rem; color: var(--muted); }
+
+/* 結果 */
+.group-title { font-size: .82rem; font-weight: 700; color: var(--muted); margin: 1rem 0 .4rem; }
+.empty { color: var(--muted); background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: .8rem 1rem; margin-bottom: .8rem; }
+.entry-head { display: flex; align-items: flex-end; gap: .7rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.headword { font-size: 1.8rem; font-weight: 700; line-height: 1.2; }
+ruby.headword rt { font-size: .8rem; font-weight: 400; color: var(--muted); }
+.speak {
+  font-size: 1rem; line-height: 1; cursor: pointer; padding: .2em .35em; align-self: center;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+}
+.speak:hover { background: var(--bg-code); }
+.speak:active { transform: scale(.92); }
+.badge { font-size: .72rem; color: var(--muted); background: var(--bg-code); border: 1px solid var(--border); border-radius: 999px; padding: .05em .6em; align-self: center; }
+.badge.common { color: #1a7f37; background: #dafbe1; border-color: #aceebb; }
+.deinf { font-size: .85rem; color: var(--accent); margin-bottom: .4rem; }
+
+/* 音調:高拍上劃線,下降處右側豎線 */
+.pitch { display: inline-flex; align-items: flex-end; font-size: 1rem; align-self: center; }
+.mora { padding-top: 2px; border-top: 2px solid transparent; }
+.mora.h { border-top-color: var(--pitch); }
+.mora.drop { border-right: 2px solid var(--pitch); }
+.pitch-n { font-size: .75rem; color: var(--muted); margin-left: .3rem; }
+.pitch .tag { margin-right: .2rem; }
+
+/* 繁中釋義(主角) */
+.zh { background: var(--zh-bg); border: 1px solid var(--zh-border); border-radius: 10px; padding: .5rem .9rem; margin: .4rem 0 .6rem; color: #1f2d3d; }
+.zh-pos { font-size: .78rem; font-weight: 600; color: var(--accent); }
+.zh ol, .senses ol { margin: .1rem 0 .3rem; padding-left: 1.4rem; }
+.zh li, .senses li { margin: .2rem 0; }
+.zh li { font-size: 1.02rem; }
+.src { font-size: .7rem; color: var(--muted); text-align: right; }
+
+/* 英文義項 */
+.senses summary { cursor: pointer; font-size: .82rem; color: var(--muted); }
+.pos { display: block; font-size: .78rem; font-weight: 600; color: var(--accent); }
+.tag { font-size: .72rem; color: var(--muted); background: var(--bg-code); border: 1px solid var(--border-soft); border-radius: 4px; padding: 0 .35em; margin-right: .35rem; }
+.gt { color: var(--muted); font-size: .8rem; }
+.note { display: block; font-size: .82rem; color: var(--muted); }
+.eg { display: block; font-size: .9rem; color: var(--muted); margin-top: .1rem; }
+.eg-ja { display: block; color: var(--fg); }
+.forms { font-size: .85rem; color: var(--muted); border-top: 1px dashed var(--border-soft); padding-top: .35rem; margin-top: .3rem; }
+.forms-h { font-size: .75rem; font-weight: 600; margin-right: .4rem; }
+.forms-h:not(:first-child) { margin-left: .9rem; }
+
+/* 整句切詞 */
+.segments { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: .6rem .8rem; margin-bottom: .8rem; line-height: 2.2; font-size: 1.15rem; }
+.seg { font: inherit; cursor: pointer; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; padding: 0 .3em; margin: 0 .1em; color: var(--fg); }
+.seg:hover { border-color: var(--accent); }
+.seg.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.seg-plain { color: var(--muted); }
+
+/* 漢字卡 */
+.kanji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .6rem; }
+.kanji { display: flex; gap: .8rem; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: .6rem .8rem; }
+.kc { font-size: 2.6rem; line-height: 1.1; }
+.kd { font-size: .85rem; min-width: 0; }
+.kh { display: inline-block; font-size: .72rem; font-weight: 700; color: var(--accent); width: 1.4em; }
+.km { color: var(--muted); font-size: .75rem; margin-top: .2rem; }
+
+/* 重建鈕 */
+.rebuild {
+  font: inherit; font-size: .78rem; cursor: pointer; color: var(--muted);
+  background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: .25em .7em;
+}
+.rebuild:hover { color: var(--fg); background: #fff; }

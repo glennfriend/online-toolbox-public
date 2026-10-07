@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>JDict</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🗾%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <div class="left">
+      <div id="entry" class="entry"></div>
+    </div>
+    <div class="right">
+      <div class="title-row">
+        <h1 class="title">JDict
+          <span class="tipinfo"><span class="tipinfo-btn" tabindex="0" aria-label="說明">💡</span>
+            <span class="tipinfo-tip">
+              <span class="tip-h">[Feature]</span>
+              <span>日文 / 羅馬字 / 台灣繁體漢字 都能查(學習 → 学習)</span>
+              <span>活用還原:食べなかった → 食べる</span>
+              <span>貼整句日文 → 自動切詞、每段可點</span>
+              <span>英文意思反查(eat → 食べる)</span>
+              <span>繁中釋義(約 2 萬詞)、英文釋義、例句、振假名、音調、漢字</span>
+              <span>發音(真人錄音優先,否則語音合成)</span>
+              <span class="tip-h">[不支援]</span>
+              <span>用中文意思反查日文(來源資料沒有)</span>
+              <span>手寫 / 部首查字、讀音模糊比對</span>
+              <span class="tip-h">[資料來源]</span>
+              <span>JMdict、KANJIDIC2(EDRDG,CC BY-SA 4.0)</span>
+              <span>中文維基詞典(kaikki.org,CC BY-SA)</span>
+              <span>Kanjium 音調(CC BY-SA 4.0)</span>
+              <span class="tip-h">[技術支援]</span>
+              <span>OPFS + SQLite WASM(21 萬詞條存本機)</span>
+              <span>Web Worker、DecompressionStream、FTS5</span>
+              <span>發音:JapanesePod101(非官方網址)、Web Speech API</span>
+            </span>
+          </span></h1>
+        <div class="info">
+          <button id="info-btn" class="info-btn" type="button" aria-label="資料版本與重建" title="資料版本 / 重建本機資料">ⓘ</button>
+          <div id="info-pop" class="info-pop" hidden>
+            <div id="version" class="version"></div>
+            <div id="voice-hint" class="version" hidden>這台裝置沒有日語語音:離線或沒有真人錄音時會無聲(可在系統設定安裝日語語音)</div>
+            <div class="version credit">
+              本工具使用 <a href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project" target="_blank" rel="noopener">JMdict</a>
+              與 <a href="https://www.edrdg.org/wiki/index.php/KANJIDIC_Project" target="_blank" rel="noopener">KANJIDIC2</a>,
+              為 <a href="https://www.edrdg.org/" target="_blank" rel="noopener">Electronic Dictionary Research and Development Group</a> 之財產,依其授權使用。
+              中文釋義來自<a href="https://zh.wiktionary.org/" target="_blank" rel="noopener">中文維基詞典</a>(經 <a href="https://kaikki.org/zhwiktionary/" target="_blank" rel="noopener">kaikki.org</a> 抽取);
+              音調資料來自 <a href="https://github.com/mifunetoshiro/kanjium" target="_blank" rel="noopener">Kanjium</a>。
+            </div>
+            <button id="rebuild" type="button" class="rebuild" title="清除本機快取、重新下載最新字典">重建本機資料</button>
+          </div>
+        </div>
+      </div>
+      <div class="search-box">
+        <input class="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" lang="ja"
+               placeholder="日文、羅馬字、繁體漢字或英文" disabled>
+        <button class="go-btn" type="button">Enter
+          <span class="go-tip">
+            <span><kbd>Enter</kbd> 查詢</span>
+            <span><kbd>Tab</kbd> 選最上面的建議</span>
+            <span><kbd>↑</kbd> <kbd>↓</kbd> 選擇建議</span>
+          </span>
+        </button>
+        <div class="suggest" hidden></div>
+      </div>
+      <div id="status" class="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

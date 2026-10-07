@@ -1,0 +1,19 @@
+{
+  "version": "2026-10-07-a4b7a7e",
+  "db": "jdict-2026-10-07-a4b7a7e.db.gz",
+  "built_at": "2026-10-07T15:47:08.907Z",
+  "db_bytes": 78905344,
+  "gz_bytes": 27230433,
+  "counts": {
+    "entries": 218869,
+    "common": 22645,
+    "commonZh": 8520,
+    "keys": 499359,
+    "examples": 32310,
+    "zh": 20764,
+    "pitch": 122596,
+    "kanji": 13108,
+    "fold": 376,
+    "fts": 253736
+  }
+}

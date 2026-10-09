@@ -6,7 +6,7 @@
 //
 // 更新規則:改了 index.html 就把 VERSION +1。
 
-const VERSION = 6;   // 6:入口頁加入 JDict
+const VERSION = 7;   // 7:入口頁移除 Curvelab(搬到 online-study-public/math/curvelab)
 const CACHE = `toolbox-index-v${VERSION}`;
 
 self.addEventListener('install', (e) => {

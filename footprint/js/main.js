@@ -1,6 +1,7 @@
 import { getChecks } from './registry.js';
 import { glossary } from './glossary.js';
 import { escapeHtml } from './util.js';
+import { createTabs } from './tabs.js';
 
 // 新增檢測只需一個模組與此處一筆檔名. 動態載入也隔離模組匯入失敗
 const modules = [
@@ -24,6 +25,14 @@ await Promise.all(modules.map(async name => {
 // 依宣告順序呈現, 不受模組下載完成順序影響
 const checks = [...getChecks(), ...loadErrors].sort((a, b) => modules.indexOf(a.id) - modules.indexOf(b.id));
 const context = { results };
+const pending = new Set(checks.filter(check => !check.needsNetwork && !check.action).map(check => check.id));
+const tabs = createTabs(document.querySelector('#check-tabs'), document.querySelector('#groups'), groups);
+
+function updateTab(group) {
+  const exposed = tabs.panel(group).querySelectorAll('.badge.exposed').length;
+  const busy = checks.some(check => check.group === group && pending.has(check.id));
+  tabs.update(group, exposed, busy);
+}
 
 function renderRows(check, rows) {
   const body = elements.get(check.id);
@@ -39,9 +48,12 @@ function renderRows(check, rows) {
     button.addEventListener('click', () => execute(check), { once: true });
     body.querySelector('td:nth-child(2)').append(button);
   }
+  updateTab(check.group);
 }
 async function execute(check) {
   // 每個 run 與 render 都有自己的錯誤邊界
+  pending.add(check.id);
+  updateTab(check.group);
   try {
     elements.get(check.id).querySelector('button')?.remove();
     const rows = await check.run(context);
@@ -52,13 +64,12 @@ async function execute(check) {
     const rows = [{ label: check.title, value: `檢測失敗: ${error.message}`, level: 'error' }];
     results.set(check.id, rows);
     renderRows(check, rows);
+  } finally {
+    pending.delete(check.id);
+    updateTab(check.group);
   }
 }
 for (const group of groups) {
-  const section = document.createElement('section');
-  section.className = 'card';
-  const heading = document.createElement('h2');
-  heading.textContent = group;
   const table = document.createElement('table');
   table.className = 'check-table';
   table.setAttribute('aria-label', group);
@@ -69,8 +80,7 @@ for (const group of groups) {
     elements.set(check.id, body);
     table.append(body);
   }
-  section.append(heading, table);
-  document.querySelector('#groups').append(section);
+  tabs.panel(group).append(table);
 }
 for (const check of checks) renderRows(check, [{ label: check.title, value: check.needsNetwork ? '等待你按下開始網路檢測' : check.action ? '等待你主動要求權限' : '檢測中', level: 'neutral' }]);
 const services = [...new Set(checks.filter(check => check.needsNetwork).flatMap(check => check.services))].sort();
@@ -79,9 +89,11 @@ document.querySelector('#glossary').innerHTML = glossary.map(([term, meaning]) =
 document.querySelector('#start-network').addEventListener('click', async event => {
   const button = event.currentTarget;
   button.disabled = true;
+  tabs.select(groups[0]);
   document.querySelector('#network-status').textContent = '網路檢測執行中';
   // 先清除前次結果, 避免依賴項引用舊資料
   const network = checks.filter(check => check.needsNetwork);
+  network.forEach(check => pending.add(check.id));
   network.forEach(check => {
     results.delete(check.id);
     renderRows(check, [{ label: check.title, value: '檢測中', level: 'neutral' }]);
@@ -95,4 +107,3 @@ document.querySelector('#start-network').addEventListener('click', async event =
 const local = checks.filter(check => !check.needsNetwork && !check.action && !check.afterLocal);
 await Promise.all(local.map(execute));
 await Promise.all(checks.filter(check => check.afterLocal).map(execute));
-document.querySelector('#local-status').textContent = '本機檢測已完成. 結果只留在本頁, 重新整理即清除';

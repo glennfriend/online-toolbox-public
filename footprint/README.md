@@ -28,14 +28,23 @@
 
 ## 架構
 
+網路檢測卡片下方是五個分組 tabs, 預設顯示第一組 "網路與 IP". 每次只顯示一組卡片, 卡片內不重複組標題. 資訊卡與名詞說明放在 tabs 外的頁面底部
+
+切換 tabs 只改變顯示, 不重新執行檢測. 本機項目開頁全部執行, 網路項目按鈕後全部執行, 按下網路按鈕會切回第一組
+
+tabs 採 `button` 與 `tablist / tab / tabpanel` 角色. 左右鍵循環切換, Home / End 移到首尾. 手機只有 tab 列可以水平捲動, 頁面保持固定寬度
+
+tab 上的小圓點表示該組仍有檢測執行中, badge 是該組目前 "會外洩" 的結果列數. 本機狀態不另外顯示文字
+
 ```text
 footprint/
 ├── index.html               靜態結構, info-tip, 網路同意按鈕
-├── styles.css               灰底卡片, 三欄表格, 手機排版
+├── styles.css               tabs, 灰底卡片, 三欄表格, 手機排版
 ├── README.md                功能, 來源, 取捨, 開發
 ├── cors-verification.txt    實測 HTTP 狀態與 CORS headers
 └── js/
-    ├── main.js              載入模組, 分組顯示, 排程, 隔離錯誤
+    ├── main.js              載入模組, 更新分組狀態, 排程, 隔離錯誤
+    ├── tabs.js              分組切換, ARIA 角色, 鍵盤操作與 badge
     ├── registry.js          registerCheck 登記表與 unavailable helper
     ├── util.js              escape, SHA-256, timeout, fetch, IP 正規化
     ├── latency.js           三個區域共用的 HTTP RTT 量測
@@ -187,5 +196,7 @@ python3 -m http.server 8019
 4. 將 `canvas.js` 的 `run()` 暫時改成 throw, 停用 browser cache 後重新載入. 只有 Canvas 顯示錯誤, 綜合指紋提示缺少該項且繼續計算. 驗證後還原
 5. 模擬 HTTP 503, 確認對應列顯示服務 URL 與 HTTP 503, 其他模組仍正常
 6. 確認 Geolocation 只有獨立按鈕才讀取. 不呼叫 `getUserMedia` 或 clipboard 讀取 API
+7. 切換五個 tabs 與左右鍵操作, 確認每次只有一個 panel 顯示, 檢測不會重跑. 按網路按鈕後回到第一組, 背景分組結果仍全部更新
+8. 390px 下確認 tab 列可以水平捲動, 頁面本身與 info-tip 沒有水平捲動
 
-本次 headless Chrome 驗證腳本與四張截圖保存在工作回報指定的 `footprint-shots/` 目錄. 腳本保留, 不屬於網站執行期資源
+headless Chrome 驗證腳本與各輪截圖保存在工作回報指定的 `footprint-shots/` 目錄. 腳本保留, 不屬於網站執行期資源

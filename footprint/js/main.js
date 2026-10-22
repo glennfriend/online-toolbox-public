@@ -79,19 +79,17 @@ for (const group of groups) {
   for (const isUnavailable of [false, true]) {
     const items = groupChecks.filter(check => (check.status === 'unavailable') === isUnavailable);
     if (!items.length) continue;
-    let container = tabs.panel(group);
+    const container = document.createElement('section');
+    container.className = isUnavailable ? 'card unavailable-section' : 'card checks-card';
+    tabs.panel(group).append(container);
     if (isUnavailable) {
-      const section = document.createElement('section');
-      section.className = 'unavailable-section';
       const heading = document.createElement('h2');
       heading.id = `unavailable-title-${groups.indexOf(group)}`;
       heading.textContent = '靜態網頁無法檢測的項目';
-      section.setAttribute('aria-labelledby', heading.id);
+      container.setAttribute('aria-labelledby', heading.id);
       const explanation = document.createElement('p');
       explanation.textContent = '這些資訊對方網站可能拿得到, 但純靜態網頁沒辦法替你檢測';
-      section.append(heading, explanation);
-      container.append(section);
-      container = section;
+      container.append(heading, explanation);
     }
     const table = document.createElement('table');
     table.className = isUnavailable ? 'unavailable-table' : 'check-table';
@@ -108,7 +106,7 @@ for (const group of groups) {
     container.append(table);
   }
 }
-for (const check of checks) renderRows(check, [{ label: check.title, value: check.needsNetwork ? '等待你按下開始網路檢測' : check.action ? '等待你主動要求權限' : '檢測中', level: 'neutral' }]);
+for (const check of checks) renderRows(check, [{ label: check.title, value: '', level: 'neutral' }]);
 const services = [...new Set(checks.filter(check => check.needsNetwork).flatMap(check => check.services))].sort();
 document.querySelector('#services').innerHTML = services.map(service => `<li>${escapeHtml(service)}</li>`).join('');
 document.querySelector('#glossary').innerHTML = glossary.map(([term, meaning]) => `<dt>${escapeHtml(term)}</dt><dd>${escapeHtml(meaning)}</dd>`).join('');

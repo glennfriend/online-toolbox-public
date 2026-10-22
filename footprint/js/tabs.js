@@ -40,7 +40,7 @@ export function createTabs(tablist, container, groups) {
       select(groups[next[event.key]], true);
     });
     const panel = document.createElement('section');
-    panel.className = 'card tab-panel';
+    panel.className = 'tab-panel';
     panel.id = `check-panel-${index}`;
     panel.setAttribute('role', 'tabpanel');
     panel.setAttribute('aria-labelledby', button.id);

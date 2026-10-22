@@ -33,20 +33,22 @@
       <div class="network-action"><button id="start-network" class="btn primary" type="button">開始網路檢測</button><span id="network-status" role="status">尚未連線至檢測服務</span></div>
       <details open><summary>將連線的服務 (網域)</summary><ul id="services" class="services"></ul></details>
     </section>
-    <div id="check-tabs" class="tabs" role="tablist" aria-label="檢測分組"></div>
+    <div id="check-tabs" class="tabs" role="tablist" aria-label="檢測與說明"></div>
     <div id="groups"></div>
-    <section class="intro card" aria-labelledby="intro-title">
-      <h2 id="intro-title">你逛網站時, 對方能知道什麼?</h2>
-      <p>網站能讀取瀏覽器資訊, 組合成識別你的指紋. 它載入的第三方 script 通常也能讀取這些資訊</p>
-      <p>本機檢測不會把結果送出. 本頁的主機仍會收到開頁請求, 其中包含你的 IP 與 HTTP headers</p>
-      <p>精確位置另有獨立按鈕. 按下後才要求定位, 瀏覽器或作業系統可能連線至定位服務</p>
-      <p class="muted">包含 Google STUN (WebRTC) 與約 1 MB 下載. 延遲是 HTTP 往返時間, 受瀏覽器與服務處理影響. GCPing 官方已公告將停用服務</p>
-      <p class="legend"><span class="badge exposed">會外洩</span> 網站可讀取 <span class="badge caution">需注意</span> 有限制或無法判定 <span class="badge safe">安全</span> 僅表示該項限制, 無法保證匿名</p>
-    </section>
-    <section class="card" aria-labelledby="glossary-title"><h2 id="glossary-title">名詞說明</h2><dl id="glossary"></dl></section>
+    <template id="about-content">
+      <section class="intro card" aria-labelledby="intro-title">
+        <h2 id="intro-title">你逛網站時, 對方能知道什麼?</h2>
+        <p>網站能讀取瀏覽器資訊, 組合成識別你的指紋. 它載入的第三方 script 通常也能讀取這些資訊</p>
+        <p>本機檢測不會把結果送出. 本頁的主機仍會收到開頁請求, 其中包含你的 IP 與 HTTP headers</p>
+        <p>精確位置另有獨立按鈕. 按下後才要求定位, 瀏覽器或作業系統可能連線至定位服務</p>
+        <p class="muted">包含 Google STUN (WebRTC) 與約 1 MB 下載. 延遲是 HTTP 往返時間, 受瀏覽器與服務處理影響. GCPing 官方已公告將停用服務</p>
+        <p class="legend"><span class="badge exposed">會外洩</span> 網站可讀取 <span class="badge caution">需注意</span> 有限制或無法判定 <span class="badge safe">安全</span> 僅表示該項限制, 無法保證匿名</p>
+      </section>
+      <section class="card" aria-labelledby="glossary-title"><h2 id="glossary-title">名詞說明</h2><dl id="glossary"></dl></section>
+      <footer>檢測結果反映目前瀏覽器與連線. 空白或不支援不代表沒有外洩 <a href="README.md">功能與資料來源</a></footer>
+    </template>
     <noscript><p class="card">請啟用 JavaScript 才能執行檢測</p></noscript>
   </main>
-  <footer>檢測結果反映目前瀏覽器與連線. 空白或不支援不代表沒有外洩 <a href="README.md">功能與資料來源</a></footer>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

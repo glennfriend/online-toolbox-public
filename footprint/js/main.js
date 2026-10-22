@@ -26,7 +26,9 @@ await Promise.all(modules.map(async name => {
 const checks = [...getChecks(), ...loadErrors].sort((a, b) => modules.indexOf(a.id) - modules.indexOf(b.id));
 const context = { results };
 const pending = new Set(checks.filter(check => !check.needsNetwork && !check.action).map(check => check.id));
-const tabs = createTabs(document.querySelector('#check-tabs'), document.querySelector('#groups'), groups);
+const tabs = createTabs(document.querySelector('#check-tabs'), document.querySelector('#groups'), groups, [
+  { title: '說明', content: document.querySelector('#about-content').content },
+]);
 
 function updateTab(group) {
   const exposed = tabs.panel(group).querySelectorAll('.badge.exposed').length;

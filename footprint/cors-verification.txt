@@ -1,0 +1,77 @@
+CORS 驗證日期: 2026-10-22
+Origin: https://example.com
+指令: curl -s -D - -o /dev/null --max-time 20 -H 'Origin: https://example.com' '<url>'
+僅保留 HTTP 狀態與 CORS 許可 header, 不記錄個人 IP 或定位 headers
+
+https://claude.ai/cdn-cgi/trace
+HTTP/2 200
+access-control-allow-origin: *
+
+https://1.1.1.1/cdn-cgi/trace
+HTTP/2 200
+access-control-allow-origin: *
+
+https://api.ipify.org?format=json
+HTTP/2 200
+access-control-allow-origin: *
+
+https://api6.ipify.org?format=json
+curl exit 7: 無法連線, 無 HTTP 回應
+
+https://api64.ipify.org?format=json
+HTTP/2 200
+access-control-allow-origin: *
+
+https://ipinfo.io/json
+HTTP/2 200
+access-control-allow-origin: *
+
+https://httpbin.org/headers
+HTTP/2 200
+access-control-allow-origin: https://example.com
+
+https://tls.peet.ws/api/all
+HTTP/2 200
+
+https://check.torproject.org/api/ip
+HTTP/1.1 200 OK
+
+https://gcping.com/api/endpoints
+HTTP/2 200
+
+https://asia-east1-5tkroniexa-de.a.run.app
+HTTP/2 200
+
+https://us-west1-5tkroniexa-uw.a.run.app
+HTTP/2 200
+
+https://us-east1-5tkroniexa-ue.a.run.app
+HTTP/2 200
+
+https://speed.cloudflare.com/__down?bytes=1000000
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+
+https://asia-east1-5tkroniexa-de.a.run.app/api/ping
+HTTP/2 200
+access-control-allow-origin: *
+
+https://asia-east1-5tkroniexa-de.a.run.app/ping
+HTTP/2 200
+access-control-allow-origin: *
+
+https://us-west1-5tkroniexa-uw.a.run.app/api/ping
+HTTP/2 200
+access-control-allow-origin: *
+
+https://us-west1-5tkroniexa-uw.a.run.app/ping
+HTTP/2 200
+access-control-allow-origin: *
+
+https://us-east1-5tkroniexa-ue.a.run.app/api/ping
+HTTP/2 200
+access-control-allow-origin: *
+
+https://us-east1-5tkroniexa-ue.a.run.app/ping
+HTTP/2 200
+access-control-allow-origin: *

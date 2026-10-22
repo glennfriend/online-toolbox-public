@@ -36,6 +36,10 @@ tabs 採 `button` 與 `tablist / tab / tabpanel` 角色. 左右鍵循環切換, 
 
 tab 上的小圓點表示該組仍有檢測執行中, badge 是該組目前 "會外洩" 的結果列數. 本機狀態不另外顯示文字
 
+每個 tab 上方保留可檢測項目的三欄表格. 固定無法提供的項目移到下方 "靜態網頁無法檢測的項目" 區塊, 只列項目與原因. 全組都無法提供時只顯示此區塊, 沒有這類項目時不建立區塊
+
+分區依 registry 的 `status` 定義決定, 與項目 id 無關. 可檢測項目若因當次瀏覽器不支援或網路失敗而拿不到資料, 仍在原表格顯示原因. 外洩數量 badge 的計算維持不變
+
 ```text
 footprint/
 ├── index.html               靜態結構, info-tip, 網路同意按鈕
@@ -67,7 +71,9 @@ registerCheck({
 });
 ```
 
-`run()` 回傳一組列. `level` 可用 `exposed`, `caution`, `safe`, `error`, `neutral`. 無法提供的項目使用 `unavailable()` 登記, 固定顯示 "未提供檢測" 與原因
+`run()` 回傳一組列. `level` 可用 `exposed`, `caution`, `safe`, `error`, `neutral`
+
+`registerCheck()` 預設 `status: 'available'`. 固定無法提供的項目使用 `unavailable()` 登記, 由 helper 設定 `status: 'unavailable'` 與 `reason`. 這些模組的資料回傳仍維持 "未提供檢測" 與 note, 頁面依定義移到獨立區塊, 只顯示項目與原因
 
 新增檢測時新增 `checks/<id>.js`, 並在 `main.js` 的 `modules` 清單加入檔名. 模組按清單順序呈現. 移除時反向操作, 控制器不需要了解檢測邏輯
 
@@ -198,5 +204,6 @@ python3 -m http.server 8019
 6. 確認 Geolocation 只有獨立按鈕才讀取. 不呼叫 `getUserMedia` 或 clipboard 讀取 API
 7. 切換五個 tabs 與左右鍵操作, 確認每次只有一個 panel 顯示, 檢測不會重跑. 按網路按鈕後回到第一組, 背景分組結果仍全部更新
 8. 390px 下確認 tab 列可以水平捲動, 頁面本身與 info-tip 沒有水平捲動
+9. 確認各 tab 依 registry 狀態分區, "其他檢測限制" 只有無法檢測區塊, "瀏覽器與系統" 沒有該區塊. 無法檢測的列只顯示兩欄, 不重複狀態文字
 
 headless Chrome 驗證腳本與各輪截圖保存在工作回報指定的 `footprint-shots/` 目錄. 腳本保留, 不屬於網站執行期資源

@@ -5,9 +5,9 @@ export function registerCheck(check) {
     throw new Error('檢測登記缺少必要欄位');
   }
   if (checks.some(item => item.id === check.id)) throw new Error(`重複檢測: ${check.id}`);
-  checks.push({ needsNetwork: false, services: [], ...check });
+  checks.push({ status: 'available', needsNetwork: false, services: [], ...check });
 }
 export function getChecks() { return [...checks]; }
 export function unavailable(id, group, title, note) {
-  registerCheck({ id, group, title, run: () => [{ label: title, value: '未提供檢測', note, level: 'caution' }] });
+  registerCheck({ id, group, title, status: 'unavailable', reason: note, run: () => [{ label: title, value: '未提供檢測', note, level: 'caution' }] });
 }

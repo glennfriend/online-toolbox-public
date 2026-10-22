@@ -37,6 +37,10 @@ function updateTab(group) {
 function renderRows(check, rows) {
   const body = elements.get(check.id);
   body.innerHTML = rows.map(result => {
+    if (check.status === 'unavailable') {
+      const reason = result.level === 'error' ? result.value : result.note || check.reason;
+      return `<tr><th scope="row">${escapeHtml(result.label)}</th><td>${escapeHtml(reason)}</td></tr>`;
+    }
     const level = Object.hasOwn(levels, result.level) ? result.level : 'caution';
     return `<tr><td>${escapeHtml(result.label)}</td><td><div class="value">${escapeHtml(result.value)}</div>${result.note ? `<div class="note">${escapeHtml(result.note)}</div>` : ''}</td><td><span class="badge ${level}">${levels[level]}</span></td></tr>`;
   }).join('');
@@ -70,17 +74,39 @@ async function execute(check) {
   }
 }
 for (const group of groups) {
-  const table = document.createElement('table');
-  table.className = 'check-table';
-  table.setAttribute('aria-label', group);
-  table.innerHTML = '<thead><tr><th scope="col">項目</th><th scope="col">值與說明</th><th scope="col">狀態</th></tr></thead>';
-  for (const check of checks.filter(item => item.group === group)) {
-    const body = document.createElement('tbody');
-    body.dataset.check = check.id;
-    elements.set(check.id, body);
-    table.append(body);
+  const groupChecks = checks.filter(check => check.group === group);
+  // 分區由模組宣告的 status 決定, 不依賴項目 id 或瀏覽器當次支援情況
+  for (const isUnavailable of [false, true]) {
+    const items = groupChecks.filter(check => (check.status === 'unavailable') === isUnavailable);
+    if (!items.length) continue;
+    let container = tabs.panel(group);
+    if (isUnavailable) {
+      const section = document.createElement('section');
+      section.className = 'unavailable-section';
+      const heading = document.createElement('h2');
+      heading.id = `unavailable-title-${groups.indexOf(group)}`;
+      heading.textContent = '靜態網頁無法檢測的項目';
+      section.setAttribute('aria-labelledby', heading.id);
+      const explanation = document.createElement('p');
+      explanation.textContent = '這些資訊對方網站可能拿得到, 但純靜態網頁沒辦法替你檢測';
+      section.append(heading, explanation);
+      container.append(section);
+      container = section;
+    }
+    const table = document.createElement('table');
+    table.className = isUnavailable ? 'unavailable-table' : 'check-table';
+    table.setAttribute('aria-label', `${group}${isUnavailable ? ' - 靜態網頁無法檢測的項目' : ''}`);
+    table.innerHTML = isUnavailable
+      ? '<thead><tr><th scope="col">項目</th><th scope="col">原因</th></tr></thead>'
+      : '<thead><tr><th scope="col">項目</th><th scope="col">值與說明</th><th scope="col">狀態</th></tr></thead>';
+    for (const check of items) {
+      const body = document.createElement('tbody');
+      body.dataset.check = check.id;
+      elements.set(check.id, body);
+      table.append(body);
+    }
+    container.append(table);
   }
-  tabs.panel(group).append(table);
 }
 for (const check of checks) renderRows(check, [{ label: check.title, value: check.needsNetwork ? '等待你按下開始網路檢測' : check.action ? '等待你主動要求權限' : '檢測中', level: 'neutral' }]);
 const services = [...new Set(checks.filter(check => check.needsNetwork).flatMap(check => check.services))].sort();

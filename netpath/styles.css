@@ -21,7 +21,6 @@ summary { cursor: pointer; }
 .topbar, .section-head { display: flex; align-items: center; justify-content: space-between; gap: .7rem; flex-wrap: wrap; }
 .topbar { margin-bottom: 1rem; }
 .topbar p { margin: .1rem 0; }
-.topbar > a { font-size: .85rem; }
 .card { border: 1px solid var(--border); border-radius: 8px; background: #fff; padding: 1.2rem; margin-bottom: 1rem; min-width: 0; }
 .muted, footer { color: var(--muted); font-size: .85rem; }
 .badge { background: #eff6ff; color: #1d4ed8; border-radius: 5px; padding: .2rem .5rem; font-size: .8rem; }

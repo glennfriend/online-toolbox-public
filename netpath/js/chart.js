@@ -7,6 +7,8 @@ export function createChart(canvas, readout) {
   let rows = [], series = [], start = 0, end = 0, selected = -1, width = 0, height = 0;
   const left = 48, right = 12, top = 18, bottom = 30;
   function draw() {
+    // 隱藏的 panel 沒有可用寬度, 等切回來或 resize 後才畫
+    if (!canvas.clientWidth || !canvas.clientHeight || !canvas.getClientRects().length) return;
     width = canvas.clientWidth; height = canvas.clientHeight;
     const ratio = devicePixelRatio || 1;
     canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);

@@ -3,7 +3,7 @@ export const KEY = 'netpath.v1';
 export const DAY = 86400000;
 export const CAPACITY = 17280;
 // timestamp + 4-7 組 (中位數, 失敗次數), 省略未用的尾端欄位
-const empty = () => ({ version: 1, running: false, interval: 5, autoSpeed: true, window: '600', custom: [], rows: [], speeds: [], lastSpeed: 0 });
+const empty = () => ({ version: 1, running: false, interval: 5, autoSpeed: true, window: '600', tab: 'segments', custom: [], rows: [], speeds: [], lastSpeed: 0 });
 
 // 固定容量的環形緩衝, 新資料覆蓋最舊資料
 export class Ring {
@@ -34,7 +34,7 @@ export function createStore(warn) {
       });
       const now = Date.now();
       const rows = saved.rows.filter(row => Array.isArray(row) && [9, 11, 13, 15].includes(row.length) && Number.isFinite(row[0]) && row[0] >= now - DAY && row[0] <= now && row.slice(1).every((v, i) => v === null || (Number.isFinite(v) && v >= 0 && (i % 2 === 0 || (Number.isInteger(v) && v <= 3))))).sort((a, b) => a[0] - b[0]).slice(-CAPACITY);
-      state = { ...empty(), running: saved.running === true, interval: [5, 15, 60].includes(saved.interval) ? saved.interval : 5, autoSpeed: saved.autoSpeed !== false, window: ['600', '3600', '21600', 'all'].includes(saved.window) ? saved.window : '600', custom, rows, speeds: saved.speeds.filter(item => item && Number.isFinite(item.t) && item.t >= now - DAY && item.t <= now).slice(-150), lastSpeed: Number.isFinite(saved.lastSpeed) && saved.lastSpeed <= now ? saved.lastSpeed : 0 };
+      state = { ...empty(), running: saved.running === true, interval: [5, 15, 60].includes(saved.interval) ? saved.interval : 5, autoSpeed: saved.autoSpeed !== false, window: ['600', '3600', '21600', 'all'].includes(saved.window) ? saved.window : '600', tab: ['segments', 'chart', 'speed', 'custom', 'about'].includes(saved.tab) ? saved.tab : 'segments', custom, rows, speeds: saved.speeds.filter(item => item && Number.isFinite(item.t) && item.t >= now - DAY && item.t <= now).slice(-150), lastSpeed: Number.isFinite(saved.lastSpeed) && saved.lastSpeed <= now ? saved.lastSpeed : 0 };
     }
   } catch (error) { warn(`無法讀取 localStorage: ${error.message}. 本次仍可量測, reload 可能遺失資料`); }
   const ring = new Ring(state.rows);

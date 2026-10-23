@@ -16,6 +16,22 @@
 - 自訂 URL 保存在 localStorage, 也會寫入匯出的 JSON. 請避免填入機密
 - 不修改根目錄 `index.html` 與 `sw.js`. 需要網路的工具依 footprint 慣例不列入離線入口
 
+## 架構
+
+topbar 下方是全頁共用的 consent 卡, 包含開始 / 暫停, 間隔, 服務網域與流量提醒. 卡片下方依序是 "分段", "曲線", "速度", "自訂目標", "說明" 五個 tabs. 首次開頁預設顯示 "分段", 每次只顯示一個 panel. 卡片標題描述具體內容, 不重複 tab 名稱
+
+"說明" 在桌面靠右, 手機時接在最後一起水平捲動. 排錯指引, 量測限制, 儲存估算, 背景分頁 timer, GCPing 停用提醒與文件連結集中在這個 tab. 其他 tab 保留操作控制, 結果與必要的卡片註記
+
+tabs 採 `button` 與 `tablist / tab / tabpanel` 角色. 左右鍵循環切換五個分頁, Home / End 移到首尾. 手機只有 tab 列可水平捲動, 頁面本身保持固定寬度. 各 panel 由 `index.html` 的 template 移入, 切換保留既有 DOM 與表單內容
+
+切換 tabs 只改顯示, 不會停止, 重啟或重新執行量測. 最後觀看的 tab 存在 `netpath.v1` 的 `tab` 欄位, 透過原本有 try/catch 的 store 儲存. reload 回到同一個 tab, 舊資料沒有此欄位或值無效時回到 "分段"
+
+canvas 只在 "曲線" 可見時繪製. 隱藏時繼續量測與儲存, 不使用寬度 0 的畫布重畫. 切回來會取最新樣本繪製, ResizeObserver 也會略過隱藏狀態
+
+"分段" 的紅點表示最近一輪有任一目標請求失敗, 成功輪次或清除記錄後隱藏. "速度" 的藍點只在測速執行中顯示. 其他 tab 沒有狀態標記, 不建立無意義的數量 badge
+
+`js/tabs.js` 依 footprint 的結構複製調整後獨立維護, 不 import footprint 檔案. 分頁模組只負責顯示, 鍵盤與狀態點, 量測排程仍由 `js/main.js` 管理
+
 ## 功能與量測邊界
 
 上方示意路徑: 裝置 -> WiFi / 分享器 -> ISP -> CDN -> 台灣 -> 美西 -> 美東
@@ -122,8 +138,9 @@ localStorage key: `netpath.v1`. 所有讀寫都在 try/catch 內. 讀不到或�
 | `js/chart.js` | canvas 與樣本互動, 不負責量測 |
 | `js/speed.js` | 下載與上傳, 不負責排程 |
 | `js/main.js` | 同意狀態, 排程, 介面與匯出 |
+| `js/tabs.js` | 分頁顯示, ARIA, 鍵盤切換與狀態點 |
 | `tests/verify-cors.py` | curl 驗證並更新端點記錄 |
-| `tests/browser.cjs` | 真實 Chrome 連線, reload, 手機截圖與測速 |
+| `tests/browser.cjs` | 真實 Chrome 連線, tab 切換與記憶, 隱藏畫布, reload, 手機截圖與測速 |
 | `tests/browser-edge.cjs` | 真實自訂 URL 403, 模擬重新導向, 單一端點失敗, 儲存拒絕與 10 分鐘排程 |
 | `tests/modules.test.mjs` | 環形緩衝, 逾時, 資料驗證與取樣統計 |
 
@@ -139,4 +156,4 @@ python3 netpath/tests/verify-cors.py
 
 browser 腳本使用既有 `/var/www/rh/remote-hunter-frontend/node_modules/playwright`, channel `chrome`, headless. 不是網站執行期相依, 沒有安裝套件
 
-截圖預設寫到任務指定 scratchpad, 檔名為 `netpath-1.png`, `netpath-2.png`, `netpath-m.png`. 同處保存 `netpath-browser-report.json` 與 `netpath-export.json`. 可用 `NETPATH_URL`, `NETPATH_SHOTS` 更換網址與輸出位置
+截圖預設寫到任務指定 scratchpad, 檔名為 `netpath-tab-1.png` (分段), `netpath-tab-2.png` (曲線), `netpath-tab-3.png` (說明), `netpath-tab-m.png` (390px 分段). 同處保存 `netpath-browser-report.json` 與 `netpath-export.json`. 可用 `NETPATH_URL`, `NETPATH_SHOTS` 更換網址與輸出位置

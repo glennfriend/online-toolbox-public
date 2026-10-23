@@ -1,6 +1,7 @@
 import { SEGMENTS, SAMPLES, targets, validateURL } from './segments.js';
 import { probe, readColo, median } from './probe.js';
 import { createStore } from './store.js';
+import { createTabs } from './tabs.js';
 
 const $ = id => document.getElementById(id);
 const warn = message => { $('storage-warning').hidden = false; $('storage-warning').textContent = message; };
@@ -8,6 +9,17 @@ const store = createStore(warn), state = store.state;
 const cards = new Map(), latest = new Map();
 let chart = null, measureSpeed = null, timer = null, active = null, epoch = 0, pendingSpeed = false;
 let coloLoaded = false, lastStatus = '尚未連線至檢測服務';
+const definitions = [
+  { id: 'segments', title: '分段', indicator: 'error' },
+  { id: 'chart', title: '曲線' },
+  { id: 'speed', title: '速度', indicator: 'busy' },
+  { id: 'custom', title: '自訂目標' },
+  { id: 'about', title: '說明', aside: true },
+];
+const tabs = createTabs($('netpath-tabs'), $('tab-panels'), definitions.map(tab => ({ ...tab, content: $(`${tab.id}-content`).content })), {
+  initial: state.tab,
+  onSelect(id) { state.tab = id; store.save(); if (id === 'chart') drawChart(); },
+});
 // 圖表或測速模組失效, 仍可繼續量延遲與儲存
 await Promise.all([
   import('./chart.js').then(module => { chart = module.createChart($('chart'), $('chart-hover')); }).catch(error => { $('chart-hover').textContent = `圖表無法使用: ${error.message}`; }),
@@ -68,6 +80,11 @@ function renderSpeed() {
   const times = ['download', 'upload'].filter(key => Number.isFinite(record[key]?.ms)).map(key => `${key === 'download' ? '下載' : '上傳'} ${record[key].ms} ms`);
   $('speed-status').textContent = `${new Date(record.t).toLocaleString('zh-TW', { hour12: false })} / ${times.join(', ')}${record.errors?.length ? ` / ${record.errors.join('; ')}` : ''}`;
 }
+function drawChart(rows = store.snapshot().rows) {
+  if (!chart || tabs.active() !== 'chart') return;
+  try { chart.update(rows, targets(state.custom), state.window); }
+  catch (error) { chart = null; $('chart-hover').textContent = `圖表無法繪製: ${error.message}. 卡片與記錄仍可使用`; }
+}
 function render() {
   const rows = store.snapshot().rows;
   for (const target of targets(state.custom)) {
@@ -90,14 +107,13 @@ function render() {
   const last = rows.findLast(row => row[8] != null);
   $('total-ms').textContent = last ? showMS(last[7]) : '待量測';
   $('total-stats').textContent = statsFor(rows, 3);
-  if (chart) {
-    try { chart.update(rows, targets(state.custom), state.window); }
-    catch (error) { chart = null; $('chart-hover').textContent = `圖表無法繪製: ${error.message}. 卡片與記錄仍可使用`; }
-  }
-  $('history-status').textContent = rows.length ? `${rows.length.toLocaleString()} 輪 / ${new Date(rows[0][0]).toLocaleTimeString('zh-TW', { hour12: false })} 起 / ${state.running ? '持續記錄' : '已暫停'} (上方保留最後結果)` : '尚無記錄';
+  drawChart(rows);
+  tabs.update('segments', targets(state.custom).some(target => rows.at(-1)?.[2 + target.slot * 2] > 0));
+  $('history-status').textContent = rows.length ? `${rows.length.toLocaleString()} 輪 / ${new Date(rows[0][0]).toLocaleTimeString('zh-TW', { hour12: false })} 起 / ${state.running ? '持續記錄' : '已暫停'}` : '尚無記錄';
   controls();
 }
 function controls() {
+  tabs.update('speed', active?.kind === 'speed');
   $('start').disabled = state.running || Boolean(active);
   $('pause').disabled = !state.running;
   $('speed-now').disabled = !state.running || !measureSpeed || pendingSpeed || active?.kind === 'speed';

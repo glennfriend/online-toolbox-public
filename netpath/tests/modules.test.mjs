@@ -28,14 +28,19 @@ test('儲存與 reload 會保留樣本, 讀取時清掉過期或損壞樣本', (
   globalThis.localStorage = { getItem: key => data.get(key) || null, setItem: (key, value) => data.set(key, value) };
   const store = createStore(message => warnings.push(message));
   const now = Date.now(), row = [now, 30.1, 0, 45.2, 1, 150, 0, null, 3];
-  store.ring.push(row); store.state.running = true; store.save();
+  store.ring.push(row); store.state.running = true; store.state.tab = 'about'; store.save();
   const saved = JSON.parse(data.get(KEY));
   saved.rows.push([now - DAY - 1, 1, 0, 1, 0, 1, 0, 1, 0], [now, -5, 0, 1, 0, 1, 0, 1, 0]);
   data.set(KEY, JSON.stringify(saved));
   const restored = createStore(message => warnings.push(message));
   assert.equal(restored.state.running, true);
+  assert.equal(restored.state.tab, 'about');
   assert.deepEqual(restored.ring.values(), [row]);
   assert.equal(warnings.length, 0);
+  saved.tab = 'unknown'; data.set(KEY, JSON.stringify(saved));
+  assert.equal(createStore(message => warnings.push(message)).state.tab, 'segments');
+  delete saved.tab; data.set(KEY, JSON.stringify(saved));
+  assert.equal(createStore(message => warnings.push(message)).state.tab, 'segments');
   console.log(`預設 24 小時估算: ${JSON.stringify(row).length * CAPACITY} JSON bytes, 約 ${JSON.stringify(row).length * CAPACITY * 2} UTF-16 bytes`);
 });
 

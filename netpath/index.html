@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="持續記錄到 CDN, 台灣與海外的延遲, 用時間曲線找出連線異常">
+  <title>Netpath - 連線分段測速</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Cpath d='M10 34h12l7-16 9 30 6-14h10' fill='none' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar"><div><h1>Netpath <span>連線分段測速</span></h1><p class="muted">持續看延遲, 找出變慢的時間與範圍</p></div><a href="README.md">技術與限制</a></header>
+  <main>
+    <section class="card" aria-labelledby="path-title">
+      <div class="section-head"><div><h2 id="path-title">你的連線經過哪裡</h2><p class="muted">延遲是請求來回所需的時間, 越低通常越快</p></div><span class="badge">HTTP 來回時間 / ms</span></div>
+      <p class="notice">這是理解連線的示意圖. 每個可測節點都從你的裝置出發, 實際路由可能不同. 卡片不能相加或相減成單段延遲</p>
+      <div class="path" id="path">
+        <article class="node static-node"><h3>你的裝置</h3><div class="reading unavailable">起點</div><p>瀏覽器在這裡送出請求與計時</p><small>目前 / 中位數 / p95 / 失敗率: 不適用</small></article>
+        <article class="node static-node"><h3>WiFi / 分享器</h3><div class="reading unavailable">無法量測</div><p>家中裝置到分享器的這一段</p><small>HTTPS 的 mixed content 與 Chrome Private Network Access 等政策, 會限制存取內網</small><small>5 分鐘中位數 / p95 / 失敗率: 無法量測</small></article>
+        <article class="node static-node"><h3>ISP / 網路業者</h3><div class="reading unavailable">無法量測</div><p>中華電信等業者將家中網路接到外界</p><small>網頁無法單獨量出 ISP 那一段, 也無法確認業者</small><small>5 分鐘中位數 / p95 / 失敗率: 無法量測</small></article>
+      </div>
+      <div class="total" id="total"><div><strong>總延遲 / 裝置到美東</strong><p class="muted">代表這個目的地的一次來回, 包含沿途網路與服務時間</p></div><div><strong class="reading" id="total-ms">待量測</strong><p class="muted" id="total-stats">最近 5 分鐘尚無樣本</p></div></div>
+      <p class="muted" id="colo">Cloudflare 節點代碼: 開始後查詢. "最近" 指網路導向的節點, 地理位置未必最近</p>
+    </section>
+
+    <section class="card" aria-labelledby="consent-title">
+      <h2 id="consent-title">開始前, 先看會連到哪裡</h2>
+      <p>首次開頁不連檢測服務. 按 "開始" 才連外, 對方會看到你的 IP. 開始狀態會存在本機, reload 後自動續跑. 按 "暫停" 可關閉續跑</p>
+      <p><strong>測速會消耗流量, 每次約 2-12 MB</strong>. 下載 1 MB, 夠快再下載 10 MB, 上傳 1 MB. 預設開始後每 10 分鐘一次, 首次等滿 10 分鐘</p>
+      <details><summary>檢測服務與用途 (網域)</summary><ul id="services" class="services"></ul><p class="muted">請求不附 Cookie 或 Referer. 內建目標禁止重新導向. 自訂目標會跟隨重新導向, 可能連到清單以外的網域. 資料只留在本機, 不使用 analytics 或第三方 script</p></details>
+      <div class="controls"><button id="start" class="primary" type="button">開始</button><button id="pause" type="button" disabled>暫停</button><label>延遲間隔 <select id="interval"><option value="5">5 秒</option><option value="15">15 秒</option><option value="60">60 秒</option></select></label><span id="status" role="status">尚未連線至檢測服務</span></div>
+      <p id="storage-warning" class="warning" role="status" hidden></p>
+    </section>
+
+    <section class="card" aria-labelledby="chart-title">
+      <div class="section-head"><h2 id="chart-title">延遲時間曲線</h2><label>顯示 <select id="window"><option value="600">最近 10 分鐘</option><option value="3600">最近 1 小時</option><option value="21600">最近 6 小時</option><option value="all">全部 (最多 24 小時)</option></select></label></div>
+      <div id="legend" class="legend"></div>
+      <canvas id="chart" tabindex="0" role="img" aria-label="各目標延遲時間曲線, 可用滑鼠, 觸控或左右方向鍵查看樣本" aria-describedby="chart-hover">你的瀏覽器未支援 canvas. 目前結果仍會顯示在上方卡片</canvas>
+      <p id="chart-hover" class="hover-readout" aria-live="polite">移到曲線上查看數值. 觸控可點選, 鍵盤可用左右方向鍵</p>
+      <div class="section-head"><span id="history-status" class="muted">尚無記錄</span><div class="controls"><button id="export" type="button">匯出 JSON</button><button id="clear" type="button">清除記錄</button></div></div>
+      <p class="muted">每輪每個端點測 3 次, 至少成功 2 次才顯示中位數. 失敗留缺口, 紅點代表該輪有失敗. p95 是 95% 的輪次延遲不超過的數值. 失敗率按請求次數計算</p>
+      <p class="muted">背景分頁的 timer 可能被拉長到 1 分鐘以上. 休眠, 關頁與慢請求也會減少樣本. 時間軸按實際時間畫, 不補樣本. 測速期間暫停延遲量測, 避免塞滿連線造成誤判</p>
+      <p class="muted">只留最近 24 小時, 最多 17,280 輪. 預設 4 個目標約 1 MB JSON, localStorage 文字儲存約 2 MB. 加自訂目標會增加用量. 無法儲存時會提示, 仍可量測與匯出</p>
+    </section>
+
+    <section class="card" aria-labelledby="speed-title">
+      <div class="section-head"><h2 id="speed-title">下載與上傳速度</h2><button id="speed-now" type="button" disabled>立即測</button></div>
+      <div class="controls"><label><input type="checkbox" id="auto-speed" checked> 每 10 分鐘自動測一次</label><span id="speed-next" class="muted">開始後才會計時</span></div>
+      <div class="speed-grid"><div><span class="muted">下載</span><strong id="download">待測速</strong></div><div><span class="muted">上傳</span><strong id="upload">待測速</strong></div></div>
+      <p id="speed-status" role="status" class="muted">Mbps 是每秒百萬位元. 測的是到 Cloudflare 的短時間速度, 含連線與伺服器處理</p>
+    </section>
+
+    <section class="card" aria-labelledby="custom-title">
+      <h2 id="custom-title">加入自己的目標</h2><p>最多 3 個 HTTPS URL, 存在本機. 使用 no-cors 模式與 redirect: follow. 量到的是含重新導向的總時間, 且只能量總時間. 無法讀內容, 狀態碼或計時細項. 401 / 403 也算有回應, 無法保證服務正常</p>
+      <p class="muted">自訂目標會跟隨重新導向, 可能連到清單以外的網域</p>
+      <p class="muted">對方會收到 GET 請求, 請填你允許測試的網址. 大型檔案可能消耗額外流量. URL 也會列入匯出 JSON, 請避免填入機密</p>
+      <form id="custom-form" class="controls"><label class="url-label" for="custom-url">目標 URL<input id="custom-url" type="url" placeholder="https://your-site.example/health" required maxlength="2048"></label><button type="submit">加入目標</button></form>
+      <p id="custom-error" class="warning" role="status" hidden></p><div id="custom-cards" class="custom-cards"></div>
+    </section>
+
+    <section class="card help" aria-labelledby="help-title">
+      <h2 id="help-title">怎麼看出問題在哪裡</h2>
+      <dl><dt>CDN 和所有地區一起變慢</dt><dd>可能是 WiFi, 分享器, ISP 或其他程式佔滿連線. 先靠近分享器, 再改用網路線比較. 改用網路線後改善, 才更支持 WiFi 有問題</dd>
+      <dt>CDN 忽然飆高或失敗</dt><dd>WiFi 抖動是常見可能, 也可能是 ISP 或 Cloudflare 異常. 單一曲線無法證明是哪一段, 請一起看台灣與海外是否同步變慢</dd>
+      <dt>附近正常, 海外變慢</dt><dd>可能是跨國線路, 業者互連或海外服務處理較慢. 比較美西與美東, 或換行動網路再測</dd>
+      <dt>只有一個目標變慢或失敗</dt><dd>可能是對方伺服器或那條路由. 自訂目標收到錯誤頁也可能顯示很快. 內建端點失敗還可能是 CORS 許可改變</dd>
+      <dt>DNS / TCP / TLS / TTFB 是什麼?</dt><dd>展開卡片可看細項. DNS 是查位址, TCP 是建立連線, TLS 是加密握手, TTFB 是送出請求到首個回應位元組. 只有允許 Timing-Allow-Origin 的服務可讀. 連線重用時 DNS / TCP / TLS 可能是 0</dd>
+      <dt>為什麼無法確定每一段慢幾 ms?</dt><dd>瀏覽器量的是到不同服務的 HTTP 請求, 包含排程與服務處理. 無法執行 traceroute 或 ICMP ping. 海外請求也未必經過圖中的台灣機房或 CDN</dd></dl>
+      <p class="warning">區域端點沿用 GCPing. <a href="https://github.com/GoogleCloudPlatform/gcping" target="_blank" rel="noopener noreferrer">官方已公告將停用</a>. 失效時會顯示錯誤, 不改用別的區域代替</p>
+    </section>
+  </main>
+  <footer>Netpath / 純前端, 零相依 <a href="README.md">功能與邊界</a> · <a href="cors-verification.txt">端點驗證記錄</a></footer>
+  <noscript><p class="card">請啟用 JavaScript 才能量測</p></noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

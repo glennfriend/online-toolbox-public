@@ -1,0 +1,68 @@
+CORS 驗證日期: 2026-10-23 (UTC)
+Origin: https://example.com
+指令: curl -sS -D - -o /dev/null --max-time 25 -H 'Origin: https://example.com' '<url>'
+POST 另加: -H 'Content-Type: text/plain' --data-binary 'netpath-verification'
+僅保留 HTTP 狀態與必要 CORS / Timing headers, 不記錄個人 IP 或定位 headers
+驗證腳本: tests/verify-cors.py
+
+https://speed.cloudflare.com/__down?bytes=0
+HTTP/1.1 200 OK
+Content-Length: 0
+Access-Control-Allow-Origin: *
+access-control-expose-headers: server-timing, content-length, cf-meta-ip, cf-meta-request-time, cf-meta-colo, cf-meta-asn, cf-meta-country, cf-meta-city, cf-meta-postalCode, cf-meta-latitude, cf-meta-longitude, cf-meta-timezone
+timing-allow-origin: *
+Server-Timing: cfSpeedEdge;dur=16, cfSpeedWorker;dur=34
+
+https://1.1.1.1/cdn-cgi/trace
+HTTP/2 200
+content-length: 196
+access-control-allow-origin: *
+
+https://asia-east1-5tkroniexa-de.a.run.app/api/ping
+HTTP/2 200
+access-control-allow-origin: *
+content-length: 11
+
+https://us-west1-5tkroniexa-uw.a.run.app/api/ping
+HTTP/2 200
+access-control-allow-origin: *
+content-length: 9
+
+https://us-east1-5tkroniexa-ue.a.run.app/api/ping
+HTTP/2 200
+access-control-allow-origin: *
+content-length: 9
+
+https://speed.cloudflare.com/__down?bytes=1000000
+HTTP/1.1 200 OK
+Content-Length: 1000000
+Access-Control-Allow-Origin: *
+access-control-expose-headers: server-timing, content-length, cf-meta-ip, cf-meta-request-time, cf-meta-colo, cf-meta-asn, cf-meta-country, cf-meta-city, cf-meta-postalCode, cf-meta-latitude, cf-meta-longitude, cf-meta-timezone
+timing-allow-origin: *
+Server-Timing: cfSpeedEdge;dur=9, cfSpeedWorker;dur=428
+
+https://speed.cloudflare.com/__down?bytes=10000000
+HTTP/1.1 200 OK
+Content-Length: 10000000
+Access-Control-Allow-Origin: *
+access-control-expose-headers: server-timing, content-length, cf-meta-ip, cf-meta-request-time, cf-meta-colo, cf-meta-asn, cf-meta-country, cf-meta-city, cf-meta-postalCode, cf-meta-latitude, cf-meta-longitude, cf-meta-timezone
+timing-allow-origin: *
+Server-Timing: cfSpeedEdge;dur=8, cfSpeedWorker;dur=43
+
+https://speed.cloudflare.com/__up (POST, Content-Type: text/plain)
+HTTP/1.1 200 OK
+Content-Length: 0
+Access-Control-Allow-Origin: *
+access-control-allow-headers: content-type
+access-control-expose-headers: server-timing, cf-meta-colo, cf-meta-request-time, cf-meta-upload-bytes
+timing-allow-origin: *
+Server-Timing: cfSpeedEdge;dur=3, cfSpeedWorker;dur=4
+
+判讀:
+- ACAO (*) 允許跨來源 fetch, credentials 使用 omit
+- Cloudflare 回應有 timing-allow-origin: *, 可讀 Resource Timing
+- GCPing / trace 若未回傳 timing-allow-origin, 細項不可讀, 不顯示假 0
+- cf-ray 若未列在 expose-headers, JS 無法讀取. 優先讀 cf-meta-colo, trace 僅讀 colo
+- 本次 cfRequestDuration 未出現在回應. 只顯示完整 HTTP 時間, 不扣其他名稱的 duration
+- Cache busting query 另由 Chrome 真實連線驗證
+- 公共服務可用性與 headers 可能改變, 以當次實際回應為準

@@ -8,6 +8,7 @@
 |  |  | [**Comic**](https://glennfriend.github.io/online-toolbox-public/comic/) | JSON 劇本 → 漫畫 | [**Fillcard**](https://glennfriend.github.io/online-toolbox-public/fillcard/) | 填字進版型 → 出圖 |
 |  |  | [**Handbook**](https://glennfriend.github.io/online-toolbox-public/handbook/) | 生活資訊手冊 | [**Pipeflow**](https://glennfriend.github.io/online-toolbox-public/pipeflow/) | 簡易資料轉換 |
 |  |  | [**Footprint**](https://glennfriend.github.io/online-toolbox-public/footprint/) | 瀏覽資訊外洩檢測 |  |  |
+|  |  | [**Netpath**](https://glennfriend.github.io/online-toolbox-public/netpath/) | 連線分段測速 |  |  |
 |  |  |  |  | [**TextDiff**](https://glennfriend.github.io/online-toolbox-public/textdiff/) | 文字比對 |
 
 ---
